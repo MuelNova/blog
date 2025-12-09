@@ -9,8 +9,7 @@ authors:
 - nova
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 不知道为什么以前都不把这些记录下来，然后每次做到的时候都会忘了从零开始学。
 
@@ -47,7 +46,7 @@ import TabItem from '@theme/TabItem';
 
 <Tabs groupId="version">
 
-<TabItem value="2.23" default>
+<TabItem value="2.23" label="2.23" default>
 
 在 free 堆块大于 `get_max_fast()` 时，就会进入 consolidate 过程，在这里，我们的 backward 指的是低地址的堆块，forward 则是高地址的堆块。
 
@@ -87,7 +86,7 @@ import TabItem from '@theme/TabItem';
 
 </TabItem>
 
-<TabItem value="2.31">
+<TabItem value="2.31" label="2.31">
 
 在 2.31 下，我们可以看到一个非常重要的检测 `chunksize(prevchunk) != prevsize`
 
@@ -131,7 +130,7 @@ import TabItem from '@theme/TabItem';
 
 <Tabs groupId="version">
 
-<TabItem value="2.23" default>
+<TabItem value="2.23" label="2.23" default>
 
 在 2.23 下，我们注意到 2.23 仅有一个 check 需要绕过。
 
@@ -174,7 +173,7 @@ import TabItem from '@theme/TabItem';
 
 </TabItem>
 
-<TabItem value="2.31">
+<TabItem value="2.31" label="2.31">
 
 事实上 `unlink` 在 2.31 也增加了新的保护。然而随意分析一下就可以想到，这个对我们实际上没有太大的影响。p 堆块是我们要解链的堆块，而非我们做了 obn 的堆块，因此 `chunksize(p)` 是我们没有修改的，它会取到 `next_chunk(p)` 这个我们控制的另一个堆块，因此我们也可以设置它的 `prev_size` 域。
 
@@ -211,7 +210,7 @@ unlink_chunk (mstate av, mchunkptr p)
 
 <Tabs groupId="version">
 
-<TabItem value="2.23" default>
+<TabItem value="2.23" label="2.23" default>
 
 2.23 下我们仅需要绕过 `unlink` 的检查。这是极其容易的，我们可以利用 `unsortedbin` 的 `fd` 和 `bk`，初始情况下，这个双链就是这么链接的。
 
@@ -241,7 +240,7 @@ unlink_chunk (mstate av, mchunkptr p)
 
 </TabItem>
 
-<TabItem value="2.31">
+<TabItem value="2.31" label="2.31">
 
 回想 2.23 的流程，我们使用 unsorted 自带的双链来完成了 `unlink` 的检查。
 
@@ -339,7 +338,7 @@ unlink_chunk (mstate av, mchunkptr p)
 
 <Tabs groupId="version">
 
-<TabItem value="2.23" default>
+<TabItem value="2.23" label="2.23" default>
 
 那么在 2.23 下，我们可以这样构造
 
@@ -367,7 +366,7 @@ add(0x18)  # same as B, E
 
 </TabItem>
 
-<TabItem value="2.31">
+<TabItem value="2.31" label="2.31">
 
 #### 思路 1：large + unsorted + small
 
