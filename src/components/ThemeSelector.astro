@@ -18,76 +18,31 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 <theme-selector class="inline-flex">
 	<!-- Trigger Button -->
 	<button
-		class="
-			flex items-center justify-center
-			p-2 rounded-md
-			text-foreground/70
-			hover:text-primary
-			transition-colors duration-150
-			cursor-pointer
-		"
+		class="flex items-center justify-center p-2 rounded-md text-foreground/70 hover:text-primary transition-colors duration-150 cursor-pointer"
 		data-open-modal
 		aria-label="Theme"
 		title="Theme (Ctrl+K)"
 	>
-		<!-- Palette Icon (SVG) -->
 		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
 		</svg>
 		<span class="sr-only">Theme</span>
 	</button>
 
-	<!-- Modal Dialog -->
 	<dialog
-		class="
-			fixed inset-0
-			w-full max-w-2xl
-			max-h-[80vh]
-			m-auto
-			p-0
-			bg-background
-			border border-accent/40
-			rounded-lg
-			shadow-2xl
-			backdrop:backdrop-blur-sm
-			backdrop:bg-black/50
-		"
+		class="fixed inset-0 w-full max-w-2xl max-h-[80vh] m-auto p-0 bg-background border border-accent/40 rounded-lg shadow-2xl backdrop:backdrop-blur-sm backdrop:bg-black/50"
 		data-theme-dialog
 	>
 		<div class="flex flex-col h-full">
-			<!-- Header -->
 			<div class="flex items-center justify-between p-4 border-b border-accent/40">
-				<div class="flex items-center gap-4">
-					<h2 class="text-lg font-semibold text-foreground">Theme</h2>
-					
-					<!-- Theme Preference Toggle (All/Dark/Light) -->
-					<div class="flex items-center gap-2 text-xs">
-						<span class="text-foreground/70">Random:</span>
-						<div class="flex bg-foreground/10 rounded-md p-0.5">
-							<button
-								class="px-2 py-1 rounded transition-colors duration-150"
-								data-preference="all"
-							>
-								All
-							</button>
-							<button
-								class="px-2 py-1 rounded transition-colors duration-150"
-								data-preference="dark"
-								data-preference-active="true"
-							>
-								Dark
-							</button>
-							<button
-								class="px-2 py-1 rounded transition-colors duration-150"
-								data-preference="light"
-							>
-								Light
-							</button>
-						</div>
-					</div>
-					
-					<!-- Lock Toggle -->
-					<label class="flex items-center gap-2 cursor-pointer group">
+				<div class="flex items-center gap-3 flex-wrap">
+					<h2 class="text-lg font-semibold text-foreground flex items-center gap-2">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+						</svg>
+						<span class="header-text">Theme</span>
+					</h2>
+					<label class="flex items-center gap-2 cursor-pointer group lock-switch">
 						<input
 							type="checkbox"
 							class="sr-only"
@@ -96,7 +51,6 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 						/>
 						<div class="relative w-10 h-5 bg-foreground/20 rounded-full transition-colors duration-150 group-hover:bg-foreground/30">
 							<div class="lock-indicator absolute top-0.5 left-0.5 w-4 h-4 bg-foreground rounded-full transition-transform duration-150 flex items-center justify-center">
-								<!-- Lock Icon (will be toggled) -->
 								<svg class="lock-icon-open w-3 h-3 text-background" fill="currentColor" viewBox="0 0 20 20">
 									<path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" />
 								</svg>
@@ -105,108 +59,69 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 								</svg>
 							</div>
 						</div>
-						<span class="text-xs text-foreground/70">Lock</span>
+						<span class="text-xs text-foreground/70 header-text">Lock</span>
 					</label>
+					<button
+						class="w-9 h-9 flex items-center justify-center rounded-md border border-accent/40 hover:border-primary hover:text-primary transition-colors duration-150 lock-icon-compact hidden"
+						data-lock-button
+						type="button"
+						aria-label="Lock theme"
+						aria-pressed="false"
+					>
+						<svg class="lock-icon-open w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+							<path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" />
+						</svg>
+						<svg class="lock-icon-closed w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+						</svg>
+					</button>
+				</div>
+				<div class="flex items-center gap-2 overflow-x-auto">
+					<button
+						class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-foreground/70 hover:text-foreground transition-colors duration-150"
+						data-tab="all"
+						data-active="true"
+					>
+						All ({allThemes.length})
+					</button>
+					<button
+						class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-foreground/70 hover:text-foreground transition-colors duration-150"
+						data-tab="dark"
+					>
+						Dark ({darkThemes.length})
+					</button>
+					<button
+						class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-foreground/70 hover:text-foreground transition-colors duration-150"
+						data-tab="light"
+					>
+						Light ({lightThemes.length})
+					</button>
 				</div>
 				<button
-					class="
-						p-1 rounded-md
-						text-foreground/70
-						hover:text-foreground
-						hover:bg-foreground/10
-						transition-colors duration-150
-					"
+					class="p-1 rounded-md text-foreground/70 hover:text-foreground hover:bg-foreground/10 transition-colors duration-150"
 					data-close-modal
 					aria-label="Close"
 				>
-					<!-- X Icon -->
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
 					</svg>
 				</button>
 			</div>
 
-			<!-- Theme Tabs -->
-			<div class="flex border-b border-accent/40 px-4">
-				<button
-					class="
-						px-4 py-2 text-sm font-medium
-						border-b-2 border-transparent
-						text-foreground/70
-						hover:text-foreground
-						transition-colors duration-150
-					"
-					data-tab="all"
-					data-active="true"
-				>
-					All ({allThemes.length})
-				</button>
-				<button
-					class="
-						px-4 py-2 text-sm font-medium
-						border-b-2 border-transparent
-						text-foreground/70
-						hover:text-foreground
-						transition-colors duration-150
-					"
-					data-tab="dark"
-				>
-					Dark ({darkThemes.length})
-				</button>
-				<button
-					class="
-						px-4 py-2 text-sm font-medium
-						border-b-2 border-transparent
-						text-foreground/70
-						hover:text-foreground
-						transition-colors duration-150
-					"
-					data-tab="light"
-				>
-					Light ({lightThemes.length})
-				</button>
-			</div>
-
-			<!-- Theme List (single source, filtered client-side) -->
 			<div class="flex-1 overflow-y-auto p-4">
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2" data-theme-list>
 					{allThemes.map((theme) => (
 						<button
-							class="
-								flex flex-col items-start
-								p-3 rounded-md
-								border border-accent/40
-								text-left
-								hover:border-primary
-								hover:bg-primary/5
-								transition-all duration-150
-								theme-option
-							"
+							class="flex flex-col items-start p-3 rounded-md border border-accent/40 text-left hover:border-primary hover:bg-primary/5 transition-all duration-150 theme-option"
 							data-theme-id={theme.id}
 							data-theme-type={darkThemeIds.has(theme.id) ? 'dark' : 'light'}
 						>
-							<span class="text-sm font-medium text-foreground">
-								{theme.name}
-							</span>
-							<span class="text-xs text-foreground/70 mt-1">
-								{theme.description}
-							</span>
+							<span class="text-sm font-medium text-foreground">{theme.name}</span>
+							<span class="text-xs text-foreground/70 mt-1">{theme.description}</span>
 							<div class="flex gap-1 mt-2">
-								<div
-									class="w-4 h-4 rounded-sm border border-accent/40/50"
-									style={`background-color: ${theme.colors.background}`}
-									title="Background"
-								/>
-								<div
-									class="w-4 h-4 rounded-sm border border-accent/40/50"
-									style={`background-color: ${theme.colors.primary}`}
-									title="Primary"
-								/>
-								<div
-									class="w-4 h-4 rounded-sm border border-accent/40/50"
-									style={`background-color: ${theme.colors.foreground}`}
-									title="Foreground"
-								/>
+								<div class="w-4 h-4 rounded-sm border border-accent/40/50" style={`background-color: ${theme.colors.background}`} title="Background" />
+								<div class="w-4 h-4 rounded-sm border border-accent/40/50" style={`background-color: ${theme.colors.primary}`} title="Primary" />
+								<div class="w-4 h-4 rounded-sm border border-accent/40/50" style={`background-color: ${theme.colors.foreground}`} title="Foreground" />
 							</div>
 						</button>
 					))}
@@ -217,19 +132,16 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 </theme-selector>
 
 <style>
-	/* Active tab styling */
 	button[data-tab][data-active="true"] {
 		border-color: var(--color-primary);
 		color: var(--color-primary);
 	}
 
-	/* Current theme highlight */
 	.theme-option.current-theme {
 		border-color: var(--color-primary);
 		background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
 	}
 
-	/* Dialog backdrop animation */
 	dialog::backdrop {
 		animation: fade-in 150ms ease-out;
 	}
@@ -243,7 +155,6 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 		}
 	}
 
-	/* Dialog animation */
 	dialog[open] {
 		animation: slide-up 150ms ease-out;
 	}
@@ -256,6 +167,22 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 		to {
 			opacity: 1;
 			transform: translateY(0);
+		}
+	}
+
+	@media (max-width: 640px) {
+		.header-text {
+			display: none;
+		}
+		.lock-switch {
+			display: none;
+		}
+		.lock-icon-compact {
+			display: flex;
+		}
+		button[data-tab] {
+			padding: 0.35rem 0.6rem;
+			font-size: 0.8rem;
 		}
 	}
 </style>
@@ -271,13 +198,13 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 			this.tabButtons = this.querySelectorAll('[data-tab]');
 			this.themeOptions = this.querySelectorAll('.theme-option');
 			this.lockToggle = this.querySelector('[data-theme-lock-toggle]');
+			this.lockButton = this.querySelector('[data-lock-button]');
 			this.controller = new AbortController();
 
+			const savedTab = localStorage.getItem('theme-preference') || 'all';
 			this.setupEventListeners();
 			this.loadLockState();
-			this.loadPreferenceState();
-			this.setupPreferenceToggle();
-			this.switchTab('all');
+			this.switchTab(savedTab);
 		}
 
 		setupEventListeners() {
@@ -312,9 +239,13 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 				});
 			});
 
-			// Lock toggle
+			// Lock toggle (switch and compact button)
 			this.lockToggle?.addEventListener('change', (e) => {
 				this.toggleLock(e.target.checked);
+			});
+			this.lockButton?.addEventListener('click', () => {
+				const current = localStorage.getItem('theme-locked') === 'true';
+				this.toggleLock(!current);
 			});
 		}
 
@@ -322,65 +253,34 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 			const isLocked = localStorage.getItem('theme-locked') === 'true';
 			if (this.lockToggle) {
 				this.lockToggle.checked = isLocked;
-				this.updateLockUI(isLocked);
 			}
+			this.updateLockUI(isLocked);
 		}
 
 		toggleLock(isLocked) {
 			localStorage.setItem('theme-locked', isLocked.toString());
+			if (this.lockToggle) {
+				this.lockToggle.checked = isLocked;
+			}
 			this.updateLockUI(isLocked);
-		}
-
-		loadPreferenceState() {
-			const preference = localStorage.getItem('theme-preference') || 'dark';
-			const buttons = this.querySelectorAll('[data-preference]');
-			buttons.forEach(button => {
-				const btn = button as HTMLButtonElement;
-				const isActive = btn.dataset.preference === preference;
-				btn.dataset.preferenceActive = String(isActive);
-				if (isActive) {
-					btn.style.backgroundColor = 'var(--color-foreground)';
-					btn.style.color = 'var(--color-background)';
-				} else {
-					btn.style.backgroundColor = 'transparent';
-					btn.style.color = 'color-mix(in srgb, var(--color-foreground) 70%, transparent)';
-				}
-			});
-		}
-
-		setupPreferenceToggle() {
-			const buttons = this.querySelectorAll('[data-preference]');
-			buttons.forEach(button => {
-				button.addEventListener('click', (e) => {
-					const btn = e.target as HTMLButtonElement;
-					const preference = btn.dataset.preference;
-					if (preference) {
-						localStorage.setItem('theme-preference', preference);
-						this.loadPreferenceState();
-					}
-				});
-			});
 		}
 
 		updateLockUI(isLocked) {
 			const indicator = this.querySelector('.lock-indicator');
-			const openIcon = this.querySelector('.lock-icon-open');
-			const closedIcon = this.querySelector('.lock-icon-closed');
-			const toggle = this.querySelector('[data-theme-lock-toggle]');
-			
-			if (isLocked) {
-				indicator?.classList.add('translate-x-5');
-				indicator?.parentElement?.classList.add('bg-primary');
-				indicator?.parentElement?.classList.remove('bg-foreground/20');
-				openIcon?.classList.add('hidden');
-				closedIcon?.classList.remove('hidden');
-			} else {
-				indicator?.classList.remove('translate-x-5');
-				indicator?.parentElement?.classList.remove('bg-primary');
-				indicator?.parentElement?.classList.add('bg-foreground/20');
-				openIcon?.classList.remove('hidden');
-				closedIcon?.classList.add('hidden');
-			}
+			const openIcon = this.querySelectorAll('.lock-icon-open');
+			const closedIcon = this.querySelectorAll('.lock-icon-closed');
+
+			indicator?.classList.toggle('translate-x-5', isLocked);
+			indicator?.parentElement?.classList.toggle('bg-primary', isLocked);
+			indicator?.parentElement?.classList.toggle('bg-foreground/20', !isLocked);
+
+			openIcon.forEach((icon) => icon.classList.toggle('hidden', isLocked));
+			closedIcon.forEach((icon) => icon.classList.toggle('hidden', !isLocked));
+
+			this.lockToggle?.setAttribute('aria-pressed', isLocked ? 'true' : 'false');
+			this.lockButton?.setAttribute('aria-pressed', isLocked ? 'true' : 'false');
+			this.lockButton?.classList.toggle('border-primary', isLocked);
+			this.lockButton?.classList.toggle('text-primary', isLocked);
 		}
 
 		connectedCallback() {
@@ -413,7 +313,6 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 		}
 
 		switchTab(tabType) {
-			// Update tab buttons
 			this.tabButtons.forEach((tab) => {
 				if (tab.dataset.tab === tabType) {
 					tab.dataset.active = 'true';
@@ -422,7 +321,8 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 				}
 			});
 
-			// Filter theme options instead of rendering multiple lists
+			localStorage.setItem('theme-preference', tabType);
+
 			this.themeOptions.forEach((option) => {
 				const optionType = option.dataset.themeType;
 				if (tabType === 'all' || optionType === tabType) {
@@ -434,26 +334,18 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 		}
 
 		selectTheme(themeId) {
-			// MultiTerm style: just set data-theme attribute
-			// CSS will automatically match via :root[data-theme="xxx"]
 			document.documentElement.setAttribute('data-theme', themeId);
-			
-			// Save to localStorage
 			localStorage.setItem('theme', themeId);
-			
-			// Save theme preference (dark or light)
-			const themeOption = Array.from(this.themeOptions).find(opt => opt.dataset.themeId === themeId);
+
+			const themeOption = Array.from(this.themeOptions).find((opt) => opt.dataset.themeId === themeId);
 			if (themeOption) {
 				const themeType = themeOption.dataset.themeType;
 				if (themeType) {
 					localStorage.setItem('theme-preference', themeType);
 				}
 			}
-			
-			// Close modal
+
 			this.closeModal();
-			
-			// Update highlight
 			this.highlightCurrentTheme();
 		}
 
