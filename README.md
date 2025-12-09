@@ -1,62 +1,40 @@
-# Astro Starter Kit: Blog
+# Blog Astro (Spectre x MultiTerm)
 
-```sh
-yarn create astro@latest -- --template blog
-```
+A custom Astro blog that blends the Spectre visual style with MultiTerm-inspired theme switching. Themes are pre-generated from Shiki to avoid runtime loading issues on Cloudflare workers.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Stack
+- Astro 5 (Cloudflare adapter)
+- Tailwind (v4 plugin) + global CSS variables for theming
+- astro-expressive-code + Shiki bundled themes
 
-Features:
+## Scripts
+- `yarn dev` — start dev server
+- `yarn build` — production build
+- `yarn preview` — preview the build locally
+- `yarn astro ...` — run Astro CLI commands
+- `yarn generate:themes` — pre-generate theme color JSON from Shiki (`src/generated/theme-colors.json`)
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
+## Theme system
+- Theme definitions live in `src/config/themes.ts` and use the pre-generated `src/generated/theme-colors.json`.
+- `BaseHead.astro` injects CSS variables for every theme at build time.
+- `ThemeLoader.astro` reads `localStorage` early and applies `data-theme` to prevent FOUC; defaults to `spectre` if no stored theme.
 
-## 🚀 Project Structure
+### Adding a new theme
+1) Edit `scripts/generate-theme-colors.ts` and append a new entry to `themeDefinitions` with `id`, `name`, `description`, `shikiTheme`, and `tone` (`dark` or `light`).
+2) Run `yarn generate:themes` to regenerate `src/generated/theme-colors.json`.
+3) Ensure the new theme appears in the UI (ThemeSelector lists all themes automatically).
 
-Inside of your Astro project, you'll see the following folders and files:
+## Performance notes
+- Latest build output: CSS bundle `dist/_astro/ec.y0rd3.css` ~18.5 kB (gz ~4.1 kB); client JS `dist/_astro/client.C3DCzcxU.js` ~195 kB (gz ~61 kB).
+- Tailwind v4 on-demand compilation removes unused utilities automatically; custom CSS is minimal.
+- Theme FOUC is mitigated by early `ThemeLoader` defaulting to `spectre` when no saved theme exists.
+- For a full audit, run Lighthouse against the built site (e.g., `yarn build && npx serve dist` then Lighthouse in Chrome DevTools).
 
-```text
-├── public/
-├── src/
-│   ├── components/
-│   ├── content/
-│   ├── layouts/
-│   └── pages/
-├── astro.config.mjs
-├── README.md
-├── package.json
-└── tsconfig.json
-```
+## Content & pages
+- Blog posts: `src/content/blog/`
+- Layouts: `src/layouts/`
+- Components: `src/components/`
+- Global styles: `src/styles/global.css`
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `yarn install`             | Installs dependencies                            |
-| `yarn dev`             | Starts local dev server at `localhost:4321`      |
-| `yarn build`           | Build your production site to `./dist/`          |
-| `yarn preview`         | Preview your build locally, before deploying     |
-| `yarn astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `yarn astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
-## Credit
-
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+## Deployment
+- Built for Cloudflare; see `astro.config.mjs` and `wrangler.jsonc` for bindings (SESSION KV required).
