@@ -1,6 +1,6 @@
 {
 	"main": "dist/_worker.js/index.js",
-	"name": "",
+	"name": "blog",
   "compatibility_date": "2025-12-09",
   "compatibility_flags": [
     "nodejs_compat",
