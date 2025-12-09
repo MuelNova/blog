@@ -13,5 +13,8 @@ export default defineConfig({
   output: 'static',
   site: 'https://astro.nova.gal',
   integrations: [mdx(), sitemap(), react()],
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    imageService: 'cloudflare',
+    
+  }),
 });
