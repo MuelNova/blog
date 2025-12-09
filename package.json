@@ -27,6 +27,7 @@
   "packageManager": "yarn@4.12.0",
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.17",
+    "chrome-launcher": "^1.2.1",
     "tailwindcss": "^4.1.17",
     "tsx": "^4.21.0"
   }
