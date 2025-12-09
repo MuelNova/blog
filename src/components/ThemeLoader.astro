@@ -27,7 +27,7 @@ const lightThemeIdsJson = JSON.stringify(lightThemeIds);
 		const themePreference = localStorage.getItem('theme-preference') || 'dark'; // 'dark' or 'light'
 		const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
 		
-		let themeToApply = storedTheme;
+		let themeToApply = storedTheme || 'spectre';
 		
 		// If on homepage and theme is not locked, pick a random theme based on preference
 		if (isHomePage && !isLocked) {
