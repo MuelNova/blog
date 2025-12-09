@@ -10,6 +10,7 @@ import expressiveCode from 'astro-expressive-code';
 import cloudflare from '@astrojs/cloudflare';
 
 import tailwindcss from '@tailwindcss/vite';
+import viteCompression from 'vite-plugin-compression';
 
 // https://astro.build/config
 export default defineConfig({
@@ -20,7 +21,16 @@ export default defineConfig({
     imageService: 'cloudflare',
     
   }),
+  build: {
+    // Inline styles to avoid render-blocking CSS requests on simple pages
+    inlineStylesheets: 'always',
+  },
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [
+      tailwindcss(),
+      // Precompress assets so CDNs/servers can serve brotli or gzip when available
+      viteCompression({ algorithm: 'brotliCompress' }),
+      viteCompression({ algorithm: 'gzip' }),
+    ],
   },
 });
