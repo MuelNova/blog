@@ -16,9 +16,16 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "astro": "^5.16.4",
+    "astro-expressive-code": "^0.41.3",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.3",
+    "shiki": "^3.19.0"
   },
-  "packageManager": "yarn@4.12.0"
+  "packageManager": "yarn@4.12.0",
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.17",
+    "tailwindcss": "^4.1.17",
+    "tsx": "^4.21.0"
+  }
 }

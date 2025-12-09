@@ -1,0 +1,48 @@
+---
+/**
+ * LatestPosts Component
+ * Displays latest blog posts
+ */
+
+import FormattedDate from './FormattedDate.astro';
+import type { Post } from '../types';
+import { stripMarkdown } from '../utils/markdown';
+
+interface Props {
+	posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+
+<div class="flex flex-col gap-3 post-list">
+		{posts.map((post) => (
+			<a 
+				href={`/blog/${post.id}/`}
+				class="flex flex-col gap-2 p-3 border border-accent/40 text-white transition-all duration-150 hover:bg-primary/12.5 hover:border-primary focus-visible:outline-none focus-visible:bg-primary/12.5 focus-visible:border-primary"
+			>
+				<div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
+					<h3 class="text-sm font-semibold text-foreground m-0">{post.data.title}</h3>
+					<time class="text-xs text-foreground/70 shrink-0">
+						<FormattedDate date={post.data.pubDate} />
+					</time>
+				</div>
+				{post.data.description && (
+					<p class="text-xs text-foreground/70 m-0 leading-relaxed">
+						{stripMarkdown(post.data.description)}
+					</p>
+				)}
+			</a>
+		))}
+</div>
+
+<style>
+	/* Scoped style to prevent underline on post links */
+	.post-list a {
+		text-decoration: none;
+	}
+	
+	.post-list a:hover {
+		text-decoration: none;
+	}
+</style>

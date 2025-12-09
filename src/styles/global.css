@@ -1,132 +1,189 @@
-/*
-  The CSS in this style tag is based off of Bear Blog's default CSS.
-  https://github.com/HermanMartinus/bearblog/blob/297026a877bc2ab2b3bdfbd6b9f7961c350917dd/templates/styles/blog/default.css
-  License MIT: https://github.com/HermanMartinus/bearblog/blob/master/LICENSE.md
- */
+/* Import Tailwind CSS v4 */
+@import "tailwindcss";
 
+
+/* Theme CSS Variables - Spectre inspired color scheme */
 :root {
-	--accent: #2337ff;
-	--accent-dark: #000d8a;
-	--black: 15, 18, 25;
-	--gray: 96, 115, 159;
-	--gray-light: 229, 233, 240;
-	--gray-dark: 34, 41, 57;
-	--gray-gradient: rgba(var(--gray-light), 50%), #fff;
-	--box-shadow:
-		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%), 0 16px 32px
-		rgba(var(--gray), 33%);
+	/* Primary color - Spectre purple */
+	--theme-primary: #8c5cf5;
+	--theme-primary-rgb: 140, 92, 245;
+	--theme-primary-light: #a277ff;
+	--theme-primary-lightest: #c2a8fd;
+	
+	/* Background and foreground - Dark theme */
+	--theme-background: #0a0a0a;
+	--theme-foreground: #ffffff;
+	--theme-foreground-secondary: #c7c7c7;
+	
+	/* Borders and separators */
+	--theme-border: #353535;
+	--theme-separator: #353535;
+	
+	/* Semantic colors */
+	--theme-accent: var(--theme-primary);
+	--theme-link: var(--theme-primary-light);
+	
+	/* Legacy variables for compatibility */
+	--accent: var(--theme-primary);
+	--accent-dark: #6b3fd4;
 }
+
+/* Tailwind v4 Theme Configuration */
+@theme {
+	/* Map theme colors to Tailwind utilities */
+	--color-primary: var(--theme-primary);
+	--color-primary-light: var(--theme-primary-light);
+	--color-primary-lightest: var(--theme-primary-lightest);
+	--color-background: var(--theme-background);
+	--color-foreground: var(--theme-foreground);
+	--color-accent: var(--theme-accent);
+	--color-link: var(--theme-link);
+	
+	/* Font families - Tailwind v4 syntax */
+	--font-sans: Geist, ui-sans-serif, system-ui, sans-serif;
+	--font-mono: GeistMono, ui-monospace, 'SFMono-Regular', Monaco, 'Cascadia Code', 'Segoe UI Mono', 'Courier New', monospace;
+	
+	/* Box shadows for glow effects */
+	--shadow-glow-sm: 0 0 2px var(--theme-primary);
+	--shadow-glow: 0 0 4px var(--theme-primary);
+	--shadow-glow-md: 0 0 8px var(--theme-primary);
+	--shadow-glow-lg: 0 0 12px var(--theme-primary);
+	--shadow-glow-xl: 0 0 16px var(--theme-primary);
+	
+	/* Drop shadows for text glow */
+	--drop-shadow-glow: drop-shadow(0 0 4px var(--theme-primary));
+	--drop-shadow-glow-lg: drop-shadow(0 0 12px var(--theme-primary));
+	
+	/* Animations */
+	--animate-fade-in: fade-in 150ms ease-in;
+	--animate-slide-in: slide-in 150ms ease-out;
+}
+
+/* Font faces - Geist from Spectre */
 @font-face {
-	font-family: "Atkinson";
-	src: url("/fonts/atkinson-regular.woff") format("woff");
-	font-weight: 400;
+	font-family: "Geist";
+	src: url("/fonts/Geist.woff2") format("woff2");
+	font-weight: 100 900;
 	font-style: normal;
 	font-display: swap;
 }
 @font-face {
-	font-family: "Atkinson";
-	src: url("/fonts/atkinson-bold.woff") format("woff");
-	font-weight: 700;
+	font-family: "GeistMono";
+	src: url("/fonts/GeistMono.woff2") format("woff2");
+	font-weight: 100 900;
 	font-style: normal;
 	font-display: swap;
 }
+
+/* Keyframes for animations */
+@keyframes fade-in {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@keyframes slide-in {
+	0% { transform: translateY(-10px); opacity: 0; }
+	100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Base styles - Tailwind v4 doesn't require @layer for base styles */
 body {
-	font-family: "Atkinson", sans-serif;
+	@apply font-sans bg-background text-foreground;
 	margin: 0;
 	padding: 0;
 	text-align: left;
-	background: linear-gradient(var(--gray-gradient)) no-repeat;
-	background-size: 100% 600px;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
-	color: rgb(var(--gray-dark));
+	line-height: 1.6;
 	font-size: 20px;
-	line-height: 1.7;
+	-webkit-font-smoothing: antialiased;
 }
-main {
-	width: 720px;
-	max-width: calc(100% - 2em);
-	margin: auto;
-	padding: 3em 1em;
-}
+
+/* Removed fixed width constraint - now handled per-page */
+
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-	margin: 0 0 0.5rem 0;
-	color: rgb(var(--black));
-	line-height: 1.2;
+	@apply text-foreground;
+	/* Use browser default sizes and margins */
 }
-h1 {
-	font-size: 3.052em;
-}
-h2 {
-	font-size: 2.441em;
-}
-h3 {
-	font-size: 1.953em;
-}
-h4 {
-	font-size: 1.563em;
-}
-h5 {
-	font-size: 1.25em;
-}
+
 strong,
 b {
 	font-weight: 700;
 }
+
 a {
-	color: var(--accent);
+	@apply text-link transition-colors duration-150;
 }
 a:hover {
-	color: var(--accent);
+	@apply text-primary-lightest underline;
 }
+
 p {
 	margin-bottom: 1em;
 }
+
 .prose p {
 	margin-bottom: 2em;
 }
+
 textarea {
 	width: 100%;
 	font-size: 16px;
 }
+
 input {
 	font-size: 16px;
 }
+
 table {
 	width: 100%;
 }
+
 img {
 	max-width: 100%;
 	height: auto;
 	border-radius: 8px;
 }
+
 code {
 	padding: 2px 5px;
-	background-color: rgb(var(--gray-light));
-	border-radius: 2px;
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: 0.25rem;
 }
+
 pre {
 	padding: 1.5em;
 	border-radius: 8px;
 }
+
 pre > code {
 	all: unset;
 }
+
 blockquote {
-	border-left: 4px solid var(--accent);
+	@apply border-l-4 border-accent;
 	padding: 0 0 0 20px;
 	margin: 0;
 	font-size: 1.333em;
 }
+
 hr {
 	border: none;
-	border-top: 1px solid rgb(var(--gray-light));
+	@apply border-t border-accent/40;
 }
+
+/* Responsive styles */
+@media (max-width: 1380px) {
+  body {
+    padding: 0 2rem;
+  }
+}
+
 @media (max-width: 720px) {
 	body {
 		font-size: 18px;
@@ -136,20 +193,127 @@ hr {
 	}
 }
 
+/* Utility class */
 .sr-only {
+	@apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap;
+	clip: rect(0, 0, 0, 0);
 	border: 0;
-	padding: 0;
-	margin: 0;
-	position: absolute !important;
-	height: 1px;
-	width: 1px;
-	overflow: hidden;
-	/* IE6, IE7 - a 0 height clip, off to the bottom right of the visible 1px box */
-	clip: rect(1px 1px 1px 1px);
-	/* maybe deprecated but we need to support legacy browsers */
-	clip: rect(1px, 1px, 1px, 1px);
-	/* modern browsers, clip-path works inwards from each corner */
-	clip-path: inset(50%);
-	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
-	white-space: nowrap;
 }
+
+/* ===================================
+   Spectre-inspired Global Enhancements
+   =================================== */
+
+/* Smooth scrolling */
+html {
+	scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar - Spectre inspired */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: rgba(var(--theme-primary-rgb), 0.4);
+	border-radius: 4px;
+	transition: background 150ms ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(var(--theme-primary-rgb), 0.6);
+}
+
+/* Firefox scrollbar */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(var(--theme-primary-rgb), 0.4) transparent;
+}
+
+/* Selection styling */
+::selection {
+	background: var(--theme-primary);
+	color: var(--theme-foreground);
+}
+
+::-moz-selection {
+	background: var(--theme-primary);
+	color: var(--theme-foreground);
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+	outline: 2px solid var(--theme-primary);
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+/* ===================================
+   Theme Variants - Dynamic Theme Switching
+   =================================== */
+
+/**
+ * Nord Theme - Nordic-inspired dark theme with cool blue tones
+ * Apply by setting: <html data-theme="nord">
+ */
+html[data-theme="nord"],
+html[data-theme="nord"] body {
+	/* Base colors */
+	--theme-background: #2e3440;
+	--theme-foreground: #eceff4;
+	--theme-foreground-secondary: #d8dee9;
+	
+	/* Primary colors */
+	--theme-primary: #88c0d0;
+	--theme-primary-rgb: 136, 192, 208;
+	--theme-primary-light: #8fbcbb;
+	--theme-primary-lightest: #a3d4d6;
+	
+	/* UI colors */
+	--theme-border: #3b4252;
+	--theme-separator: #3b4252;
+	--theme-accent: #88c0d0;
+	--theme-link: #8fbcbb;
+	
+	/* Legacy variables for compatibility */
+	--accent: #88c0d0;
+	--accent-dark: #5e81ac;
+}
+
+/**
+ * Everforest Theme - Warm dark theme with green forest tones
+ * Apply by setting: <html data-theme="everforest">
+ */
+html[data-theme="everforest"],
+html[data-theme="everforest"] body {
+	/* Base colors */
+	--theme-background: #2b3339;
+	--theme-foreground: #d3c6aa;
+	--theme-foreground-secondary: #9da9a0;
+	
+	/* Primary colors */
+	--theme-primary: #a7c080;
+	--theme-primary-rgb: 167, 192, 128;
+	--theme-primary-light: #b5ca8c;
+	--theme-primary-lightest: #c3d498;
+	
+	/* UI colors */
+	--theme-border: #3d484d;
+	--theme-separator: #3d484d;
+	--theme-accent: #a7c080;
+	--theme-link: #b5ca8c;
+	
+	/* Legacy variables for compatibility */
+	--accent: #a7c080;
+	--accent-dark: #83a567;
+}
+
+/**
+ * Spectre Theme (Default) - already defined in :root
+ * No need for [data-theme="spectre"] selector as it's the default
+ */

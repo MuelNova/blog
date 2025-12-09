@@ -1,0 +1,17 @@
+---
+/**
+ * AboutCard Component
+ * Displays about section with prose content
+ */
+
+import Card from './Card.astro';
+import CardHeader from './CardHeader.astro';
+---
+
+<Card>
+	<CardHeader title="About Me" icon="user" />
+	
+	<div class="text-[var(--color-foreground)] leading-relaxed text-sm space-y-3">
+		<slot />
+	</div>
+</Card>

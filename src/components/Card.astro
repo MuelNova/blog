@@ -1,0 +1,19 @@
+---
+/**
+ * Card Component
+ * Base card component with Spectre styling
+ */
+
+interface Props {
+	class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={[
+	'border border-accent/40 bg-background p-6',
+	className
+]}>
+	<slot />
+</div>

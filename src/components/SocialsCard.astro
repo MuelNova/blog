@@ -1,0 +1,43 @@
+---
+/**
+ * SocialsCard Component
+ * Displays social media links
+ */
+
+import Card from './Card.astro';
+import CardHeader from './CardHeader.astro';
+import type { Social } from '../types';
+
+interface Props {
+	socials: Social[];
+}
+
+const { socials } = Astro.props;
+---
+
+<Card>
+	<CardHeader title="Socials" />
+	
+	<ul class="list-none p-0 m-0">
+		{socials.map((social) => (
+			<li class="mb-2 last:mb-0">
+				<a 
+					href={social.url} 
+					class="flex items-center gap-2 text-white hover:text-white no-underline text-sm"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					<svg 
+						class="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" 
+						style="filter: drop-shadow(0 0 4px var(--color-primary))" 
+						fill="currentColor" 
+						viewBox="0 0 24 24"
+					>
+						<path d={social.icon} />
+					</svg>
+					<span>{social.name}</span>
+				</a>
+			</li>
+		))}
+	</ul>
+</Card>

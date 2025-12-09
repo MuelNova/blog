@@ -1,0 +1,46 @@
+---
+/**
+ * Theme Loader Component (MultiTerm style)
+ * 
+ * Loads the saved theme from localStorage before page render.
+ * Supports random theme on homepage visit and theme locking.
+ * Respects user's dark/light theme preference.
+ */
+import { getDarkThemes, getLightThemes } from '../config/themes';
+
+const darkThemes = await getDarkThemes();
+const lightThemes = await getLightThemes();
+const darkThemeIds = darkThemes.map(t => t.id);
+const lightThemeIds = lightThemes.map(t => t.id);
+const darkThemeIdsJson = JSON.stringify(darkThemeIds);
+const lightThemeIdsJson = JSON.stringify(lightThemeIds);
+---
+
+<script is:inline define:vars={{ darkThemeIdsJson, lightThemeIdsJson }}>
+	(function loadTheme() {
+		const darkThemeIds = JSON.parse(darkThemeIdsJson);
+		const lightThemeIds = JSON.parse(lightThemeIdsJson);
+		
+		// Check if theme is locked
+		const isLocked = localStorage.getItem('theme-locked') === 'true';
+		const storedTheme = localStorage.getItem('theme');
+		const themePreference = localStorage.getItem('theme-preference') || 'dark'; // 'dark' or 'light'
+		const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+		
+		let themeToApply = storedTheme;
+		
+		// If on homepage and theme is not locked, pick a random theme based on preference
+		if (isHomePage && !isLocked) {
+			const themePool = themePreference === 'light' ? lightThemeIds : darkThemeIds;
+			const randomIndex = Math.floor(Math.random() * themePool.length);
+			themeToApply = themePool[randomIndex];
+			// Save the randomly selected theme
+			localStorage.setItem('theme', themeToApply);
+		}
+		
+		// Apply theme if exists
+		if (themeToApply) {
+			document.documentElement.setAttribute('data-theme', themeToApply);
+		}
+	})();
+</script>

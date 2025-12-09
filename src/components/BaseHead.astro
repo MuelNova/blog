@@ -4,7 +4,9 @@
 import '../styles/global.css';
 import type { ImageMetadata } from 'astro';
 import FallbackImage from '../assets/blog-placeholder-1.jpg';
+import ThemeLoader from './ThemeLoader.astro';
 import { SITE_TITLE } from '../consts';
+import { getThemes } from '../config/themes';
 
 interface Props {
 	title: string;
@@ -15,6 +17,25 @@ interface Props {
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 const { title, description, image = FallbackImage } = Astro.props;
+
+// Generate theme CSS at build time (MultiTerm style)
+const allThemes = await getThemes();
+const defaultTheme = allThemes[Math.floor(Math.random() * allThemes.length)];
+
+let cssLines: string[] = [];
+for (const theme of allThemes) {
+	cssLines.push(`:root[data-theme="${theme.id}"] {`);
+	cssLines.push(`  --color-background: ${theme.colors.background};`);
+	cssLines.push(`  --color-foreground: ${theme.colors.foreground};`);
+	cssLines.push(`  --color-primary: ${theme.colors.primary};`);
+	cssLines.push(`  --color-primary-light: ${theme.colors.primaryLight};`);
+	cssLines.push(`  --color-primary-lightest: ${theme.colors.primaryLightest};`);
+	cssLines.push(`  --color-primary-rgb: ${theme.colors.primaryRgb};`);
+	cssLines.push(`  --color-accent: ${theme.colors.accent};`);
+	cssLines.push(`  --color-link: ${theme.colors.link};`);
+	cssLines.push(`}`);
+}
+const generatedCss = cssLines.join('\n');
 ---
 
 <!-- Global Metadata -->
@@ -55,3 +76,9 @@ const { title, description, image = FallbackImage } = Astro.props;
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image.src, Astro.url)} />
+
+<!-- Auto-generated theme CSS (MultiTerm style) -->
+<style is:inline set:html={generatedCss}></style>
+
+<!-- Theme Loader (must be early to prevent FOUC) -->
+<ThemeLoader />
