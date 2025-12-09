@@ -1,0 +1,1145 @@
+{
+  "generatedAt": "2025-12-09T21:38:53.581Z",
+  "themes": [
+    {
+      "id": "andromeeda",
+      "name": "Andromeeda",
+      "description": "Deep space galaxy dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#23262e",
+        "foreground": "#d5ced9",
+        "foregroundSecondary": "#746f77",
+        "primary": "#00b0ff",
+        "primaryLight": "#26d6ff",
+        "primaryLightest": "#4dfdff",
+        "primaryRgb": "0, 176, 255",
+        "border": "#1b1d23",
+        "separator": "#1b1d23",
+        "accent": "#00b0ff",
+        "link": "#26d6ff"
+      }
+    },
+    {
+      "id": "aurora-x",
+      "name": "Aurora X",
+      "description": "Aurora dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#07090f",
+        "foreground": "#bbbbbb",
+        "foregroundSecondary": "#262e47bb",
+        "primary": "#86a5ff",
+        "primaryLight": "#accbff",
+        "primaryLightest": "#d3f2ff",
+        "primaryRgb": "134, 165, 255",
+        "border": "#15182b",
+        "separator": "#15182b",
+        "accent": "#86a5ff",
+        "link": "#accbff"
+      }
+    },
+    {
+      "id": "ayu-dark",
+      "name": "Ayu Dark",
+      "description": "Ayu dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#0b0e14",
+        "foreground": "#bfbdb6",
+        "foregroundSecondary": "#6c738099",
+        "primary": "#e6b450",
+        "primaryLight": "#ffda76",
+        "primaryLightest": "#ffff9d",
+        "primaryRgb": "230, 180, 80",
+        "border": "#11151c",
+        "separator": "#11151c",
+        "accent": "#e6b450",
+        "link": "#ffda76"
+      }
+    },
+    {
+      "id": "catppuccin-frappe",
+      "name": "Catppuccin Frappé",
+      "description": "Catppuccin Frappé theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#303446",
+        "foreground": "#c6d0f5",
+        "foregroundSecondary": "#838ba7",
+        "primary": "#ca9ee6",
+        "primaryLight": "#f0c4ff",
+        "primaryLightest": "#ffebff",
+        "primaryRgb": "202, 158, 230",
+        "border": "#626880",
+        "separator": "#626880",
+        "accent": "#ca9ee6",
+        "link": "#f0c4ff"
+      }
+    },
+    {
+      "id": "catppuccin-macchiato",
+      "name": "Catppuccin Macchiato",
+      "description": "Catppuccin Macchiato theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#24273a",
+        "foreground": "#cad3f5",
+        "foregroundSecondary": "#8087a2",
+        "primary": "#c6a0f6",
+        "primaryLight": "#ecc6ff",
+        "primaryLightest": "#ffedff",
+        "primaryRgb": "198, 160, 246",
+        "border": "#5b6078",
+        "separator": "#5b6078",
+        "accent": "#c6a0f6",
+        "link": "#ecc6ff"
+      }
+    },
+    {
+      "id": "catppuccin-mocha",
+      "name": "Catppuccin Mocha",
+      "description": "Catppuccin Mocha theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#1e1e2e",
+        "foreground": "#cdd6f4",
+        "foregroundSecondary": "#7f849c",
+        "primary": "#cba6f7",
+        "primaryLight": "#f1ccff",
+        "primaryLightest": "#fff3ff",
+        "primaryRgb": "203, 166, 247",
+        "border": "#585b70",
+        "separator": "#585b70",
+        "accent": "#cba6f7",
+        "link": "#f1ccff"
+      }
+    },
+    {
+      "id": "dark-plus",
+      "name": "Dark+",
+      "description": "VS Code default dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#1e1e1e",
+        "foreground": "#d4d4d4",
+        "foregroundSecondary": "#858585",
+        "primary": "#007acc",
+        "primaryLight": "#26a0f2",
+        "primaryLightest": "#4dc7ff",
+        "primaryRgb": "0, 122, 204",
+        "border": "#80808059",
+        "separator": "#80808059",
+        "accent": "#007acc",
+        "link": "#26a0f2"
+      }
+    },
+    {
+      "id": "dracula",
+      "name": "Dracula",
+      "description": "Classic Dracula dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#282a36",
+        "foreground": "#f8f8f2",
+        "foregroundSecondary": "#6272a4",
+        "primary": "#ff79c6",
+        "primaryLight": "#ff9fec",
+        "primaryLightest": "#ffc6ff",
+        "primaryRgb": "255, 121, 198",
+        "border": "#bd93f9",
+        "separator": "#bd93f9",
+        "accent": "#ff79c6",
+        "link": "#ff9fec"
+      }
+    },
+    {
+      "id": "dracula-soft",
+      "name": "Dracula Soft",
+      "description": "Dracula soft version",
+      "tone": "dark",
+      "colors": {
+        "background": "#282a36",
+        "foreground": "#f6f6f4",
+        "foregroundSecondary": "#7b7f8b",
+        "primary": "#f286c4",
+        "primaryLight": "#ffacea",
+        "primaryLightest": "#ffd3ff",
+        "primaryRgb": "242, 134, 196",
+        "border": "#bf9eee",
+        "separator": "#bf9eee",
+        "accent": "#f286c4",
+        "link": "#ffacea"
+      }
+    },
+    {
+      "id": "everforest-dark",
+      "name": "Everforest Dark",
+      "description": "Forest green dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#2d353b",
+        "foreground": "#d3c6aa",
+        "foregroundSecondary": "#7f897da0",
+        "primary": "#a7c080",
+        "primaryLight": "#cde6a6",
+        "primaryLightest": "#f4ffcd",
+        "primaryRgb": "167, 192, 128",
+        "border": "#2d353b",
+        "separator": "#2d353b",
+        "accent": "#a7c080",
+        "link": "#cde6a6"
+      }
+    },
+    {
+      "id": "github-dark",
+      "name": "GitHub Dark",
+      "description": "GitHub dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#24292e",
+        "foreground": "#e1e4e8",
+        "foregroundSecondary": "#444d56",
+        "primary": "#0366d6",
+        "primaryLight": "#298cfc",
+        "primaryLightest": "#50b3ff",
+        "primaryRgb": "3, 102, 214",
+        "border": "#1b1f23",
+        "separator": "#1b1f23",
+        "accent": "#0366d6",
+        "link": "#298cfc"
+      }
+    },
+    {
+      "id": "github-dark-default",
+      "name": "GitHub Dark Default",
+      "description": "GitHub default dark",
+      "tone": "dark",
+      "colors": {
+        "background": "#0d1117",
+        "foreground": "#e6edf3",
+        "foregroundSecondary": "#6e7681",
+        "primary": "#1f6feb",
+        "primaryLight": "#4595ff",
+        "primaryLightest": "#6cbcff",
+        "primaryRgb": "31, 111, 235",
+        "border": "#30363d",
+        "separator": "#30363d",
+        "accent": "#1f6feb",
+        "link": "#4595ff"
+      }
+    },
+    {
+      "id": "github-dark-dimmed",
+      "name": "GitHub Dark Dimmed",
+      "description": "GitHub dimmed dark",
+      "tone": "dark",
+      "colors": {
+        "background": "#22272e",
+        "foreground": "#adbac7",
+        "foregroundSecondary": "#636e7b",
+        "primary": "#316dca",
+        "primaryLight": "#5793f0",
+        "primaryLightest": "#7ebaff",
+        "primaryRgb": "49, 109, 202",
+        "border": "#444c56",
+        "separator": "#444c56",
+        "accent": "#316dca",
+        "link": "#5793f0"
+      }
+    },
+    {
+      "id": "github-dark-high-contrast",
+      "name": "GitHub Dark High Contrast",
+      "description": "GitHub high contrast dark",
+      "tone": "dark",
+      "colors": {
+        "background": "#0a0c10",
+        "foreground": "#f0f3f6",
+        "foregroundSecondary": "#9ea7b3",
+        "primary": "#409eff",
+        "primaryLight": "#66c4ff",
+        "primaryLightest": "#8debff",
+        "primaryRgb": "64, 158, 255",
+        "border": "#7a828e",
+        "separator": "#7a828e",
+        "accent": "#409eff",
+        "link": "#66c4ff"
+      }
+    },
+    {
+      "id": "gruvbox-dark-hard",
+      "name": "Gruvbox Dark Hard",
+      "description": "Gruvbox hard dark",
+      "tone": "dark",
+      "colors": {
+        "background": "#1d2021",
+        "foreground": "#ebdbb2",
+        "foregroundSecondary": "#665c54",
+        "primary": "#458588",
+        "primaryLight": "#6babae",
+        "primaryLightest": "#92d2d5",
+        "primaryRgb": "69, 133, 136",
+        "border": "#3c3836",
+        "separator": "#3c3836",
+        "accent": "#458588",
+        "link": "#6babae"
+      }
+    },
+    {
+      "id": "gruvbox-dark-medium",
+      "name": "Gruvbox Dark Medium",
+      "description": "Gruvbox medium dark",
+      "tone": "dark",
+      "colors": {
+        "background": "#282828",
+        "foreground": "#ebdbb2",
+        "foregroundSecondary": "#665c54",
+        "primary": "#458588",
+        "primaryLight": "#6babae",
+        "primaryLightest": "#92d2d5",
+        "primaryRgb": "69, 133, 136",
+        "border": "#3c3836",
+        "separator": "#3c3836",
+        "accent": "#458588",
+        "link": "#6babae"
+      }
+    },
+    {
+      "id": "gruvbox-dark-soft",
+      "name": "Gruvbox Dark Soft",
+      "description": "Gruvbox soft dark",
+      "tone": "dark",
+      "colors": {
+        "background": "#32302f",
+        "foreground": "#ebdbb2",
+        "foregroundSecondary": "#665c54",
+        "primary": "#458588",
+        "primaryLight": "#6babae",
+        "primaryLightest": "#92d2d5",
+        "primaryRgb": "69, 133, 136",
+        "border": "#3c3836",
+        "separator": "#3c3836",
+        "accent": "#458588",
+        "link": "#6babae"
+      }
+    },
+    {
+      "id": "houston",
+      "name": "Houston",
+      "description": "Space themed dark",
+      "tone": "dark",
+      "colors": {
+        "background": "#17191e",
+        "foreground": "#eef0f9",
+        "foregroundSecondary": "#545864",
+        "primary": "#4bf3c8",
+        "primaryLight": "#71ffee",
+        "primaryLightest": "#98ffff",
+        "primaryRgb": "75, 243, 200",
+        "border": "#17191e",
+        "separator": "#17191e",
+        "accent": "#4bf3c8",
+        "link": "#71ffee"
+      }
+    },
+    {
+      "id": "kanagawa-dragon",
+      "name": "Kanagawa Dragon",
+      "description": "Kanagawa dragon dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#181616",
+        "foreground": "#c5c9c5",
+        "foregroundSecondary": "#625e5a",
+        "primary": "#658594",
+        "primaryLight": "#8babba",
+        "primaryLightest": "#b2d2e1",
+        "primaryRgb": "101, 133, 148",
+        "border": "#0d0c0c",
+        "separator": "#0d0c0c",
+        "accent": "#658594",
+        "link": "#8babba"
+      }
+    },
+    {
+      "id": "kanagawa-wave",
+      "name": "Kanagawa Wave",
+      "description": "Kanagawa wave dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#1f1f28",
+        "foreground": "#dcd7ba",
+        "foregroundSecondary": "#54546d",
+        "primary": "#658594",
+        "primaryLight": "#8babba",
+        "primaryLightest": "#b2d2e1",
+        "primaryRgb": "101, 133, 148",
+        "border": "#16161d",
+        "separator": "#16161d",
+        "accent": "#658594",
+        "link": "#8babba"
+      }
+    },
+    {
+      "id": "laserwave",
+      "name": "Laserwave",
+      "description": "Laserwave dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#27212e",
+        "foreground": "#ffffff",
+        "foregroundSecondary": "#858585",
+        "primary": "#eb64b9",
+        "primaryLight": "#ff8adf",
+        "primaryLightest": "#ffb1ff",
+        "primaryRgb": "235, 100, 185",
+        "border": "#80808059",
+        "separator": "#80808059",
+        "accent": "#eb64b9",
+        "link": "#ff8adf"
+      }
+    },
+    {
+      "id": "material-theme",
+      "name": "Material Theme",
+      "description": "Material Design theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#263238",
+        "foreground": "#eeffff",
+        "foregroundSecondary": "#465a64",
+        "primary": "#80cbc4",
+        "primaryLight": "#a6f1ea",
+        "primaryLightest": "#cdffff",
+        "primaryRgb": "128, 203, 196",
+        "border": "#26323860",
+        "separator": "#26323860",
+        "accent": "#80cbc4",
+        "link": "#a6f1ea"
+      }
+    },
+    {
+      "id": "material-theme-darker",
+      "name": "Material Theme Darker",
+      "description": "Material darker theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#212121",
+        "foreground": "#eeffff",
+        "foregroundSecondary": "#424242",
+        "primary": "#80cbc4",
+        "primaryLight": "#a6f1ea",
+        "primaryLightest": "#cdffff",
+        "primaryRgb": "128, 203, 196",
+        "border": "#21212160",
+        "separator": "#21212160",
+        "accent": "#80cbc4",
+        "link": "#a6f1ea"
+      }
+    },
+    {
+      "id": "material-theme-ocean",
+      "name": "Material Theme Ocean",
+      "description": "Material ocean theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#0f111a",
+        "foreground": "#babed8",
+        "foregroundSecondary": "#3b3f5180",
+        "primary": "#80cbc4",
+        "primaryLight": "#a6f1ea",
+        "primaryLightest": "#cdffff",
+        "primaryRgb": "128, 203, 196",
+        "border": "#0f111a60",
+        "separator": "#0f111a60",
+        "accent": "#80cbc4",
+        "link": "#a6f1ea"
+      }
+    },
+    {
+      "id": "material-theme-palenight",
+      "name": "Material Theme Palenight",
+      "description": "Material palenight theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#292d3e",
+        "foreground": "#babed8",
+        "foregroundSecondary": "#3a3f58",
+        "primary": "#80cbc4",
+        "primaryLight": "#a6f1ea",
+        "primaryLightest": "#cdffff",
+        "primaryRgb": "128, 203, 196",
+        "border": "#292d3e60",
+        "separator": "#292d3e60",
+        "accent": "#80cbc4",
+        "link": "#a6f1ea"
+      }
+    },
+    {
+      "id": "min-dark",
+      "name": "Min Dark",
+      "description": "Minimalist dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#1f1f1f",
+        "foreground": "#bbbbbb",
+        "foregroundSecondary": "#727272",
+        "primary": "#383838",
+        "primaryLight": "#5e5e5e",
+        "primaryLightest": "#858585",
+        "primaryRgb": "56, 56, 56",
+        "border": "#80808059",
+        "separator": "#80808059",
+        "accent": "#383838",
+        "link": "#5e5e5e"
+      }
+    },
+    {
+      "id": "monokai",
+      "name": "Monokai",
+      "description": "Classic Monokai theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#272822",
+        "foreground": "#f8f8f2",
+        "foregroundSecondary": "#90908a",
+        "primary": "#75715e",
+        "primaryLight": "#9b9784",
+        "primaryLightest": "#c2beab",
+        "primaryRgb": "117, 113, 94",
+        "border": "#414339",
+        "separator": "#414339",
+        "accent": "#75715e",
+        "link": "#9b9784"
+      }
+    },
+    {
+      "id": "night-owl",
+      "name": "Night Owl",
+      "description": "Night Owl dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#011627",
+        "foreground": "#d6deeb",
+        "foregroundSecondary": "#4b6479",
+        "primary": "#44596b",
+        "primaryLight": "#6a7f91",
+        "primaryLightest": "#91a6b8",
+        "primaryRgb": "68, 89, 107",
+        "border": "#5f7e97",
+        "separator": "#5f7e97",
+        "accent": "#44596b",
+        "link": "#6a7f91"
+      }
+    },
+    {
+      "id": "nord",
+      "name": "Nord",
+      "description": "Nordic dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#2e3440",
+        "foreground": "#d8dee9",
+        "foregroundSecondary": "#4c566a",
+        "primary": "#88c0d0",
+        "primaryLight": "#aee6f6",
+        "primaryLightest": "#d5ffff",
+        "primaryRgb": "136, 192, 208",
+        "border": "#3b4252",
+        "separator": "#3b4252",
+        "accent": "#88c0d0",
+        "link": "#aee6f6"
+      }
+    },
+    {
+      "id": "one-dark-pro",
+      "name": "One Dark Pro",
+      "description": "Atom One Dark Pro",
+      "tone": "dark",
+      "colors": {
+        "background": "#282c34",
+        "foreground": "#abb2bf",
+        "foregroundSecondary": "#495162",
+        "primary": "#4d78cc",
+        "primaryLight": "#739ef2",
+        "primaryLightest": "#9ac5ff",
+        "primaryRgb": "77, 120, 204",
+        "border": "#3e4452",
+        "separator": "#3e4452",
+        "accent": "#4d78cc",
+        "link": "#739ef2"
+      }
+    },
+    {
+      "id": "plastic",
+      "name": "Plastic",
+      "description": "Plastic dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#21252b",
+        "foreground": "#a9b2c3",
+        "foregroundSecondary": "#5f6672",
+        "primary": "#e06c75",
+        "primaryLight": "#ff929b",
+        "primaryLightest": "#ffb9c2",
+        "primaryRgb": "224, 108, 117",
+        "border": "#0d1117",
+        "separator": "#0d1117",
+        "accent": "#e06c75",
+        "link": "#ff929b"
+      }
+    },
+    {
+      "id": "poimandres",
+      "name": "Poimandres",
+      "description": "Poimandres dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#1b1e28",
+        "foreground": "#a6accd",
+        "foregroundSecondary": "#767c9d50",
+        "primary": "#303340",
+        "primaryLight": "#565966",
+        "primaryLightest": "#7d808d",
+        "primaryRgb": "48, 51, 64",
+        "border": "#00000030",
+        "separator": "#00000030",
+        "accent": "#303340",
+        "link": "#565966"
+      }
+    },
+    {
+      "id": "red",
+      "name": "Red",
+      "description": "Red dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#390000",
+        "foreground": "#f8f8f8",
+        "foregroundSecondary": "#ff777788",
+        "primary": "#833",
+        "primaryLight": "#833",
+        "primaryLightest": "#833",
+        "primaryRgb": "0, 0, 0",
+        "border": "#80808059",
+        "separator": "#80808059",
+        "accent": "#833",
+        "link": "#833"
+      }
+    },
+    {
+      "id": "rose-pine",
+      "name": "Rosé Pine",
+      "description": "Rosé Pine dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#191724",
+        "foreground": "#e0def4",
+        "foregroundSecondary": "#908caa",
+        "primary": "#ebbcba",
+        "primaryLight": "#ffe2e0",
+        "primaryLightest": "#ffffff",
+        "primaryRgb": "235, 188, 186",
+        "border": "#0000",
+        "separator": "#0000",
+        "accent": "#ebbcba",
+        "link": "#ffe2e0"
+      }
+    },
+    {
+      "id": "rose-pine-moon",
+      "name": "Rosé Pine Moon",
+      "description": "Rosé Pine Moon theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#232136",
+        "foreground": "#e0def4",
+        "foregroundSecondary": "#908caa",
+        "primary": "#ea9a97",
+        "primaryLight": "#ffc0bd",
+        "primaryLightest": "#ffe7e4",
+        "primaryRgb": "234, 154, 151",
+        "border": "#0000",
+        "separator": "#0000",
+        "accent": "#ea9a97",
+        "link": "#ffc0bd"
+      }
+    },
+    {
+      "id": "slack-dark",
+      "name": "Slack Dark",
+      "description": "Slack dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#222222",
+        "foreground": "#e6e6e6",
+        "foregroundSecondary": "#858585",
+        "primary": "#1d978d",
+        "primaryLight": "#43bdb3",
+        "primaryLightest": "#6ae4da",
+        "primaryRgb": "29, 151, 141",
+        "border": "#80808059",
+        "separator": "#80808059",
+        "accent": "#1d978d",
+        "link": "#43bdb3"
+      }
+    },
+    {
+      "id": "slack-ochin",
+      "name": "Slack Ochin",
+      "description": "Slack Ochin theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#fff",
+        "foreground": "#000",
+        "foregroundSecondary": "#b9b9b9",
+        "primary": "#8ae773",
+        "primaryLight": "#b0ff99",
+        "primaryLightest": "#d7ffc0",
+        "primaryRgb": "138, 231, 115",
+        "border": "#2d3e4c",
+        "separator": "#2d3e4c",
+        "accent": "#8ae773",
+        "link": "#b0ff99"
+      }
+    },
+    {
+      "id": "solarized-dark",
+      "name": "Solarized Dark",
+      "description": "Solarized dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#002b36",
+        "foreground": "#839496",
+        "foregroundSecondary": "#858585",
+        "primary": "#2aa19899",
+        "primaryLight": "#2aa19899",
+        "primaryLightest": "#2aa19899",
+        "primaryRgb": "0, 0, 0",
+        "border": "#2b2b4a",
+        "separator": "#2b2b4a",
+        "accent": "#2aa19899",
+        "link": "#2aa19899"
+      }
+    },
+    {
+      "id": "synthwave-84",
+      "name": "Synthwave 84",
+      "description": "Cyberpunk synthwave theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#262335",
+        "foreground": "#bbbbbb",
+        "foregroundSecondary": "#ffffff73",
+        "primary": "#f97e72",
+        "primaryLight": "#ffa498",
+        "primaryLightest": "#ffcbbf",
+        "primaryRgb": "249, 126, 114",
+        "border": "#80808059",
+        "separator": "#80808059",
+        "accent": "#f97e72",
+        "link": "#ffa498"
+      }
+    },
+    {
+      "id": "tokyo-night",
+      "name": "Tokyo Night",
+      "description": "Tokyo Night theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#1a1b26",
+        "foreground": "#a9b1d6",
+        "foregroundSecondary": "#363b54",
+        "primary": "#3d59a1",
+        "primaryLight": "#637fc7",
+        "primaryLightest": "#8aa6ee",
+        "primaryRgb": "61, 89, 161",
+        "border": "#101014",
+        "separator": "#101014",
+        "accent": "#3d59a1",
+        "link": "#637fc7"
+      }
+    },
+    {
+      "id": "vesper",
+      "name": "Vesper",
+      "description": "Vesper dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#101010",
+        "foreground": "#fff",
+        "foregroundSecondary": "#505050",
+        "primary": "#ffc799",
+        "primaryLight": "#ffedbf",
+        "primaryLightest": "#ffffe6",
+        "primaryRgb": "255, 199, 153",
+        "border": "#80808059",
+        "separator": "#80808059",
+        "accent": "#ffc799",
+        "link": "#ffedbf"
+      }
+    },
+    {
+      "id": "vitesse-black",
+      "name": "Vitesse Black",
+      "description": "Vitesse pure black theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#000",
+        "foreground": "#dbd7cacc",
+        "foregroundSecondary": "#dedcd550",
+        "primary": "#bfbaaa",
+        "primaryLight": "#e5e0d0",
+        "primaryLightest": "#fffff7",
+        "primaryRgb": "191, 186, 170",
+        "border": "#191919",
+        "separator": "#191919",
+        "accent": "#bfbaaa",
+        "link": "#e5e0d0"
+      }
+    },
+    {
+      "id": "vitesse-dark",
+      "name": "Vitesse Dark",
+      "description": "Vitesse dark theme",
+      "tone": "dark",
+      "colors": {
+        "background": "#121212",
+        "foreground": "#dbd7caee",
+        "foregroundSecondary": "#dedcd550",
+        "primary": "#bfbaaa",
+        "primaryLight": "#e5e0d0",
+        "primaryLightest": "#fffff7",
+        "primaryRgb": "191, 186, 170",
+        "border": "#191919",
+        "separator": "#191919",
+        "accent": "#bfbaaa",
+        "link": "#e5e0d0"
+      }
+    },
+    {
+      "id": "catppuccin-latte",
+      "name": "Catppuccin Latte",
+      "description": "Catppuccin Latte light theme",
+      "tone": "light",
+      "colors": {
+        "background": "#eff1f5",
+        "foreground": "#4c4f69",
+        "foregroundSecondary": "#8c8fa1",
+        "primary": "#8839ef",
+        "primaryLight": "#ae5fff",
+        "primaryLightest": "#d586ff",
+        "primaryRgb": "136, 57, 239",
+        "border": "#acb0be",
+        "separator": "#acb0be",
+        "accent": "#8839ef",
+        "link": "#ae5fff"
+      }
+    },
+    {
+      "id": "everforest-light",
+      "name": "Everforest Light",
+      "description": "Forest green light theme",
+      "tone": "light",
+      "colors": {
+        "background": "#fdf6e3",
+        "foreground": "#5c6a72",
+        "foregroundSecondary": "#a4ad9ea0",
+        "primary": "#93b259",
+        "primaryLight": "#b9d87f",
+        "primaryLightest": "#e0ffa6",
+        "primaryRgb": "147, 178, 89",
+        "border": "#fdf6e3",
+        "separator": "#fdf6e3",
+        "accent": "#93b259",
+        "link": "#b9d87f"
+      }
+    },
+    {
+      "id": "github-light",
+      "name": "GitHub Light",
+      "description": "GitHub light theme",
+      "tone": "light",
+      "colors": {
+        "background": "#fff",
+        "foreground": "#24292e",
+        "foregroundSecondary": "#1b1f234d",
+        "primary": "#2188ff",
+        "primaryLight": "#47aeff",
+        "primaryLightest": "#6ed5ff",
+        "primaryRgb": "33, 136, 255",
+        "border": "#e1e4e8",
+        "separator": "#e1e4e8",
+        "accent": "#2188ff",
+        "link": "#47aeff"
+      }
+    },
+    {
+      "id": "github-light-default",
+      "name": "GitHub Light Default",
+      "description": "GitHub default light",
+      "tone": "light",
+      "colors": {
+        "background": "#ffffff",
+        "foreground": "#1f2328",
+        "foregroundSecondary": "#8c959f",
+        "primary": "#0969da",
+        "primaryLight": "#2f8fff",
+        "primaryLightest": "#56b6ff",
+        "primaryRgb": "9, 105, 218",
+        "border": "#d0d7de",
+        "separator": "#d0d7de",
+        "accent": "#0969da",
+        "link": "#2f8fff"
+      }
+    },
+    {
+      "id": "github-light-high-contrast",
+      "name": "GitHub Light High Contrast",
+      "description": "GitHub high contrast light",
+      "tone": "light",
+      "colors": {
+        "background": "#ffffff",
+        "foreground": "#0e1116",
+        "foregroundSecondary": "#88929d",
+        "primary": "#0349b4",
+        "primaryLight": "#296fda",
+        "primaryLightest": "#5096ff",
+        "primaryRgb": "3, 73, 180",
+        "border": "#20252c",
+        "separator": "#20252c",
+        "accent": "#0349b4",
+        "link": "#296fda"
+      }
+    },
+    {
+      "id": "gruvbox-light-hard",
+      "name": "Gruvbox Light Hard",
+      "description": "Gruvbox hard light",
+      "tone": "light",
+      "colors": {
+        "background": "#f9f5d7",
+        "foreground": "#3c3836",
+        "foregroundSecondary": "#bdae93",
+        "primary": "#458588",
+        "primaryLight": "#6babae",
+        "primaryLightest": "#92d2d5",
+        "primaryRgb": "69, 133, 136",
+        "border": "#ebdbb2",
+        "separator": "#ebdbb2",
+        "accent": "#458588",
+        "link": "#6babae"
+      }
+    },
+    {
+      "id": "gruvbox-light-medium",
+      "name": "Gruvbox Light Medium",
+      "description": "Gruvbox medium light",
+      "tone": "light",
+      "colors": {
+        "background": "#fbf1c7",
+        "foreground": "#3c3836",
+        "foregroundSecondary": "#bdae93",
+        "primary": "#458588",
+        "primaryLight": "#6babae",
+        "primaryLightest": "#92d2d5",
+        "primaryRgb": "69, 133, 136",
+        "border": "#ebdbb2",
+        "separator": "#ebdbb2",
+        "accent": "#458588",
+        "link": "#6babae"
+      }
+    },
+    {
+      "id": "gruvbox-light-soft",
+      "name": "Gruvbox Light Soft",
+      "description": "Gruvbox soft light",
+      "tone": "light",
+      "colors": {
+        "background": "#f2e5bc",
+        "foreground": "#3c3836",
+        "foregroundSecondary": "#bdae93",
+        "primary": "#458588",
+        "primaryLight": "#6babae",
+        "primaryLightest": "#92d2d5",
+        "primaryRgb": "69, 133, 136",
+        "border": "#ebdbb2",
+        "separator": "#ebdbb2",
+        "accent": "#458588",
+        "link": "#6babae"
+      }
+    },
+    {
+      "id": "kanagawa-lotus",
+      "name": "Kanagawa Lotus",
+      "description": "Kanagawa lotus light theme",
+      "tone": "light",
+      "colors": {
+        "background": "#f2ecbc",
+        "foreground": "#545464",
+        "foregroundSecondary": "#766b90",
+        "primary": "#5a7785",
+        "primaryLight": "#809dab",
+        "primaryLightest": "#a7c4d2",
+        "primaryRgb": "90, 119, 133",
+        "border": "#d5cea3",
+        "separator": "#d5cea3",
+        "accent": "#5a7785",
+        "link": "#809dab"
+      }
+    },
+    {
+      "id": "light-plus",
+      "name": "Light+",
+      "description": "VS Code default light theme",
+      "tone": "light",
+      "colors": {
+        "background": "#ffffff",
+        "foreground": "#000000",
+        "foregroundSecondary": "#237893",
+        "primary": "#007acc",
+        "primaryLight": "#26a0f2",
+        "primaryLightest": "#4dc7ff",
+        "primaryRgb": "0, 122, 204",
+        "border": "#80808059",
+        "separator": "#80808059",
+        "accent": "#007acc",
+        "link": "#26a0f2"
+      }
+    },
+    {
+      "id": "material-theme-lighter",
+      "name": "Material Theme Lighter",
+      "description": "Material lighter theme",
+      "tone": "light",
+      "colors": {
+        "background": "#fafafa",
+        "foreground": "#90a4ae",
+        "foregroundSecondary": "#cfd8dc",
+        "primary": "#80cbc4",
+        "primaryLight": "#a6f1ea",
+        "primaryLightest": "#cdffff",
+        "primaryRgb": "128, 203, 196",
+        "border": "#fafafa60",
+        "separator": "#fafafa60",
+        "accent": "#80cbc4",
+        "link": "#a6f1ea"
+      }
+    },
+    {
+      "id": "min-light",
+      "name": "Min Light",
+      "description": "Minimalist light theme",
+      "tone": "light",
+      "colors": {
+        "background": "#ffffff",
+        "foreground": "#212121",
+        "foregroundSecondary": "#ccc",
+        "primary": "#616161",
+        "primaryLight": "#878787",
+        "primaryLightest": "#aeaeae",
+        "primaryRgb": "97, 97, 97",
+        "border": "#f4f4f4",
+        "separator": "#f4f4f4",
+        "accent": "#616161",
+        "link": "#878787"
+      }
+    },
+    {
+      "id": "one-light",
+      "name": "One Light",
+      "description": "Atom One Light",
+      "tone": "light",
+      "colors": {
+        "background": "#fafafa",
+        "foreground": "#383a42",
+        "foregroundSecondary": "#9d9d9f",
+        "primary": "#526fff",
+        "primaryLight": "#7895ff",
+        "primaryLightest": "#9fbcff",
+        "primaryRgb": "82, 111, 255",
+        "border": "#80808059",
+        "separator": "#80808059",
+        "accent": "#526fff",
+        "link": "#7895ff"
+      }
+    },
+    {
+      "id": "rose-pine-dawn",
+      "name": "Rosé Pine Dawn",
+      "description": "Rosé Pine Dawn theme",
+      "tone": "light",
+      "colors": {
+        "background": "#faf4ed",
+        "foreground": "#575279",
+        "foregroundSecondary": "#797593",
+        "primary": "#d7827e",
+        "primaryLight": "#fda8a4",
+        "primaryLightest": "#ffcfcb",
+        "primaryRgb": "215, 130, 126",
+        "border": "#0000",
+        "separator": "#0000",
+        "accent": "#d7827e",
+        "link": "#fda8a4"
+      }
+    },
+    {
+      "id": "snazzy-light",
+      "name": "Snazzy Light",
+      "description": "Snazzy light theme",
+      "tone": "light",
+      "colors": {
+        "background": "#fafbfc",
+        "foreground": "#565869",
+        "foregroundSecondary": "#9194a2aa",
+        "primary": "#09a1ed",
+        "primaryLight": "#2fc7ff",
+        "primaryLightest": "#56eeff",
+        "primaryRgb": "9, 161, 237",
+        "border": "#80808059",
+        "separator": "#80808059",
+        "accent": "#09a1ed",
+        "link": "#2fc7ff"
+      }
+    },
+    {
+      "id": "solarized-light",
+      "name": "Solarized Light",
+      "description": "Solarized light theme",
+      "tone": "light",
+      "colors": {
+        "background": "#fdf6e3",
+        "foreground": "#657b83",
+        "foregroundSecondary": "#237893",
+        "primary": "#b58900",
+        "primaryLight": "#dbaf26",
+        "primaryLightest": "#ffd64d",
+        "primaryRgb": "181, 137, 0",
+        "border": "#ddd6c1",
+        "separator": "#ddd6c1",
+        "accent": "#b58900",
+        "link": "#dbaf26"
+      }
+    },
+    {
+      "id": "vitesse-light",
+      "name": "Vitesse Light",
+      "description": "Vitesse light theme",
+      "tone": "light",
+      "colors": {
+        "background": "#ffffff",
+        "foreground": "#393a34",
+        "foregroundSecondary": "#393a3450",
+        "primary": "#4e4f47",
+        "primaryLight": "#74756d",
+        "primaryLightest": "#9b9c94",
+        "primaryRgb": "78, 79, 71",
+        "border": "#f0f0f0",
+        "separator": "#f0f0f0",
+        "accent": "#4e4f47",
+        "link": "#74756d"
+      }
+    }
+  ]
+}

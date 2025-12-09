@@ -13,9 +13,10 @@ interface Props {
 	title: string;
 	description: string;
 	class?: string;
+	showFooter?: boolean;
 }
 
-const { title, description, class: className } = Astro.props;
+const { title, description, class: className, showFooter = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -28,6 +29,6 @@ const { title, description, class: className } = Astro.props;
 		<main class={className}>
 			<slot />
 		</main>
-		<!-- <Footer /> -->
+		{showFooter && <Footer />}
 	</body>
 </html>

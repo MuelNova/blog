@@ -99,6 +99,54 @@ body {
 	-webkit-font-smoothing: antialiased;
 }
 
+/* Blog post layout helpers */
+.blog-post-main {
+	width: calc(100% - 2em);
+	max-width: 100%;
+	margin: 0 auto;
+}
+
+.blog-post-hero {
+	width: 100%;
+}
+
+.blog-post-hero img {
+	display: block;
+	margin: 0 auto;
+	border-radius: 12px;
+	box-shadow: var(--shadow-glow-md);
+}
+
+.blog-post-prose {
+	width: 720px;
+	max-width: calc(100% - 2em);
+	margin: auto;
+	padding: 1em;
+	color: var(--color-foreground);
+	font-size: 0.925rem;
+	line-height: 1.6;
+}
+
+.blog-post-title {
+	margin-bottom: 1em;
+	padding: 1em 0;
+	text-align: center;
+	line-height: 1;
+}
+
+.blog-post-title h1 {
+	margin: 0 0 0.5em 0;
+}
+
+.blog-post-date {
+	margin-bottom: 0.5em;
+	color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
+}
+
+.blog-post-last-updated {
+	font-style: italic;
+}
+
 /* Removed fixed width constraint - now handled per-page */
 
 h1,

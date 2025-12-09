@@ -12,12 +12,7 @@ import { getThemes, getDarkThemes, getLightThemes } from '../config/themes';
 const allThemes = await getThemes();
 const darkThemes = await getDarkThemes();
 const lightThemes = await getLightThemes();
-
-// Create a theme map for client-side access
-const themeMap = Object.fromEntries(
-	allThemes.map(theme => [theme.id, theme.colors])
-);
-const themeMapJson = JSON.stringify(themeMap);
+const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 ---
 
 <theme-selector class="inline-flex">
@@ -172,10 +167,9 @@ const themeMapJson = JSON.stringify(themeMap);
 				</button>
 			</div>
 
-			<!-- Theme List -->
+			<!-- Theme List (single source, filtered client-side) -->
 			<div class="flex-1 overflow-y-auto p-4">
-				<!-- All Themes -->
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2" data-theme-list="all">
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2" data-theme-list>
 					{allThemes.map((theme) => (
 						<button
 							class="
@@ -189,52 +183,7 @@ const themeMapJson = JSON.stringify(themeMap);
 								theme-option
 							"
 							data-theme-id={theme.id}
-							data-theme-type={darkThemes.some(t => t.id === theme.id) ? 'dark' : 'light'}
-						>
-							<span class="text-sm font-medium text-foreground">
-								{theme.name}
-							</span>
-							<span class="text-xs text-foreground/70 mt-1">
-								{theme.description}
-							</span>
-								<!-- Color Preview -->
-								<div class="flex gap-1 mt-2">
-									<div
-										class="w-4 h-4 rounded-sm border border-accent/40/50"
-										style={`background-color: ${theme.colors.background}`}
-										title="Background"
-									/>
-									<div
-										class="w-4 h-4 rounded-sm border border-accent/40/50"
-										style={`background-color: ${theme.colors.primary}`}
-										title="Primary"
-									/>
-									<div
-										class="w-4 h-4 rounded-sm border border-accent/40/50"
-										style={`background-color: ${theme.colors.foreground}`}
-										title="Foreground"
-									/>
-							</div>
-						</button>
-					))}
-				</div>
-
-				<!-- Dark Themes -->
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 hidden" data-theme-list="dark">
-					{darkThemes.map((theme) => (
-						<button
-							class="
-								flex flex-col items-start
-								p-3 rounded-md
-								border border-accent/40
-								text-left
-								hover:border-primary
-								hover:bg-primary/5
-								transition-all duration-150
-								theme-option
-							"
-							data-theme-id={theme.id}
-							data-theme-type="dark"
+							data-theme-type={darkThemeIds.has(theme.id) ? 'dark' : 'light'}
 						>
 							<span class="text-sm font-medium text-foreground">
 								{theme.name}
@@ -246,55 +195,17 @@ const themeMapJson = JSON.stringify(themeMap);
 								<div
 									class="w-4 h-4 rounded-sm border border-accent/40/50"
 									style={`background-color: ${theme.colors.background}`}
+									title="Background"
 								/>
 								<div
 									class="w-4 h-4 rounded-sm border border-accent/40/50"
 									style={`background-color: ${theme.colors.primary}`}
+									title="Primary"
 								/>
 								<div
 									class="w-4 h-4 rounded-sm border border-accent/40/50"
 									style={`background-color: ${theme.colors.foreground}`}
-								/>
-							</div>
-						</button>
-					))}
-				</div>
-
-				<!-- Light Themes -->
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 hidden" data-theme-list="light">
-					{lightThemes.map((theme) => (
-						<button
-							class="
-								flex flex-col items-start
-								p-3 rounded-md
-								border border-accent/40
-								text-left
-								hover:border-primary
-								hover:bg-primary/5
-								transition-all duration-150
-								theme-option
-							"
-							data-theme-id={theme.id}
-							data-theme-type="light"
-						>
-							<span class="text-sm font-medium text-foreground">
-								{theme.name}
-							</span>
-							<span class="text-xs text-foreground/70 mt-1">
-								{theme.description}
-							</span>
-							<div class="flex gap-1 mt-2">
-								<div
-									class="w-4 h-4 rounded-sm border border-accent/40/50"
-									style={`background-color: ${theme.colors.background}`}
-								/>
-								<div
-									class="w-4 h-4 rounded-sm border border-accent/40/50"
-									style={`background-color: ${theme.colors.primary}`}
-								/>
-								<div
-									class="w-4 h-4 rounded-sm border border-accent/40/50"
-									style={`background-color: ${theme.colors.foreground}`}
+									title="Foreground"
 								/>
 							</div>
 						</button>
@@ -358,7 +269,6 @@ const themeMapJson = JSON.stringify(themeMap);
 			this.closeBtn = this.querySelector('[data-close-modal]');
 			this.dialog = this.querySelector('[data-theme-dialog]');
 			this.tabButtons = this.querySelectorAll('[data-tab]');
-			this.themeLists = this.querySelectorAll('[data-theme-list]');
 			this.themeOptions = this.querySelectorAll('.theme-option');
 			this.lockToggle = this.querySelector('[data-theme-lock-toggle]');
 			this.controller = new AbortController();
@@ -367,6 +277,7 @@ const themeMapJson = JSON.stringify(themeMap);
 			this.loadLockState();
 			this.loadPreferenceState();
 			this.setupPreferenceToggle();
+			this.switchTab('all');
 		}
 
 		setupEventListeners() {
@@ -511,12 +422,13 @@ const themeMapJson = JSON.stringify(themeMap);
 				}
 			});
 
-			// Update theme lists
-			this.themeLists.forEach((list) => {
-				if (list.dataset.themeList === tabType) {
-					list.classList.remove('hidden');
+			// Filter theme options instead of rendering multiple lists
+			this.themeOptions.forEach((option) => {
+				const optionType = option.dataset.themeType;
+				if (tabType === 'all' || optionType === tabType) {
+					option.classList.remove('hidden');
 				} else {
-					list.classList.add('hidden');
+					option.classList.add('hidden');
 				}
 			});
 		}

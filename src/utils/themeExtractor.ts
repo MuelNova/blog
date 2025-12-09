@@ -9,6 +9,16 @@
 
 import { loadShikiTheme, type BundledShikiTheme, type ExpressiveCodeTheme } from 'astro-expressive-code';
 
+async function loadThemeSafely(themeName: BundledShikiTheme): Promise<ExpressiveCodeTheme | null> {
+	try {
+		return await loadShikiTheme(themeName);
+	} catch (err) {
+		// On some adapters the bundled theme loader fails (e.g., worker builds). In that case we fall back.
+		console.warn(`[themeExtractor] Primary load failed for "${themeName}"`, err);
+		return null;
+	}
+}
+
 /**
  * Flatten Shiki theme colors (from MultiTerm's utils.ts)
  * Combines theme.colors with scoped textmate settings
@@ -36,11 +46,27 @@ export function flattenThemeColors(theme: ExpressiveCodeTheme): {
  * Extract and map colors from a Shiki theme to our theme structure
  */
 export async function extractThemeColors(themeName: BundledShikiTheme) {
-	// Load the Shiki theme using astro-expressive-code
-	const shikiTheme = await loadShikiTheme(themeName);
-	
-	// Flatten all colors
-	const colors = flattenThemeColors(shikiTheme);
+	// Load the Shiki theme using astro-expressive-code with fallbacks for worker bundling.
+	let colors: Record<string, string>;
+	const shikiTheme = await loadThemeSafely(themeName);
+	if (shikiTheme) {
+		colors = flattenThemeColors(shikiTheme);
+	} else {
+		// Graceful fallback: use a simple palette so build does not break.
+		console.warn(`[themeExtractor] Failed to load Shiki theme "${themeName}", falling back to default palette.`);
+		colors = {
+			'editor.background': '#0a0a0a',
+			'editor.foreground': '#ffffff',
+			'activityBarBadge.background': '#8c5cf5',
+			'button.background': '#8c5cf5',
+			'focusBorder': '#8c5cf5',
+			'terminal.ansiBlue': '#8c5cf5',
+			'color.foreground': '#ffffff',
+			'foreground': '#ffffff',
+			'primary': '#8c5cf5',
+			'link': '#a277ff',
+		};
+	}
 	
 	// Helper to get color with fallback
 	const getColor = (keys: string[], fallback: string): string => {
