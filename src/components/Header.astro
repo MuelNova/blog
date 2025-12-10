@@ -19,8 +19,8 @@ const path = Astro.url.pathname;
 		<li>
 			<a href="/about" class:list={{ active: path.startsWith('/about') }}>About</a>
 		</li>
-		<li class="nav-separator">/</li>
-		<li>
+		<li class="nav-separator theme-separator">/</li>
+		<li class="theme-nav-item">
 			<ThemeSelector />
 		</li>
 	</ul>
@@ -150,7 +150,8 @@ const path = Astro.url.pathname;
 			display: flex;
 		}
 
-		.nav-separator {
+		:global(.nav-separator),
+		nav :global(.theme-separator) {
 			display: none;
 		}
 
@@ -190,6 +191,10 @@ const path = Astro.url.pathname;
 			max-width: none;
 			padding: 0;
 			font-size: 1.125rem;
+		}
+
+		nav ul li:last-child {
+			border-bottom: none;
 		}
 
 		nav ul li a {

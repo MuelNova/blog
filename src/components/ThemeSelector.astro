@@ -18,15 +18,28 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 <theme-selector class="inline-flex">
 	<!-- Trigger Button -->
 	<button
-		class="flex items-center justify-center p-2 rounded-md text-foreground/70 hover:text-primary transition-colors duration-150 cursor-pointer"
+		class="flex items-center justify-center px-[0.5rem] py-[0.25rem] rounded-md text-foreground hover:text-accent transition-colors duration-150 cursor-pointer nav-trigger"
 		data-open-modal
 		aria-label="Theme"
 		title="Theme (Ctrl+K)"
 	>
-		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		<svg class="w-5 h-5 nav-trigger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
 		</svg>
 		<span class="sr-only">Theme</span>
+		<span class="nav-label-mobile">Theme</span>
+	</button>
+
+	<!-- Mobile floating trigger (for real devices where nav may be closed) -->
+	<button
+		class="mobile-theme-trigger fixed bottom-4 right-4 z-50 p-3 rounded-full shadow-lg bg-foreground text-background hover:bg-foreground/90 transition-colors duration-150 sm:hidden"
+		data-open-modal-mobile
+		aria-label="Theme"
+		title="Theme"
+	>
+		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+		</svg>
 	</button>
 
 	<dialog
@@ -35,7 +48,7 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 	>
 		<div class="flex flex-col h-full">
 			<div class="flex items-center justify-between p-4 border-b border-accent/40">
-				<div class="flex items-center gap-3 flex-wrap">
+				<div class="flex items-center gap-3 flex-wrap header-actions">
 					<h2 class="text-lg font-semibold text-foreground flex items-center gap-2">
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
@@ -49,7 +62,7 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 							data-theme-lock-toggle
 							aria-label="Lock theme"
 						/>
-						<div class="relative w-10 h-5 bg-foreground/20 rounded-full transition-colors duration-150 group-hover:bg-foreground/30">
+						<div class="relative w-10 h-5 bg-foreground/20 rounded-full transition-colors duration-150">
 							<div class="lock-indicator absolute top-0.5 left-0.5 w-4 h-4 bg-foreground rounded-full transition-transform duration-150 flex items-center justify-center">
 								<svg class="lock-icon-open w-3 h-3 text-background" fill="currentColor" viewBox="0 0 20 20">
 									<path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" />
@@ -60,6 +73,25 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 							</div>
 						</div>
 						<span class="text-xs text-foreground/70 header-text">Lock</span>
+					</label>
+					<label class="flex items-center gap-2 cursor-pointer group lock-switch">
+						<input
+							type="checkbox"
+							class="sr-only"
+							data-intro-toggle
+							aria-label="Intro animation"
+						/>
+						<div class="relative w-10 h-5 bg-foreground/20 rounded-full intro-track">
+							<div class="intro-indicator absolute top-0.5 left-0.5 w-4 h-4 bg-foreground rounded-full transition-transform duration-150 flex items-center justify-center">
+								<svg class="intro-icon-on w-3 h-3 text-background" fill="currentColor" viewBox="0 0 20 20">
+									<path d="M4 5a3 3 0 013-3h6a3 3 0 013 3v10a2 2 0 11-4 0V8a1 1 0 10-2 0v7a2 2 0 11-4 0V5z" />
+								</svg>
+								<svg class="intro-icon-off w-3 h-3 text-background hidden" fill="currentColor" viewBox="0 0 20 20">
+									<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0l10 10a1 1 0 01-1.414 1.414l-2.51-2.51A2.999 2.999 0 0110 16a3 3 0 01-3-3V8.414L4.293 6.707a1 1 0 010-1.414zm9.283 6.455L7.252 4.424C7.737 4.16 8.348 4 9 4h2a3 3 0 013 3v3.748a1 1 0 01-.424.82z" clip-rule="evenodd" />
+								</svg>
+							</div>
+						</div>
+						<span class="text-xs text-foreground/70 header-text">Intro</span>
 					</label>
 					<button
 						class="w-9 h-9 flex items-center justify-center rounded-md border border-accent/40 hover:border-primary hover:text-primary transition-colors duration-150 lock-icon-compact hidden"
@@ -73,6 +105,20 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 						</svg>
 						<svg class="lock-icon-closed w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20">
 							<path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+						</svg>
+					</button>
+					<button
+						class="w-9 h-9 flex items-center justify-center rounded-md border border-accent/40 hover:border-primary hover:text-primary transition-colors duration-150 intro-icon-compact hidden"
+						data-intro-button
+						type="button"
+						aria-label="Intro animation"
+						aria-pressed="true"
+					>
+						<svg class="intro-icon-on w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+							<path d="M4 5a3 3 0 013-3h6a3 3 0 013 3v10a2 2 0 11-4 0V8a1 1 0 10-2 0v7a2 2 0 11-4 0V5z" />
+						</svg>
+						<svg class="intro-icon-off w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0l10 10a1 1 0 01-1.414 1.414l-2.51-2.51A2.999 2.999 0 0110 16a3 3 0 01-3-3V8.414L4.293 6.707a1 1 0 010-1.414zm9.283 6.455L7.252 4.424C7.737 4.16 8.348 4 9 4h2a3 3 0 013 3v3.748a1 1 0 01-.424.82z" clip-rule="evenodd" />
 						</svg>
 					</button>
 				</div>
@@ -170,6 +216,9 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 		}
 	}
 
+	.mobile-theme-trigger {
+		box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+	}
 	@media (max-width: 640px) {
 		.header-text {
 			display: none;
@@ -177,12 +226,24 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 		.lock-switch {
 			display: none;
 		}
-		.lock-icon-compact {
+		.lock-icon-compact,
+		.intro-icon-compact {
 			display: flex;
+		}
+		.header-actions {
+			flex-wrap: nowrap;
+			gap: 0.5rem;
+		}
+		button[data-open-modal] {
+			display: none;
 		}
 		button[data-tab] {
 			padding: 0.35rem 0.6rem;
 			font-size: 0.8rem;
+		}
+		dialog {
+			min-height: 80vh;
+			max-height: 100vh;
 		}
 	}
 </style>
@@ -193,23 +254,29 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 			super();
 
 			this.openBtn = this.querySelector('[data-open-modal]');
+			this.openBtnMobile = this.querySelector('[data-open-modal-mobile]');
 			this.closeBtn = this.querySelector('[data-close-modal]');
 			this.dialog = this.querySelector('[data-theme-dialog]');
 			this.tabButtons = this.querySelectorAll('[data-tab]');
 			this.themeOptions = this.querySelectorAll('.theme-option');
 			this.lockToggle = this.querySelector('[data-theme-lock-toggle]');
 			this.lockButton = this.querySelector('[data-lock-button]');
+			this.introToggle = this.querySelector('[data-intro-toggle]');
+			this.introButton = this.querySelector('[data-intro-button]');
 			this.controller = new AbortController();
+			this.dialogSupported = true; // native dialog path only
 
 			const savedTab = localStorage.getItem('theme-preference') || 'all';
 			this.setupEventListeners();
 			this.loadLockState();
+			this.loadIntroState();
 			this.switchTab(savedTab);
 		}
 
 		setupEventListeners() {
 			// Open modal
 			this.openBtn?.addEventListener('click', () => this.openModal());
+			this.openBtnMobile?.addEventListener('click', () => this.openModal());
 
 			// Close modal
 			this.closeBtn?.addEventListener('click', () => this.closeModal());
@@ -247,6 +314,15 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 				const current = localStorage.getItem('theme-locked') === 'true';
 				this.toggleLock(!current);
 			});
+
+			// Intro toggle
+			this.introToggle?.addEventListener('change', (e) => {
+				this.toggleIntro(e.target.checked);
+			});
+			this.introButton?.addEventListener('click', () => {
+				const current = localStorage.getItem('intro-enabled') !== 'false';
+				this.toggleIntro(!current);
+			});
 		}
 
 		loadLockState() {
@@ -255,6 +331,14 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 				this.lockToggle.checked = isLocked;
 			}
 			this.updateLockUI(isLocked);
+		}
+
+		loadIntroState() {
+			const introEnabled = localStorage.getItem('intro-enabled') !== 'false';
+			if (this.introToggle) { 
+				this.introToggle.checked = introEnabled;
+			}
+			this.updateIntroUI(introEnabled);
 		}
 
 		toggleLock(isLocked) {
@@ -281,6 +365,33 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 			this.lockButton?.setAttribute('aria-pressed', isLocked ? 'true' : 'false');
 			this.lockButton?.classList.toggle('border-primary', isLocked);
 			this.lockButton?.classList.toggle('text-primary', isLocked);
+		}
+
+		updateIntroUI(isEnabled) {
+			const indicator = this.querySelector('.intro-indicator');
+			const onIcon = this.querySelectorAll('.intro-icon-on');
+			const offIcon = this.querySelectorAll('.intro-icon-off');
+			const compact = this.introButton;
+
+			indicator?.classList.toggle('translate-x-5', isEnabled);
+			indicator?.parentElement?.classList.toggle('bg-primary', isEnabled);
+			indicator?.parentElement?.classList.toggle('bg-foreground/20', !isEnabled);
+
+			onIcon.forEach((icon) => icon.classList.toggle('hidden', !isEnabled));
+			offIcon.forEach((icon) => icon.classList.toggle('hidden', isEnabled));
+
+			this.introToggle?.setAttribute('aria-pressed', isEnabled ? 'true' : 'false');
+			compact?.setAttribute('aria-pressed', isEnabled ? 'true' : 'false');
+			compact?.classList.toggle('border-primary', isEnabled);
+			compact?.classList.toggle('text-primary', isEnabled);
+		}
+
+		toggleIntro(isEnabled) {
+			localStorage.setItem('intro-enabled', isEnabled ? 'true' : 'false');
+			if (this.introToggle) {
+				this.introToggle.checked = isEnabled;
+			}
+			this.updateIntroUI(isEnabled);
 		}
 
 		connectedCallback() {

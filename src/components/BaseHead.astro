@@ -23,6 +23,16 @@ const allThemes = await getThemes();
 const defaultTheme = allThemes[Math.floor(Math.random() * allThemes.length)];
 
 let cssLines: string[] = [];
+const plainIntroCss = `:root[data-theme="plain-intro"] {
+	--color-background: #f5f5f1;
+	--color-foreground: #1f2933;
+	--color-primary: #1f3a5f;
+	--color-primary-light: #33527a;
+	--color-primary-lightest: #e5e9f2;
+	--color-primary-rgb: 31, 58, 95;
+	--color-accent: #94a3b8;
+	--color-link: #2563eb;
+}`;
 for (const theme of allThemes) {
 	cssLines.push(`:root[data-theme="${theme.id}"] {`);
 	cssLines.push(`  --color-background: ${theme.colors.background};`);
@@ -35,7 +45,7 @@ for (const theme of allThemes) {
 	cssLines.push(`  --color-link: ${theme.colors.link};`);
 	cssLines.push(`}`);
 }
-const generatedCss = cssLines.join('\n');
+const generatedCss = [plainIntroCss, cssLines.join('\n')].join('\n');
 ---
 
 <!-- Global Metadata -->

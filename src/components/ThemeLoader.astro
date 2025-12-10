@@ -26,6 +26,11 @@ const lightThemeIdsJson = JSON.stringify(lightThemeIds);
 		const storedTheme = localStorage.getItem('theme');
 		const themePreference = localStorage.getItem('theme-preference') || 'dark'; // 'dark' or 'light'
 		const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+		const introKey = 'intro-played-session-v1';
+		// const introEnabled = localStorage.getItem('intro-enabled') !== 'false';
+		const introEnabled = false; // Disable intro globally for now
+		const introSeenThisSession = sessionStorage.getItem(introKey) === 'true';
+		const shouldDeferIntro = isHomePage && introEnabled && !introSeenThisSession;
 		
 		let themeToApply = storedTheme || 'spectre';
 		
@@ -38,6 +43,15 @@ const lightThemeIdsJson = JSON.stringify(lightThemeIds);
 			localStorage.setItem('theme', themeToApply);
 		}
 		
+		// Defer applying the homepage theme until the intro finishes
+		if (shouldDeferIntro && themeToApply) {
+			window.__deferredTheme = themeToApply;
+			window.__introEnabled = true;
+			document.documentElement.setAttribute('data-theme', 'plain-intro');
+			return;
+		}
+		window.__introEnabled = introEnabled;
+
 		// Apply theme if exists
 		if (themeToApply) {
 			document.documentElement.setAttribute('data-theme', themeToApply);
