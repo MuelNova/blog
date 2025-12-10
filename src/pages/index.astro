@@ -7,7 +7,7 @@ import AboutCard from '../components/AboutCard.astro';
 import LatestPosts from '../components/LatestPosts.astro';
 import { SITE_DESCRIPTION, SITE_TITLE, USER_NAME } from '../consts';
 import { QUICK_INFO, SOCIAL_LINKS } from '../config/profile';
-import IntroGlitch from '../components/IntroGlitch.astro';
+import OpeningAnimation from '../components/OpeningAnimation.astro';
 
 // Get latest 2 blog posts
 const posts = (await getCollection('blog'))
@@ -21,11 +21,12 @@ const posts = (await getCollection('blog'))
 	description={SITE_DESCRIPTION}
 	class="w-full max-w-[1280px] mx-auto flex flex-col gap-8 py-8"
 >
-	<IntroGlitch />
+	<OpeningAnimation slot="overlay" />
+	
 	<!-- Two Column Grid Layout -->
-	<div class="grid grid-cols-1 lg:grid-cols-[2fr_5fr] gap-8 plain-grid">
+	<div class="grid grid-cols-1 lg:grid-cols-[2fr_5fr] gap-8">
 		<!-- Left Column -->
-		<div class="flex flex-col gap-8 plain-hide">
+		<div class="flex flex-col gap-8 landing-section delay-100">
 			<ProfileCard name={USER_NAME} info={QUICK_INFO} />
 			<SocialsCard socials={SOCIAL_LINKS} />
 		</div>
@@ -33,19 +34,24 @@ const posts = (await getCollection('blog'))
 		<!-- Right Column -->
 		<div class="flex flex-col gap-8">
 			<!-- About Section with accent header -->
-			<div class="plain-hide">
+			<div class="landing-section delay-200">
 				<AboutCard>
 					<p>If you see this, you know I'm still developing this site.</p>
 				</AboutCard>
 			</div>
 			<!-- Divider -->
-			<div class="flex items-center gap-4 my-2 plain-hide">
+			<div class="flex items-center gap-4 my-2 landing-section delay-300">
 				<hr class="flex-1 bg-accent h-0.5 border-none" />
 				<span class="text-accent/70 text-sm font-semibold">Latest Posts</span>
 				<hr class="flex-1 bg-accent h-0.5 border-none" />
 			</div>
 			
-			<LatestPosts posts={posts} class="plain-latest" />
+			<div class="landing-section delay-400">
+				<LatestPosts posts={posts} />
+			</div>
 		</div>
 	</div>
 </PageLayout>
+
+<style>
+</style>

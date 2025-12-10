@@ -26,6 +26,7 @@ const { title, description, class: className, showFooter = false } = Astro.props
 		<BaseHead title={title} description={description} />
 	</head>
 	<body class="font-sans">
+		<slot name="overlay" />
 		<Background />
 		<Header />
 		<main class={className}>
