@@ -562,9 +562,10 @@ hr {
 @media (max-width: 720px) {
 	body {
 		font-size: 18px;
+		padding: 0 1rem;
 	}
 	main {
-		padding: 1em;
+		padding: 1em 0;
 	}
 }
 
