@@ -171,15 +171,33 @@ const path = Astro.url.pathname;
 <script is:inline>
 	const nav = document.querySelector('nav[data-open]');
 	const toggle = document.querySelector('[data-nav-toggle]');
+	const navList = document.getElementById('primary-nav');
 
 	// Mobile menu toggle
 	if (nav && toggle) {
-		toggle.addEventListener('click', () => {
+		toggle.addEventListener('click', (e) => {
+			e.stopPropagation(); // 防止触发document的点击事件
 			const isOpen = nav.getAttribute('data-open') === 'true';
 			nav.setAttribute('data-open', isOpen ? 'false' : 'true');
 			toggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
 		});
 	}
+	
+	// Close menu when clicking outside (mobile only)
+	document.addEventListener('click', (e) => {
+		// Only on mobile (when toggle is visible)
+		if (window.innerWidth >= 640) return;
+		
+		if (nav && navList && toggle) {
+			const isOpen = nav.getAttribute('data-open') === 'true';
+			
+			// If menu is open and click is outside nav and toggle button
+			if (isOpen && !navList.contains(e.target) && !toggle.contains(e.target)) {
+				nav.setAttribute('data-open', 'false');
+				toggle.setAttribute('aria-expanded', 'false');
+			}
+		}
+	});
 	
 	// Auto-hide/show nav on scroll
 	let lastScrollTop = 0;
