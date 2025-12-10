@@ -3,7 +3,7 @@ import { LinkCardProps } from "@site/src/contents/pages/links/_Links";
 const List: LinkCardProps[] = [
   {
     link: "https://silente.dev/",
-    linkText: "Shar Blog",
+    linkText: "Shark Blog",
     description:
       "SilentE 是区块链大师，Web3 米恰飞起来了，又会 Web 安全，太厉害了",
     icon: "https://silente.dev/favicon.svg",
@@ -29,10 +29,10 @@ const List: LinkCardProps[] = [
     icon: "https://rocketma.dev/images/avatar.png",
   },
   {
-    link: "https://haoqiguai.site/",
+    link: "https://www.haoqiguai.site/",
     linkText: "奇怪的轩轩",
     description: "同组的学弟，大二开始学 Pwn，进度非常快，喜欢奶龙（笑）",
-    icon: "https://img.notionusercontent.com/s3/prod-files-secure%2F647dfbeb-5527-4768-ae58-86e7a56d9e84%2Faa4b7b3e-c7ed-44f7-a747-0f5cbeb2d8bb%2F%E5%A5%B6%E9%BE%991.webp",
+    icon: "https://img.notionusercontent.com/s3/prod-files-secure%2F647dfbeb-5527-4768-ae58-86e7a56d9e84%2Faa4b7b3e-c7ed-44f7-a747-0f5cbeb2d8bb%2F%E5%A5%B6%E9%BE%991.webp/size/w=800?exp=1765471005&sig=f1dKycUmusJmdbX6LpLw15NKSP12cmaVhm47VaQN1Zs&id=13cf358e-6f8b-8128-a832-000b901b75fa&table=collection&userId=c00961db-e27a-40f1-aa6e-8c40e80b89ee",
   },
   {
     link: "https://www.fei3ei.xyz/",
