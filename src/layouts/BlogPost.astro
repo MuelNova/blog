@@ -7,6 +7,7 @@ import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import TableOfContents from '../components/TableOfContents.astro';
 import Background from '../components/Background.astro';
+import Giscus from '../components/Giscus.astro';
 
 type Props = CollectionEntry<'blog'>['data'] & {
 	headings?: any[];
@@ -48,6 +49,7 @@ const { title, description, pubDate, updatedDate, heroImage, headings = [] } = A
 			</article>
 			<TableOfContents headings={headings} />
 		</main>
+		<Giscus />
 		<Footer />
 	</body>
 </html>

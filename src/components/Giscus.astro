@@ -1,0 +1,157 @@
+---
+/**
+ * Giscus Comment Component
+ * Loads Giscus comments and handles theme switching
+ */
+
+import giscusConfig from '../config/giscus';
+
+const origin = giscusConfig.siteUrl || Astro.url.origin;
+const { repo, repoId, category, categoryId, reactionsEnabled, inputPosition, lang, loading } = giscusConfig;
+---
+
+<div
+	class="giscus-container"
+	data-origin={origin}
+	data-repo={repo}
+	data-repo-id={repoId}
+	data-category={category}
+	data-category-id={categoryId}
+	data-reactions-enabled={reactionsEnabled ? '1' : '0'}
+	data-input-position={inputPosition}
+	data-lang={lang}
+	data-loading={loading}
+>
+</div>
+
+<script>
+	function loadGiscus() {
+		const giscusDiv = document.querySelector('.giscus-container');
+		if (!giscusDiv) {
+			console.error('Giscus container not found');
+			return;
+		}
+
+		const origin = giscusDiv.getAttribute('data-origin')!;
+		const repo = giscusDiv.getAttribute('data-repo')!;
+		const repoId = giscusDiv.getAttribute('data-repo-id')!;
+		const category = giscusDiv.getAttribute('data-category')!;
+		const categoryId = giscusDiv.getAttribute('data-category-id')!;
+		const reactionsEnabled = giscusDiv.getAttribute('data-reactions-enabled')!;
+		const inputPosition = giscusDiv.getAttribute('data-input-position')!;
+		const lang = giscusDiv.getAttribute('data-lang')!;
+		const loadingAttr = giscusDiv.getAttribute('data-loading')!;
+
+		console.log('Loading Giscus with config:', {
+			origin,
+			repo,
+			repoId,
+			category,
+			categoryId,
+			reactionsEnabled,
+			inputPosition,
+			lang,
+			loadingAttr
+		});
+		
+
+		// Get current theme from localStorage or DOM attribute, default to 'spectre'
+		const currentTheme = localStorage.getItem('theme') || 
+		                     document.documentElement.getAttribute('data-theme') || 
+		                     'spectre';
+		const themeUrl = `${origin}/giscus/${currentTheme}.css`;
+		
+		const script = document.createElement('script');
+		script.src = 'https://giscus.app/client.js';
+		script.setAttribute('data-repo', repo);
+		script.setAttribute('data-repo-id', repoId);
+		script.setAttribute('data-category', category);
+		script.setAttribute('data-category-id', categoryId);
+		script.setAttribute('data-mapping', 'title');
+		script.setAttribute('data-strict', '0');
+		script.setAttribute('data-reactions-enabled', reactionsEnabled);
+		script.setAttribute('data-emit-metadata', '0');
+		script.setAttribute('data-input-position', inputPosition);
+		script.setAttribute('data-theme', themeUrl); // Use custom theme URL
+		script.setAttribute('data-lang', lang);
+		script.setAttribute('data-loading', loadingAttr);
+		script.crossOrigin = 'anonymous';
+		script.async = true;
+
+		giscusDiv.appendChild(script);
+	}
+
+	async function updateGiscusTheme(themeId: string) {
+		console.log('Updating Giscus theme to:', themeId);
+		
+		let giscusFrame: HTMLIFrameElement | null = null;
+		
+		// Try to find the Giscus iframe (retry up to 3 times)
+		for (let i = 0; i < 3; i++) {
+			giscusFrame = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+			if (giscusFrame) break;
+			
+			console.log('Giscus iframe not found, retrying...');
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+		}
+
+		if (!giscusFrame) {
+			console.error('Giscus iframe not found after retries');
+			return;
+		}
+
+		// Get the origin and construct theme URL
+		const giscusDiv = document.querySelector('.giscus-container');
+		const origin = giscusDiv?.getAttribute('data-origin') || window.location.origin;
+		const themeUrl = `${origin}/giscus/${themeId}.css`;
+
+		// Send theme update message to Giscus iframe
+		giscusFrame.contentWindow?.postMessage(
+			{ giscus: { setConfig: { theme: themeUrl } } },
+			'https://giscus.app'
+		);
+	}
+
+	function listenForThemeChange() {
+		// Listen for theme changes from localStorage
+		window.addEventListener('storage', async (e) => {
+			if (e.key === 'theme' && e.newValue) {
+				await updateGiscusTheme(e.newValue);
+			}
+		});
+
+		// Also watch for data-theme attribute changes on documentElement
+		const observer = new MutationObserver((mutations) => {
+			mutations.forEach(async (mutation) => {
+				if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+					const newTheme = document.documentElement.getAttribute('data-theme');
+					if (newTheme) {
+						await updateGiscusTheme(newTheme);
+					}
+				}
+			});
+		});
+
+		observer.observe(document.documentElement, {
+			attributes: true,
+			attributeFilter: ['data-theme'],
+		});
+	}
+
+	// Initialize Giscus
+	loadGiscus();
+	listenForThemeChange();
+</script>
+
+<style>
+	.giscus-container {
+		margin-top: 3rem;
+		margin-bottom: 2rem;
+		max-width: 800px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	.giscus-container :global(iframe.giscus-frame) {
+		width: 100%;
+	}
+</style>
