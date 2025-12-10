@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 
-/* Theme CSS Variables - Spectre inspired color scheme */
+/* Legacy Theme CSS Variables (for backward compatibility only) */
 :root {
 	/* Primary color - Spectre purple */
 	--theme-primary: #8c5cf5;
@@ -30,7 +30,7 @@
 
 /* Tailwind v4 Theme Configuration */
 @theme {
-	/* Map theme colors to Tailwind utilities */
+	/* Map legacy theme colors to Tailwind utilities (for backward compatibility) */
 	--color-primary: var(--theme-primary);
 	--color-primary-light: var(--theme-primary-light);
 	--color-primary-lightest: var(--theme-primary-lightest);
@@ -52,7 +52,7 @@
 	
 	/* Drop shadows for text glow */
 	--drop-shadow-glow: drop-shadow(0 0 4px var(--color-primary));
-	--drop-shadow-glow-lg: drop-shadow(0 0 12px var(--color		-primary));
+	--drop-shadow-glow-lg: drop-shadow(0 0 12px var(--color-primary));
 	
 	/* Animations */
 	--animate-fade-in: fade-in 150ms ease-in;
@@ -222,6 +222,34 @@ body {
 	margin: 0 auto;
 }
 
+/* Blog post with ToC layout */
+.blog-post-main-with-toc {
+	width: 100%;
+	max-width: 100%;
+	margin: 0 auto;
+	padding: 0;
+}
+
+@media (min-width: 768px) {
+	.blog-post-main-with-toc {
+		width: calc(100% - 2em);
+		padding: 0 1em;
+	}
+}
+
+@media (min-width: 1280px) {
+	.blog-post-main-with-toc {
+		display: flex;
+		gap: 2rem;
+		align-items: flex-start;
+	}
+	
+	.blog-article-wrapper {
+		flex: 1;
+		min-width: 0;
+	}
+}
+
 .blog-post-hero {
 	width: 100%;
 }
@@ -234,13 +262,33 @@ body {
 }
 
 .blog-post-prose {
-	width: 720px;
-	max-width: calc(100% - 2em);
+	width: 100%;
+	max-width: 100%;
 	margin: auto;
-	padding: 1em;
+	padding: 0.5rem;
 	color: var(--color-foreground);
 	font-size: 0.925rem;
 	line-height: 1.6;
+}
+
+@media (min-width: 640px) {
+	.blog-post-prose {
+		padding: 1rem;
+	}
+}
+
+@media (min-width: 768px) {
+	.blog-post-prose {
+		width: 720px;
+		max-width: calc(100% - 2em);
+	}
+}
+
+@media (min-width: 1280px) {
+	.blog-post-prose {
+		width: 100%;
+		max-width: 720px;
+	}
 }
 
 .blog-post-title {
@@ -274,6 +322,285 @@ h6 {
 	@apply text-foreground;
 	/* Use browser default sizes and margins */
 }
+
+/* ===================================
+   MultiTerm-inspired Prose Styles
+   =================================== */
+
+/* Prose container for blog posts and markdown content */
+.prose {
+	font-size: 1rem;
+	line-height: 1.75;
+	
+	/* Inline code styling */
+	code:not(pre code) {
+		font-size: 0.875rem;
+		background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.5rem;
+		white-space: nowrap;
+		color: color-mix(in srgb, var(--color-foreground) 90%, transparent);
+	}
+	
+	/* Headings with markdown-style prefixes */
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		margin-top: 1.5rem;
+		margin-bottom: 1.5rem;
+		font-weight: 600;
+	}
+	
+	h1 a,
+	h2 a,
+	h3 a,
+	h4 a,
+	h5 a,
+	h6 a {
+		text-decoration: none;
+		color: inherit;
+	}
+	
+	h1 {
+		font-size: 1.875rem; /* text-3xl */
+		margin-top: 2rem; /* mt-8 */
+		color: var(--color-primary-light);
+	}
+	
+	h1::before {
+		content: '#';
+		margin-right: 0.5rem;
+	}
+	
+	h2 {
+		font-size: 1.5rem; /* text-2xl */
+		margin-top: 3rem; /* mt-12 */
+		color: color-mix(in srgb, var(--color-primary-light) 70%, var(--color-primary-lightest) 30%);
+	}
+	
+	h2::before {
+		content: '##';
+		margin-right: 0.5rem;
+	}
+	
+	h3 {
+		font-size: 1.25rem; /* text-xl */
+		margin-top: 2.5rem; /* mt-10 */
+		color: var(--color-primary-lightest);
+	}
+	
+	h3::before {
+		content: '###';
+		margin-right: 0.5rem;
+	}
+	
+	h4 {
+		font-size: 1.125rem; /* text-lg */
+		margin-top: 2rem; /* mt-8 */
+		color: color-mix(in srgb, var(--color-foreground) 70%, var(--color-primary-lightest) 30%);
+	}
+	
+	h4::before {
+		content: '####';
+		margin-right: 0.5rem;
+	}
+	
+	h5 {
+		font-size: 1rem; /* text-base */
+		margin-top: 1.5rem; /* mt-6 */
+		color: color-mix(in srgb, var(--color-foreground) 85%, var(--color-primary-lightest) 15%);
+	}
+	
+	h5::before {
+		content: '#####';
+		margin-right: 0.5rem;
+	}
+	
+	h6 {
+		font-size: 1rem; /* text-base */
+		margin-top: 1.5rem; /* mt-6 */
+		color: color-mix(in srgb, var(--color-foreground) 90%, var(--color-primary-lightest) 10%);
+	}
+	
+	h6::before {
+		content: '######';
+		margin-right: 0.5rem;
+	}
+	
+	/* Paragraphs and spacing */
+	p,
+	ul,
+	ol,
+	img,
+	figure,
+	video,
+	table,
+	blockquote {
+		margin-top: 1.5rem;
+		margin-bottom: 1.5rem;
+	}
+	
+	/* Strong/bold text */
+	b,
+	strong {
+		font-weight: 600;
+	}
+	
+	/* Links */
+	a {
+		color: var(--color-link);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+	
+	a:hover {
+		text-decoration: underline;
+	}
+	
+	/* Lists */
+	ul,
+	ol {
+		padding-left: 2rem;
+	}
+	
+	@media (min-width: 640px) {
+		ul,
+		ol {
+			padding-left: 2.5rem;
+		}
+	}
+	
+	li {
+		padding-left: 0.5rem;
+		margin-top: 1rem;
+		margin-bottom: 1rem;
+	}
+	
+	li::marker {
+		color: var(--color-primary-light);
+	}
+	
+	/* Unordered lists use dash */
+	ul li {
+		list-style-type: '-';
+	}
+	
+	/* Ordered lists use numbers */
+	ol li {
+		list-style-type: decimal;
+	}
+	
+	/* Horizontal rule */
+	hr {
+		height: 0.125rem;
+		margin-top: 4rem;
+		margin-bottom: 4rem;
+		border: none;
+		border-radius: 0.75rem;
+		background: color-mix(in srgb, var(--color-foreground) 20%, transparent);
+	}
+	
+	/* Blockquotes */
+	blockquote {
+		position: relative;
+		padding-left: 1.75rem;
+		padding-right: 1.75rem;
+		padding-top: 1.5rem;
+		padding-bottom: 1.5rem;
+		border-radius: 0.75rem;
+		background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
+	}
+	
+	blockquote::before {
+		content: '>';
+		position: absolute;
+		left: 0.75rem;
+		font-weight: 700;
+		color: var(--color-accent);
+	}
+	
+	blockquote p:first-child {
+		margin-top: 0;
+	}
+	
+	blockquote p:last-child {
+		margin-bottom: 0;
+	}
+	
+	/* Tables */
+	table {
+		width: 100%;
+	}
+	
+	table,
+	th,
+	td {
+		border-width: 2px;
+		padding: 0.625rem;
+		border-color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+	}
+	
+	th {
+		text-transform: uppercase;
+		text-align: left;
+		font-weight: 600;
+	}
+	
+	/* Images */
+	img {
+		display: block;
+		max-width: 100%;
+		border-width: 8px;
+		border-radius: 0.75rem;
+		overflow: hidden;
+		margin-left: auto;
+		margin-right: auto;
+		border-color: color-mix(in srgb, var(--color-foreground) 10%, transparent);
+	}
+	
+	img[data-pixelated] {
+		image-rendering: pixelated;
+	}
+	
+	/* Figures with captions */
+	figure:not(.expressive-code figure) {
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+		border-radius: 0.75rem;
+		padding-top: 0.5rem;
+		padding-bottom: 0.5rem;
+	}
+	
+	figure:not(.expressive-code figure) figcaption {
+		text-align: center;
+		font-style: italic;
+	}
+	
+	/* Code blocks (Expressive Code) */
+	div.expressive-code {
+		margin-top: 2rem;
+		margin-bottom: 2rem;
+	}
+	
+	div.expressive-code figure {
+		border-width: 2px;
+		border-radius: 0.75rem;
+		border-color: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+		box-shadow: none !important;
+	}
+	
+	div.expressive-code figure > pre {
+		border-radius: 10px !important;
+		border: none !important;
+		scrollbar-width: thin;
+		background: transparent !important;
+	}
+}
+
 
 strong,
 b {
@@ -416,68 +743,3 @@ html {
 	outline-offset: 2px;
 	border-radius: 2px;
 }
-
-/* ===================================
-   Theme Variants - Dynamic Theme Switching
-   =================================== */
-
-/**
- * Nord Theme - Nordic-inspired dark theme with cool blue tones
- * Apply by setting: <html data-theme="nord">
- */
-html[data-theme="nord"],
-html[data-theme="nord"] body {
-	/* Base colors */
-	--theme-background: #2e3440;
-	--theme-foreground: #eceff4;
-	--theme-foreground-secondary: #d8dee9;
-	
-	/* Primary colors */
-	--theme-primary: #88c0d0;
-	--theme-primary-rgb: 136, 192, 208;
-	--theme-primary-light: #8fbcbb;
-	--theme-primary-lightest: #a3d4d6;
-	
-	/* UI colors */
-	--theme-border: #3b4252;
-	--theme-separator: #3b4252;
-	--theme-accent: #88c0d0;
-	--theme-link: #8fbcbb;
-	
-	/* Legacy variables for compatibility */
-	--accent: #88c0d0;
-	--accent-dark: #5e81ac;
-}
-
-/**
- * Everforest Theme - Warm dark theme with green forest tones
- * Apply by setting: <html data-theme="everforest">
- */
-html[data-theme="everforest"],
-html[data-theme="everforest"] body {
-	/* Base colors */
-	--theme-background: #2b3339;
-	--theme-foreground: #d3c6aa;
-	--theme-foreground-secondary: #9da9a0;
-	
-	/* Primary colors */
-	--theme-primary: #a7c080;
-	--theme-primary-rgb: 167, 192, 128;
-	--theme-primary-light: #b5ca8c;
-	--theme-primary-lightest: #c3d498;
-	
-	/* UI colors */
-	--theme-border: #3d484d;
-	--theme-separator: #3d484d;
-	--theme-accent: #a7c080;
-	--theme-link: #b5ca8c;
-	
-	/* Legacy variables for compatibility */
-	--accent: #a7c080;
-	--accent-dark: #83a567;
-}
-
-/**
- * Spectre Theme (Default) - already defined in :root
- * No need for [data-theme="spectre"] selector as it's the default
- */

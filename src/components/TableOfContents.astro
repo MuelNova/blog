@@ -1,0 +1,121 @@
+---
+import type { MarkdownHeading } from 'astro'
+import TOCHeading from './TableOfContentsHeading.astro'
+
+interface Props {
+  headings: MarkdownHeading[]
+}
+
+const { headings } = Astro.props
+
+const filteredHeadings = headings.filter(({ depth }) => depth >= 2 && depth <= 3)
+---
+
+{filteredHeadings.length > 0 && (
+<details
+  open
+  class="toc"
+>
+  <summary>Table of Contents</summary>
+  <nav>
+    <ul>
+      {filteredHeadings.map((heading) => <TOCHeading heading={heading} />)}
+    </ul>
+  </nav>
+</details>
+)}
+
+<script>
+  const anchors = document.querySelectorAll('h2[id], h3[id]')
+  const links = document.querySelectorAll('details.toc > nav > ul > li')
+  if (anchors.length === links.length && anchors.length > 0) {
+    window.addEventListener('scroll', (_event) => {
+      let scrollTop = window.scrollY
+      let highlighted = false
+      // then iterate backwards, on the first match highlight it and break
+      for (var i = anchors.length - 1; i >= 0; i--) {
+        const anchor = anchors[i] as HTMLElement
+        if (!highlighted && scrollTop > anchor.offsetTop - 75) {
+          links[i].classList.add('active-heading')
+          highlighted = true
+        } else {
+          links[i].classList.remove('active-heading')
+        }
+      }
+    })
+  }
+</script>
+
+<style>
+  .toc {
+    position: relative;
+    color: color-mix(in srgb, var(--color-foreground) 90%, transparent);
+    font-size: 0.875rem;
+    background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
+    padding: 1.5rem 2rem;
+    margin-top: 1.25rem;
+    border-radius: 0.75rem;
+    border: 3px double color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+  
+  .toc summary {
+    list-style: none;
+    cursor: pointer;
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  
+  .toc summary::-webkit-details-marker {
+    display: none;
+  }
+  
+  .toc summary::before {
+    content: '>';
+    color: var(--color-accent);
+    font-weight: 600;
+    position: absolute;
+    left: 0;
+    transition: transform 150ms ease;
+  }
+  
+  .toc[open] summary::before {
+    transform: rotate(90deg);
+  }
+  
+  .toc nav {
+    width: 100%;
+    font-size: 0.875rem;
+  }
+  
+  .toc ul {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+  }
+  
+  /* XL screens and up - sticky sidebar */
+  @media (min-width: 1280px) {
+    .toc {
+      background: transparent;
+      border: none;
+      padding-right: 0;
+      position: sticky;
+      top: 2.5rem;
+      flex-basis: 274px;
+      flex-shrink: 0;
+      opacity: 0.9;
+      margin-top: 0;
+    }
+    
+    .toc nav {
+      margin-left: -0.25rem;
+    }
+  }
+  
+  @media (min-width: 1536px) {
+    .toc {
+      flex-basis: 320px;
+    }
+  }
+</style>
