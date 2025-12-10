@@ -5,6 +5,7 @@
  */
 
 import Card from './Card.astro';
+import { AVATAR_URL } from '../consts';
 
 interface Props {
 	name: string;
@@ -21,11 +22,24 @@ const infoIcons = [
 ---
 
 <Card class="flex flex-col items-center gap-3">
-	<!-- Avatar -->
-	<div class="w-24 h-24 rounded-full bg-[var(--color-primary)]/20 border-2 border-[var(--color-primary)] flex items-center justify-center">
-		<svg class="w-12 h-12 text-[var(--color-primary)]" style="filter: drop-shadow(0 0 4px var(--color-primary))" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-		</svg>
+	<!-- Avatar with remote src + inline fallback -->
+	<div class="avatar-shell">
+		<img
+			src={AVATAR_URL}
+			alt={`${name} avatar`}
+			loading="lazy"
+			width="96"
+			height="96"
+			class="avatar-img"
+			decoding="async"
+			onload="const fb=this.nextElementSibling; if(fb) fb.classList.add('hide-fallback');"
+			onerror="const fb=this.nextElementSibling; if(fb) fb.classList.remove('hide-fallback');"
+		/>
+		<div class="avatar-fallback" aria-hidden="true">
+			<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+			</svg>
+		</div>
 	</div>
 	
 	<!-- Name -->
@@ -54,3 +68,38 @@ const infoIcons = [
 		))}
 	</ul>
 </Card>
+
+<style>
+	.avatar-shell {
+		position: relative;
+		width: 6rem;
+		height: 6rem;
+		border-radius: 9999px;
+		overflow: hidden;
+		border: 2px solid var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+		display: grid;
+		place-items: center;
+	}
+
+	.avatar-img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	.avatar-fallback {
+		position: absolute;
+		inset: 0;
+		display: grid;
+		place-items: center;
+		color: var(--color-primary);
+		opacity: 0.85;
+		pointer-events: none;
+	}
+
+	.avatar-fallback.hide-fallback {
+		opacity: 0;
+	}
+</style>
