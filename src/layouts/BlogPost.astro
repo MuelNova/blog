@@ -9,11 +9,14 @@ import TableOfContents from '../components/TableOfContents.astro';
 import Background from '../components/Background.astro';
 import Giscus from '../components/Giscus.astro';
 
-type Props = CollectionEntry<'blog'>['data'] & {
+type Props = Partial<CollectionEntry<'blog'>['data']> & {
+	title: string;
+	description: string;
 	headings?: any[];
+	showTitle?: boolean;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, headings = [] } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, headings = [], showTitle = true } = Astro.props;
 ---
 
 <html lang="en">
@@ -26,24 +29,28 @@ const { title, description, pubDate, updatedDate, heroImage, headings = [] } = A
 		<Header />
 		<main class="blog-post-main-with-toc">
 			<article class="blog-article-wrapper">
-				<div class="hero-image blog-post-hero">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				</div>
-				<div class="prose blog-post-prose">
-					<div class="title blog-post-title">
-						<div class="date blog-post-date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on blog-post-last-updated">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						<h1>{title}</h1>
-						<hr />
+				{heroImage && (
+					<div class="hero-image blog-post-hero">
+						<Image width={1020} height={510} src={heroImage} alt="" />
 					</div>
+				)}
+				<div class="prose blog-post-prose">
+					{(showTitle || pubDate || updatedDate) && (
+						<div class="title blog-post-title">
+							{(pubDate || updatedDate) && (
+								<div class="date blog-post-date">
+									{pubDate && <FormattedDate date={pubDate} />}
+									{updatedDate && (
+										<div class="last-updated-on blog-post-last-updated">
+											Last updated on <FormattedDate date={updatedDate} />
+										</div>
+									)}
+								</div>
+							)}
+							{showTitle && <h1>{title}</h1>}
+							{showTitle && <hr />}
+						</div>
+					)}
 					<slot />
 				</div>
 			</article>

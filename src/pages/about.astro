@@ -1,36 +1,337 @@
 ---
-import AboutHeroImage from '../assets/blog-placeholder-about.jpg';
 import Layout from '../layouts/BlogPost.astro';
 ---
 
-<Layout
-	title={"Muir \"Zhao Miao\" Nova"}
-	description="No Computer Knowledge at All"
-	pubDate={new Date('Dec 10 2025')}
-	heroImage={AboutHeroImage}
->
-	<div class="text-center mb-8">—— Communication Disorder Myself. ——</div>
-	<div class="text-center mb-8">—Miao "MuElNova" Zhao GPG Fingerprint: <code>6C4F 47DB A3A8 EB3B 5670 172A 6AC1 E2FC FE4A A441</code>—</div>
-	
-	<p>
-		MuElNova (Muir Noah / Miao Zhao) 是<a href="https://cs.pku.edu.cn/">北京大学计算机学院</a>的
-		25 级研究生，作为<a href="https://scss.bupt.edu.cn/">北京邮电大学网络空间安全学院</a>的 21 级本科生，他在
-		2025 年获取了他的学士学位。
-	</p>
+<Layout title="About Me" description="关于我 - MuelNova" showTitle={false}>
+	<div class="about-shell prose prose-invert max-w-none py-6">
+	<section class="about-hero">
+		<img
+			src="https://github.com/MuelNova.png"
+			alt="MuelNova avatar"
+			class="avatar"
+			width="128"
+			height="128"
+			loading="lazy"
+		/>
+		<div class="terminal">
+			<div class="terminal-header">
+				<span class="dot red"></span>
+				<span class="dot yellow"></span>
+				<span class="dot green"></span>
+				<span class="terminal-title">who am i</span>
+			</div>
+			<div class="terminal-body">
+				<div class="line">
+					<span class="prompt">root@nova.gal</span>:<span class="path">~</span>$ whoami
+				</div>
+				<div class="output">Muelnova (muir / Miao Zhao)</div>
+				<div class="line">
+					<span class="prompt">root@nova.gal</span>:<span class="path">~</span>$ cat ~/fingerprint.txt
+				</div>
+				<div class="output">6C4F 47DB A3A8 EB3B 5670 172A 6AC1 E2FC FE4A A441</div>
+				<div class="line">
+					<span class="prompt">root@nova.gal</span>:<span class="path">~/education</span>$ check -d 2025 --short
+				</div>
+				<div class="output">北京大学计算机学院 · 25 级硕士 · 安全研究</div>
+				<div class="line">
+					<span class="prompt">root@nova.gal</span>:<span class="path">~/contact</span>$ open github
+				</div>
+				<div class="output">
+					<a href="https://github.com/MuelNova" target="_blank" rel="noopener noreferrer">github.com/MuelNova</a>
+				</div>
+				<div class="line">
+					<span class="prompt">root@nova.gal</span>:<span class="path">~/contact</span>$ mail muel@nova.gal
+					<span class="cursor" aria-hidden="true"></span>
+				</div>
+			</div>
+		</div>
+	</section>
 
-	<p>
-		MuElNova 曾经作为<a href="#">天枢 Dubhe</a>与<a href="https://www.buptmerak.cn">天璇 Merak</a>的成员，在二进制（PWN）方向协助、参加了多项国际级、国家级、省级网络安全竞赛，辅助取得了多项荣誉。
-	</p>
+	<!-- <section class="about-grid">
+		<div class="card">
+			<h2>现在</h2>
+			<ul class="pill-list">
+				<li>北京大学 · 计算机科学 · 25 级硕士</li>
+				<li>NetSec / Binary / PWN</li>
+				<li>写代码、写论文、写博客</li>
+			</ul>
+		</div>
+		<div class="card">
+			<h2>之前</h2>
+			<ul class="pill-list">
+				<li>北京邮电大学 · 网络安全 · 21 级本科</li>
+				<li><a href="https://www.buptmerak.cn" target="_blank" rel="noopener noreferrer">天璇 Merak</a> / 天枢 Dubhe 二进制方向</li>
+				<li>多项 CTF / 网络安全竞赛获奖</li>
+			</ul>
+		</div>
+	</section> -->
 
-	<p>
-		MuElNova 目前在 <a href="https://netsec.ccert.edu.cn/vul337">vul337</a> 和 <a href="https://github.com/pkucclab">pkucclab</a> 中作为安全研究员协助、参与了多项科研计划与项目计划。
-	</p>
+	<section class="timeline card">
+		<h3>一些节点</h3>
+		<ul>
+			<li>
+				<span class="time">2025 · 现在</span>
+				<span class="desc">PKU CS 硕士 - 安全研究</span>
+			</li>
+			<li>
+				<span class="time">2021 - 2025</span>
+				<span class="desc">BUPT 网络安全 本科 - CTF / PWN</span>
+			</li>
+			<li>
+				<span class="time">更早</span>
+				<span class="desc">玩泥巴</span>
+			</li>
+		</ul>
+	</section>
 
-	<h2>掌握的技能</h2>
+	<section class="about-cards">
+		<div class="card">
+			<h3>正在做的事</h3>
+			<ul class="bullet-list">
+				<li>在 <a href="https://netsec.ccert.edu.cn/vul337" target="_blank" rel="noopener noreferrer">vul337</a> / <a href="https://github.com/pkucclab" target="_blank" rel="noopener noreferrer">pkucclab</a> 做安全研究</li>
+				<li>探索内存安全缓解与渗透链路</li>
+				<li>写一些关于系统安全、工具链和工作流的文章</li>
+			</ul>
+		</div>
+		<div class="card">
+			<h3>技能</h3>
+			<ul class="pill-list compact">
+				<li>Python / Go / TypeScript / C++</li>
+				<li>Linux / Arch</li>
+				<li>GDB / pwntools / angr</li>
+				<li>Rust（路上）</li>
+				<li>Astro / Tailwind / React</li>
+			</ul>
+		</div>
+	</section>
 
-	<ul>
-		<li>基本的 Python、C++、GoLang、TypeScript 等常见编程语言</li>
-		<li>基本的 PWN</li>
-		<li>基本的计算机</li>
-	</ul>
+	<section class="contact card">
+		<h3>联系</h3>
+		<ul class="bullet-list">
+			<li>Email: <a href="mailto:muel@nova.gal">muel@nova.gal</a></li>
+			<li>GitHub: <a href="https://github.com/MuelNova" target="_blank" rel="noopener noreferrer">@MuelNova</a></li>
+		</ul>
+	</section>
+	</div>
 </Layout>
+
+<style>
+	.about-hero {
+		display: grid;
+		gap: 1.25rem;
+		justify-items: center;
+		margin-bottom: 2rem;
+	}
+
+	.avatar {
+		width: 128px;
+		height: 128px;
+		border-radius: 999px;
+		border: 2px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+		box-shadow: 0 0 22px color-mix(in srgb, var(--color-primary) 28%, transparent);
+	}
+
+	.about-shell {
+		max-width: 960px;
+		margin: 0 auto;
+		padding: 0 1rem;
+	}
+
+	.terminal {
+		border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+		border-radius: 12px;
+		background: color-mix(in srgb, var(--color-background) 90%, transparent);
+		overflow: hidden;
+		font-family: var(--font-mono, monospace);
+	}
+
+	.terminal-header {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.6rem 0.9rem;
+		background: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+		border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+	}
+
+	.terminal-title {
+		margin-left: auto;
+		font-size: 0.85rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
+	}
+
+	.dot {
+		display: inline-flex;
+		width: 10px;
+		height: 10px;
+		border-radius: 999px;
+		box-shadow: 0 0 4px currentColor;
+	}
+
+	.dot.red { color: #ff5f56; }
+	.dot.yellow { color: #ffbd2e; }
+	.dot.green { color: #27c93f; }
+
+	.terminal-body {
+		padding: 1rem 1.25rem 1.15rem;
+		display: grid;
+		gap: 0.45rem;
+		background: radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--color-primary) 12%, transparent), transparent 45%),
+			radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--color-primary-light) 10%, transparent), transparent 40%),
+			color-mix(in srgb, var(--color-background) 94%, transparent);
+	}
+
+	.line,
+	.output {
+		font-size: 0.95rem;
+		color: color-mix(in srgb, var(--color-foreground) 88%, transparent);
+		word-break: break-word;
+	}
+
+	.prompt {
+		color: var(--color-primary);
+		font-weight: 600;
+	}
+
+	.path {
+		color: color-mix(in srgb, var(--color-primary-light) 90%, var(--color-foreground) 10%);
+	}
+
+	.output a {
+		color: var(--color-link);
+		text-decoration: none;
+	}
+
+	.output a:hover {
+		text-decoration: underline;
+	}
+
+	.cursor {
+		display: inline-block;
+		width: 0.7em;
+		height: 1.1em;
+		background: var(--color-primary);
+		margin-left: 0.15em;
+		animation: blink 1.1s step-end infinite;
+		vertical-align: -0.1em;
+	}
+
+	@keyframes blink {
+		50% { opacity: 0; }
+	}
+
+	.about-grid {
+		display: grid;
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.about-cards {
+		display: grid;
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.card {
+		border: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
+		border-radius: 12px;
+		padding: 1rem;
+		background: color-mix(in srgb, var(--color-foreground) 3%, transparent);
+	}
+
+	.card h2,
+	.card h3 {
+		margin: 0 0 0.75rem 0;
+	}
+
+	.pill-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.pill-list li {
+		padding: 0.35rem 0.75rem;
+		border: 1px solid color-mix(in srgb, var(--color-foreground) 15%, transparent);
+		border-radius: 999px;
+		font-size: 0.95rem;
+		background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
+	}
+
+	.pill-list.compact li {
+		font-size: 0.9rem;
+		padding: 0.3rem 0.65rem;
+	}
+
+	.bullet-list {
+		padding-left: 1.25rem;
+		margin: 0;
+		display: grid;
+		gap: 0.65rem;
+	}
+
+	.bullet-list li {
+		color: color-mix(in srgb, var(--color-foreground) 90%, transparent);
+	}
+
+	.timeline {
+		margin-bottom: 1.5rem;
+	}
+
+	.timeline ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.timeline li {
+		display: grid;
+		gap: 0.15rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px dashed color-mix(in srgb, var(--color-foreground) 15%, transparent);
+	}
+
+	.timeline li:last-child {
+		border-bottom: none;
+		padding-bottom: 0;
+	}
+
+	.time {
+		font-weight: 600;
+		color: var(--color-primary-light);
+	}
+
+	.desc {
+		color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+	}
+
+	.contact {
+		margin-bottom: 0.5rem;
+	}
+
+	.contact a {
+		color: var(--color-link);
+		text-decoration: none;
+	}
+
+	.contact a:hover {
+		text-decoration: underline;
+	}
+
+	@media (min-width: 768px) {
+		.about-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.about-cards {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+</style>
