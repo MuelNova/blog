@@ -39,6 +39,12 @@ const List: LinkCardProps[] = [
     linkText: "fei3ei",
     description: "21 届 vidar-tream ( vidar-team? ) 的逆向手，目前在游戏安全",
     icon: "https://www.fei3ei.xyz/favicon.ico"
+  },
+  {
+    link: "https://blog.kingbridge.one/",
+    linkText: "BRIdGE's blog",
+    description: "Gemini: 看起来不像那种由 AI 生成或者堆砌枯燥教程的“技术文档站”，这个博客更有“人味儿”。自称“赛博疯子”可能暗示了博主的涉猎范围很广，想法天马行空，或者对当下的科技生活有着某种狂热甚至戏谑的态度。",
+    icon: "https://blog.kingbridge.one//images/avatar.jpg"
   }
 ];
 
