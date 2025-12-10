@@ -20,7 +20,7 @@ export default defineConfig({
   site: 'https://astro.nova.gal',
   integrations: [expressiveCode(), mdx(), sitemap(), react(), icon()],
   adapter: cloudflare({
-    imageService: 'cloudflare',
+    imageService: 'compile',
     
   }),
   build: {
