@@ -110,6 +110,45 @@ const items = [
 		}
 	}
 
+	.nav-list {
+		max-height: calc(100vh - 4rem);
+		overflow: auto;
+	}
+
+	.nav-list li {
+		width: 100%;
+		border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
+	}
+
+	.nav-list li:last-child {
+		border-bottom: none;
+	}
+
+	/* Ensure theme selector shows in mobile menu */
+	.theme-selector-li {
+		display: block;
+		width: 100%;
+	}
+
+	/* Make theme selector full width in mobile menu */
+	.theme-selector-li :global(theme-selector) {
+		display: block;
+		width: 100%;
+	}
+
+	.theme-selector-li :global(button[data-open-modal]) {
+		display: flex;
+		width: 100%;
+		justify-content: flex-start;
+		padding: 0.25rem 0.5rem;
+		font-size: 1.125rem;
+	}
+
+	.theme-selector-li :global(.nav-label-mobile) {
+		display: inline;
+		margin-left: 0.5rem;
+	}
+
 	[data-open='true'] .nav-list {
 		display: flex;
 		opacity: 1;
@@ -124,44 +163,36 @@ const items = [
 		display: block;
 	}
 
-	@media (max-width: 639px) {
+	@media (min-width: 640px) {
 		.nav-list {
-			max-height: calc(100vh - 4rem);
-			overflow: auto;
+			max-height: none;
+			overflow: visible;
 		}
 
 		.nav-list li {
-			width: 100%;
-			border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
-		}
-
-		.nav-list li:last-child {
+			width: auto;
 			border-bottom: none;
 		}
-		
-		/* Ensure theme selector shows in mobile menu */
+
 		.theme-selector-li {
-			display: block;
-			width: 100%;
+			width: auto;
 		}
-		
-		/* Make theme selector full width in mobile menu */
+
 		.theme-selector-li :global(theme-selector) {
-			display: block;
-			width: 100%;
+			display: inline-block;
+			width: auto;
 		}
-		
+
 		.theme-selector-li :global(button[data-open-modal]) {
-			display: flex;
-			width: 100%;
-			justify-content: flex-start;
+			display: inline-flex;
+			width: auto;
+			justify-content: center;
 			padding: 0.25rem 0.5rem;
-			font-size: 1.125rem;
+			font-size: 1rem;
 		}
-		
+
 		.theme-selector-li :global(.nav-label-mobile) {
-			display: inline;
-			margin-left: 0.5rem;
+			display: none;
 		}
 	}
 	

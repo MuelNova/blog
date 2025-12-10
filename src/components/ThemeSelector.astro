@@ -225,32 +225,73 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 	.mobile-theme-trigger {
 		box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
 	}
-	@media (max-width: 640px) {
+
+	/* Mobile-first adjustments */
+	.header-text {
+		display: none;
+	}
+
+	.lock-switch {
+		display: none;
+	}
+
+	.lock-icon-compact,
+	.intro-icon-compact {
+		display: flex;
+	}
+
+	.header-actions {
+		flex-wrap: nowrap;
+		gap: 0.5rem;
+	}
+
+	button[data-open-modal] {
+		display: none;
+	}
+
+	button[data-tab] {
+		padding: 0.35rem 0.6rem;
+		font-size: 0.8rem;
+	}
+
+	dialog[data-theme-dialog][open] {
+		min-height: 80vh;
+		height: 90vh;
+		max-height: 100vh;
+	}
+
+	@media (min-width: 640px) {
 		.header-text {
-			display: none;
+			display: inline;
 		}
+
 		.lock-switch {
-			display: none;
-		}
-		.lock-icon-compact,
-		.intro-icon-compact {
 			display: flex;
 		}
-		.header-actions {
-			flex-wrap: nowrap;
-			gap: 0.5rem;
-		}
-		button[data-open-modal] {
+
+		.lock-icon-compact,
+		.intro-icon-compact {
 			display: none;
 		}
-		button[data-tab] {
-			padding: 0.35rem 0.6rem;
-			font-size: 0.8rem;
+
+		.header-actions {
+			flex-wrap: wrap;
+			gap: 0.75rem;
 		}
+
+		button[data-open-modal] {
+			display: inline-flex;
+		}
+
+		button[data-tab] {
+			padding: 0.5rem 1rem;
+			font-size: 0.875rem;
+		}
+
 		dialog[data-theme-dialog][open] {
-			min-height: 80vh;
-			height: 90vh;
-			max-height: 100vh;
+			height: min(80vh, 720px);
+			max-height: 80vh;
+			min-height: 0;
 		}
 	}
 </style>

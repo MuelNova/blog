@@ -553,17 +553,15 @@ hr {
 }
 
 /* Responsive styles */
-@media (max-width: 1380px) {
-  body {
-    padding: 0 2rem;
-  }
+main {
+	padding: 1rem 1em;
 }
 
-@media (max-width: 720px) {
+@media (min-width: 720px) {
 	body {
-		font-size: 18px;
-		padding: 0 1rem;
+		padding: 0 2rem;
 	}
+
 	main {
 		padding: 1em 0;
 	}
