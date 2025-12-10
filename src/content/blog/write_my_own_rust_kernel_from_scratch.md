@@ -210,7 +210,7 @@ Section Headers:
 
 可以看到，.text 段在 0x11158 的位置，一般来说，qemu 会把内核放在 `0x80200000` 的位置，这就导致我们 RustSBI 没有办法启动内核 —— `0x80200000` 的位置只有一些 bytes
 
-![image-20240915165446361](https://oss.nova.gal/img/image-20240915165446361.png)
+![image-20240915165446361](https://cdn.nova.gal/img/image-20240915165446361.png)
 
 那么这就是链接器要做的一些事情了，我们使用链接脚本来固定这些位置
 ```ld title="src/linker.ld"
@@ -290,7 +290,7 @@ make dbg
 
 好吧也不紧接着，我 si 了一会还是没到，直接 `b *0x80200000` 了
 
-![image-20240915171734319](https://oss.nova.gal/img/image-20240915171734319.png)
+![image-20240915171734319](https://cdn.nova.gal/img/image-20240915171734319.png)
 
 可以看到也是非常成功，那么我们的内核就搭建完成了，也是可以给这篇文章划上一个句号了...吗？
 
@@ -405,7 +405,7 @@ SECTIONS {
 }
 ```
 
-![image-20240915201316695](https://oss.nova.gal/img/image-20240915201316695.png)
+![image-20240915201316695](https://cdn.nova.gal/img/image-20240915201316695.png)
 
 可以看到，sp 已经被设置到了 .stack 段，虽然好像是段头呢怎么（）
 
@@ -458,7 +458,7 @@ SECTIONS {
 }
 ```
 
-![image-20240915202006353](https://oss.nova.gal/img/image-20240915202006353.png)
+![image-20240915202006353](https://cdn.nova.gal/img/image-20240915202006353.png)
 
 非常好栈初始化，使我心潮澎湃。
 
@@ -524,7 +524,7 @@ fn first_try() -> ! {
 
 实际跑起来，我们会发现似乎寄存器是设置上了，但是只跑了一次？
 
-![image-20240915234517088](https://oss.nova.gal/img/image-20240915234517088.png)
+![image-20240915234517088](https://cdn.nova.gal/img/image-20240915234517088.png)
 
 简单调一下，发现它把 boot_stack_top 的值拿出来了，因此生成了一个 0..0 的 Iterator，我们还需要把它转成指针
 
@@ -558,7 +558,7 @@ fn first_try() -> ! {
 }
 ```
 
-![image-20240916001028784](https://oss.nova.gal/img/image-20240916001028784.png)
+![image-20240916001028784](https://cdn.nova.gal/img/image-20240916001028784.png)
 
 非常好初始化，证明我们栈没问题... 吗？
 
@@ -574,7 +574,7 @@ target = "riscv64gc-unknown-none-elf"
  ]
 ```
 
-![image-20240916001332667](https://oss.nova.gal/img/image-20240916001332667.png)
+![image-20240916001332667](https://cdn.nova.gal/img/image-20240916001332667.png)
 
 没问题，我们的栈简直太好了！
 
@@ -649,7 +649,7 @@ fn first_try() -> ! {
 
 它提示没有 0x4442434e 这个系统调用号，用 putchar 它是 1，但是看 https://github.com/riscv-non-isa/riscv-sbi-doc/blob/master/src/ext-legacy.adoc 又有一个 replacement eid
 
-![console_write_byte](https://oss.nova.gal/img/image-20240916013616880.png)
+![console_write_byte](https://cdn.nova.gal/img/image-20240916013616880.png)
 
 那么我们猜测是 bootloader 太老了，简单进行一个更换
 
@@ -729,7 +729,7 @@ pub fn console_putchar(c: u8) {
 }
 ```
 
-![image-20240916021201773](https://oss.nova.gal/img/image-20240916021201773.png)
+![image-20240916021201773](https://cdn.nova.gal/img/image-20240916021201773.png)
 
 没问题噢老铁们
 
@@ -1486,12 +1486,12 @@ fn main() -> i32 {
 
 :::
 
-![image-20240917024040034](https://oss.nova.gal/img/image-20240917024040034.png)
+![image-20240917024040034](https://cdn.nova.gal/img/image-20240917024040034.png)
 
 
 
 之后我们使用 qemu-riscv64 运行一下看看，非常好
 
-![image-20240917034016487](https://oss.nova.gal/img/image-20240917033342479.png)
+![image-20240917034016487](https://cdn.nova.gal/img/image-20240917033342479.png)
 
 ![image-20240917034119337](C:\Users\nova\AppData\Roaming\Typora\typora-user-images\image-20240917034119337.png)

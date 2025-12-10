@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
 #### 原理
 
-![抓没咯](https://oss.nova.gal/img/image-20220307220607534.png)
+![抓没咯](https://cdn.nova.gal/img/image-20220307220607534.png)
 
 1. 通过`getrsakey/`拿到了账户的`public_key`，`payload`里是`donotcache`项和`username`项
 
@@ -295,7 +295,7 @@ def gen_guard_code(shared_secret: str) -> str:
 
 ```
 
-![成功生成了令牌](https://oss.nova.gal/img/image-20220306231115470.png)
+![成功生成了令牌](https://cdn.nova.gal/img/image-20220306231115470.png)
 
 ### 交易确认
 

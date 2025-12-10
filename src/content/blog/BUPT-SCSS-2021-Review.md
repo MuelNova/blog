@@ -290,7 +290,7 @@ authors:
 
 解密密钥是**私钥**
 
-![image-20211227135423637](https://oss.nova.gal/img/image-20211227135423637.png)
+![image-20211227135423637](https://cdn.nova.gal/img/image-20211227135423637.png)
 
 #### 优点
 
@@ -375,7 +375,7 @@ d 为私钥
 
 看不懂，是不是说 Ks(Ks(N1)) = D ?
 
-![image-20211227141202870](https://oss.nova.gal/img/image-20211227141202870.png)
+![image-20211227141202870](https://cdn.nova.gal/img/image-20211227141202870.png)
 
 #### 中间人攻击
 
@@ -418,7 +418,7 @@ C 替换了 B 的公钥为 C 的公钥，
 
 最后得到 Hash 值
 
-![image-20211227143712004](https://oss.nova.gal/img/image-20211227143712004.png)
+![image-20211227143712004](https://cdn.nova.gal/img/image-20211227143712004.png)
 
 ### 消息认证
 
@@ -431,7 +431,7 @@ C 替换了 B 的公钥为 C 的公钥，
 
 与单向哈希函数类似，但多了一个密钥作为参数，不同的密钥会产生不同的 hash 值。即可以在确定消息未被篡改的同时验证发送者
 
-![image-20211227144247481](https://oss.nova.gal/img/image-20211227144247481.png)
+![image-20211227144247481](https://cdn.nova.gal/img/image-20211227144247481.png)
 
 ### 数字签名
 
@@ -459,7 +459,7 @@ C 替换了 B 的公钥为 C 的公钥，
 - **签名生成过程**：利用私钥使用签名算法对消息产生签名
 - **签名验证过程**：利用公钥使用验证算法对消息验证
 
-![image-20211227145439619](https://oss.nova.gal/img/image-20211227145439619.png)
+![image-20211227145439619](https://cdn.nova.gal/img/image-20211227145439619.png)
 
 ### 消息认证与数字签名的区别
 
@@ -576,7 +576,7 @@ C 替换了 B 的公钥为 C 的公钥，
 
 - **客户端（Client）**
 
-  ![image-20211227160625831](https://oss.nova.gal/img/image-20211227160625831.png)
+  ![image-20211227160625831](https://cdn.nova.gal/img/image-20211227160625831.png)
 
 #### 技术手段
 
@@ -816,14 +816,14 @@ Virtual Private Network，虚拟专用网
 2. 使用数据库中原口令的哈希值解密密文得到新口令的哈希值
 3. 替换哈希值
 
-![image-20211227203543397](https://oss.nova.gal/img/image-20211227203543397.png)
+![image-20211227203543397](https://cdn.nova.gal/img/image-20211227203543397.png)
 
 #### 认证过程
 
 1. 生成一个随机数，作为提问值。以随机数和口令的哈希值作为参数生成新哈希值
 2. 随机数与数据库的哈希以同样的方式生成哈希值，与传输的哈希值进行匹配
 
-![](https://oss.nova.gal/img/image-20211227203407556.png)
+![](https://cdn.nova.gal/img/image-20211227203407556.png)
 
 ### 基于密码技术的单向身份认证
 
@@ -836,7 +836,7 @@ Virtual Private Network，虚拟专用网
 3. A 使用 Kab 解密得到明文的 Ks，IDB，rA 和 rB，确认 rA=rA，证明消息来源于 B，A 认证 B 成功。Ks 加密 rB 发送给 B
 4. B 使用 Ks 解密 rB，确认 rB=rB，B 认证 A 成功
 
-![image-20211227204019932](https://oss.nova.gal/img/image-20211227204019932.png)
+![image-20211227204019932](https://cdn.nova.gal/img/image-20211227204019932.png)
 
 #### ~~基于证书的单向身份认证~~（没看懂）
 
@@ -846,7 +846,7 @@ Virtual Private Network，虚拟专用网
 
 3. B 选取 rB，使用 Ks 加密 rB 发送给
 
-![image-20211227204439162](https://oss.nova.gal/img/image-20211227204439162.png)
+![image-20211227204439162](https://cdn.nova.gal/img/image-20211227204439162.png)
 
 ### 指纹身份认证
 

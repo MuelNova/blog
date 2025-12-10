@@ -52,19 +52,19 @@ gcc -m64 -fno-stack-protector -no-pie -z execstack -g use_after_free.c -o use_af
 
 保护全关、64 位
 
-![struct_note](https://oss.nova.gal/img/image-20220314214330300.png)
+![struct_note](https://cdn.nova.gal/img/image-20220314214330300.png)
 
 程序定义了一个结构体，定义了一个`printnote`的指针指向`print_note_content`方法以及一个`content`的指针。
 
-![add_note()](https://oss.nova.gal/img/image-20220314214555940.png)
+![add_note()](https://cdn.nova.gal/img/image-20220314214555940.png)
 
 看一下`add_note()`的实现：首先`malloc`了一个`struct note`，也就是 16 字节的堆。在这之后，为`content`申请了`size`字节的堆。
 
-![del_note()](https://oss.nova.gal/img/image-20220314214818884.png)
+![del_note()](https://cdn.nova.gal/img/image-20220314214818884.png)
 
 注意看`del_note()`。在删除节点后，`count`没有变化——这一方面限制了我们`add_note()`的次数，另一方面也给我们的漏洞利用提供了便利。同时，我们可以发现`free`之后`notelist[idx]`并没有置为`NULL`，这便给我们的`Use After Free`带来了可能。
 
-![print_note()](https://oss.nova.gal/img/image-20220314215110776.png)
+![print_note()](https://cdn.nova.gal/img/image-20220314215110776.png)
 
 可以看出，`print_note()`调用了`notelist[idx]->printnote(notelist[idx])`方法，假如我们能把`notelist[idx]->printnote`的内存修改了的话，也就能做到执行后门函数的效果了。
 
@@ -137,28 +137,28 @@ sh.interactive()
 
 根据上面的 exp，我们分别在第二个`add_note()`和第二个`delete_note()`以及最后一个`add_note()`下调试看看
 
-![heap after adding](https://oss.nova.gal/img/image-20220314221552787.png)
+![heap after adding](https://cdn.nova.gal/img/image-20220314221552787.png)
 
-![heap after adding](https://oss.nova.gal/img/image-20220314221633396.png)
+![heap after adding](https://cdn.nova.gal/img/image-20220314221633396.png)
 
 `0x401256`是`print_note_content()`的地址，`0xd04030`和`0xd04080`是`content`的地址
 
-![heap after deleting](https://oss.nova.gal/img/image-20220314221804318.png)
+![heap after deleting](https://cdn.nova.gal/img/image-20220314221804318.png)
 
-![heap after deleting](https://oss.nova.gal/img/image-20220314221824810.png)
+![heap after deleting](https://cdn.nova.gal/img/image-20220314221824810.png)
 
-![heap after deleting](https://oss.nova.gal/img/image-20220314221944311.png)
+![heap after deleting](https://cdn.nova.gal/img/image-20220314221944311.png)
 
 可以看出，不同大小的链表进入了不同的`fastbins`中。
 
-![heap final](https://oss.nova.gal/img/image-20220314222135890.png)
+![heap final](https://cdn.nova.gal/img/image-20220314222135890.png)
 
-![heap final](https://oss.nova.gal/img/image-20220314222201810.png)
+![heap final](https://cdn.nova.gal/img/image-20220314222201810.png)
 
-![heap final](https://oss.nova.gal/img/image-20220314222221269.png)
+![heap final](https://cdn.nova.gal/img/image-20220314222221269.png)
 
 最后一次添加之后，我们发现：`fastbins`中的两个`0x20`大小的堆被回收利用了！且作为`content`的`0x4015f9`的后门函数地址已经写到了一开始`print_note_content()`的地方
 
 此时运行`print_note()`，后门函数便执行了
 
-![Shell!](https://oss.nova.gal/img/image-20220314222613059.png)
+![Shell!](https://cdn.nova.gal/img/image-20220314222613059.png)

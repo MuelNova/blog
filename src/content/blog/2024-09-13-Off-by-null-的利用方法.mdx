@@ -214,7 +214,7 @@ unlink_chunk (mstate av, mchunkptr p)
 
 2.23 下我们仅需要绕过 `unlink` 的检查。这是极其容易的，我们可以利用 `unsortedbin` 的 `fd` 和 `bk`，初始情况下，这个双链就是这么链接的。
 
-![image-20240913162609542](https://oss.nova.gal/img/image-20240913162609542.png)
+![image-20240913162609542](https://cdn.nova.gal/img/image-20240913162609542.png)
 
 ```c
 /*
@@ -254,7 +254,7 @@ unlink_chunk (mstate av, mchunkptr p)
 
 因此，我们可以首先搞出这么一个 largebin
 
-![image-20240913165850179](https://oss.nova.gal/img/image-20240913165850179.png)
+![image-20240913165850179](https://cdn.nova.gal/img/image-20240913165850179.png)
 
 注意，由于 largebin 链表为空，此时 `fd_nextsize` 和 `bk_nextsize` 均指向 `chunk`
 
@@ -262,13 +262,13 @@ unlink_chunk (mstate av, mchunkptr p)
 
 同时，如果你足够机敏，你还可以想到：我们在这个时候也可以控制 `fd_nextsize`，也就是 `fakechunk->fd` 的低位使其指向其他堆块 —— 如果那个堆块的 `bk` 指向这个 chunk，那我们就绕过了 `P->fd->bk == P` 这个检测。
 
-![image-20240913170940754](https://oss.nova.gal/img/image-20240913170940754.png)
+![image-20240913170940754](https://cdn.nova.gal/img/image-20240913170940754.png)
 
 然而，这有一个小问题，因为我们有 `off-by-null`，它势必会把 `fd_nextsize` 的某一位设置成 `\x00`。我们当然可以构造一个堆块，使其地址结尾是 `\x00`，或者，更常见的一种方法是，我们让伪造的这个 `0x500` 大小的 `chunk` 就落在 `\x00\x00` 上 —— 这需要 1/16 的爆破。
 
 这下，我们可以任意指定它的最后一字节，使其指向一个堆块了（例如这里的 0x60060）。更令人兴奋的是，我们显然也可以如法炮制的修改那个堆块的 `bk` 的最低位 —— 将其指向 `\x10`，使其指向我们的堆块，从而解决了第一个检查 `P->fd->bk == P`
 
-![image-20240913171644852](https://oss.nova.gal/img/image-20240913171644852.png)
+![image-20240913171644852](https://cdn.nova.gal/img/image-20240913171644852.png)
 
 可惜的是，我们无法如法炮制的修改 `fakechunk->bk`，因为它位于 `fakechunk->fd` 之后。
 
@@ -278,7 +278,7 @@ unlink_chunk (mstate av, mchunkptr p)
 
 最后，我们简单改一下 fakechunk 的 size，在下面的堆块上利用 obn 改写 `prevsize` 和 `prev_inuse`，释放堆块，完成了。
 
-![image-20240913172236592](https://oss.nova.gal/img/image-20240913172236592.png)
+![image-20240913172236592](https://cdn.nova.gal/img/image-20240913172236592.png)
 
 #### 思路 2: large + unsorted
 

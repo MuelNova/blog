@@ -83,7 +83,7 @@ vncviewer localhost:5091
 
 此时选择 `Load Driver`，找到 `virtio-win`，便可以选择对应的架构
 
-![image-20241026172516934](https://oss.nova.gal/img/image-20241026172516934.png)
+![image-20241026172516934](https://cdn.nova.gal/img/image-20241026172516934.png)
 
 选了之后就能看到磁盘了，之后就可以一路安装。
 

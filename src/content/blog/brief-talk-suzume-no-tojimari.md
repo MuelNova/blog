@@ -32,13 +32,13 @@ authors:
 
 正常高达 100 元的票价（在咸鱼代购花了 60 ）以及 周五 12:00 这两个因素隔绝了大部分低素质的观众，所以整场观影体验是极好的（虽然仍然有人走动，隔壁情侣也在途中聊了几句），影厅里大概有 30 人左右？
 
-![主视角](https://oss.nova.gal/img/IMG20230324121222.jpg)
+![主视角](https://cdn.nova.gal/img/IMG20230324121222.jpg)
 
 个人角度，我更推荐去 _杜比影院_ 观看这部影片，因为杜比影院的 _Dolby Atmos_ 在看本片的时候确实会更爽一点，而且这种 2D 动画即使针对 IMAX2D 做了片源的调整，观影体验的提升也远不及票价的提升。当然，这讨论的是最佳解，你完全可以根据实际——例如路程、票价、服务等等因素，或是单纯认为为了看电影因此来回通勤四个小时的人有病，来选择你的观看场所。
 
 > 大多数人的理念会认为花费成倍的时间和金钱来获得一个提升较小的观影体验是不值当的，抑或是没有时间精力去了解。于我而言，对于喜欢的电影，我更希望我的第一次观影体验是接近完美的，哪怕这会增加很多时间花销与物质花销，很庆幸我没有太多想看的电影 xD
 
-![票根](https://oss.nova.gal/img/3e42080d425934b9.jpg)
+![票根](https://cdn.nova.gal/img/3e42080d425934b9.jpg)
 
 ## 影评
 
@@ -108,13 +108,13 @@ authors:
 
 在预告中截取了几张我在观影过程中印象较深的
 
-![screenshot](https://oss.nova.gal/img/image-20230324220952305.png)
+![screenshot](https://cdn.nova.gal/img/image-20230324220952305.png)
 
-![Screenshot](https://oss.nova.gal/img/image-20230324220536938.png)
+![Screenshot](https://cdn.nova.gal/img/image-20230324220536938.png)
 
-![screenshot](https://oss.nova.gal/img/image-20230324221152573.png)
+![screenshot](https://cdn.nova.gal/img/image-20230324221152573.png)
 
-![结尾](https://oss.nova.gal/img/IMG20230324141058.jpg)
+![结尾](https://cdn.nova.gal/img/IMG20230324141058.jpg)
 
 此外，作画的那些场景也颇有考究，分别与日本历史上的几次大地震相关，也有很多特别含义的景物（例如那个船）关于这一点就请各位自行根据其他文章考证了。
 
@@ -136,7 +136,7 @@ authors:
 
 洋次郎唱的 カナタハルカ 放在结尾威力确实大。我隔壁坐的妹妹一开始都绷住了，这歌一放直接稀里哗啦哭起来了，整的我也想猛男落泪。
 
-![playlist](https://oss.nova.gal/img/image-20230324223623151.png)
+![playlist](https://cdn.nova.gal/img/image-20230324223623151.png)
 
 君の名は。的 Sparkles 听了 7 年，不知道这次的 OST 能听多久呢？
 

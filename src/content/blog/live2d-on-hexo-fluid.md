@@ -101,7 +101,7 @@ export const ModelDir: string[] = ["Haru", "Hiyori", "Mark", "Natori", "Rice"];
 
 > 你可以使用第三方工具如`Visual Studio`或`WebStorm`打开本地服务器，或者在命令行输入`npm run start`后打开所示的网址, 进入`Demo`文件夹预览。
 
-![烧啊](https://oss.nova.gal/img/image-20211007214102328.png)
+![烧啊](https://cdn.nova.gal/img/image-20211007214102328.png)
 
 > [皮](https://t.bilibili.com/485722661869867718?tab=2)来自石油佬的奉献
 
@@ -341,4 +341,4 @@ custom_head:
 
 ~~人类存在的意义就是不断制造重复的轮子！~~
 
-![通过各种自定义后的看板娘](https://oss.nova.gal/img/image-20211010114744975.png)
+![通过各种自定义后的看板娘](https://cdn.nova.gal/img/image-20211010114744975.png)

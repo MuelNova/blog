@@ -124,11 +124,11 @@ sysmalloc (INTERNAL_SIZE_T nb, mstate av)
 
 mm 之后，他会设置 chunk 的 size 第二位 IS_MMAPED 为 1
 
-![image-20240919012047253](https://oss.nova.gal/img/image-20240919012047253.png)
+![image-20240919012047253](https://cdn.nova.gal/img/image-20240919012047253.png)
 
 实际分配后我们可以发现，它的位置就在 libc.so.6 的高地址一点点，那么假如说 `0x7f98000~0x7fc1000` 这个大小不够我们分配，它就会反之从 `anon_7fff7da2` 那里往低地址分配。而显然这个地址和我们 libc 是紧挨着的，这也就是我们能够不需要 leak 地址的关键。
 
-![image-20240919021930678](https://oss.nova.gal/img/image-20240919021930678.png)
+![image-20240919021930678](https://cdn.nova.gal/img/image-20240919021930678.png)
 
 那么对于这种 mmaped_chunk，自然 free 也会有一套额外逻辑
 
@@ -200,9 +200,9 @@ jmp GOT[2];
 
 我们修改 2 的 chunk_size，使其包含 1 + 2 + 我们想要的 libc 界面
 
-![image-20240919023647709](https://oss.nova.gal/img/image-20240919023647709.png)
+![image-20240919023647709](https://cdn.nova.gal/img/image-20240919023647709.png)
 
-![image-20240919023832772](https://oss.nova.gal/img/image-20240919023832772.png)
+![image-20240919023832772](https://cdn.nova.gal/img/image-20240919023832772.png)
 
 可以看到这个 chunk 包含了一部分 libc-2.31.so 的界面，而 free 之后这些界面被回收了
 
@@ -282,7 +282,7 @@ LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA
 
 略过繁琐的细节，具体来说，我们需要设置这么一些量，它们大多在 `link_map` 结构体中，我们可以通过 GOT[1] 项拿到：
 
-![image-20240919032057600](https://oss.nova.gal/img/image-20240919032057600.png)
+![image-20240919032057600](https://cdn.nova.gal/img/image-20240919032057600.png)
 
 - l_gnu_bitmask
 - l_gnu_bucket
@@ -297,13 +297,13 @@ LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA
 
 例如 bitmask，我们在第一次 link_map 值还未空时啥都看不到，第二次循环的时候到这里就有一个值了，那么我们记录这个位置，以及它的值
 
-![image-20240919034149944](https://oss.nova.gal/img/image-20240919034149944.png)
+![image-20240919034149944](https://cdn.nova.gal/img/image-20240919034149944.png)
 
 
 
 最后我们伪造这个 Elf64_Sym，至于怎么找，一般就是从 link_map 的 l_info 里找 .symtab，然后去算偏移。在图中我们可以看到，我们左边修改 st_value 为 0x459e7，这是 system 相对 libc 的偏移，因此调用 exit("/bin/sh") 就会触发 system("/bin/sh")
 
-![image-20240919035433900](https://oss.nova.gal/img/image-20240919035433900.png)
+![image-20240919035433900](https://cdn.nova.gal/img/image-20240919035433900.png)
 
 ## 总结
 

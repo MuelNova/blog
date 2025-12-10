@@ -40,7 +40,7 @@ authors:
 
 Cross Cache，在我们完成页风水后，显然容易理解了 —— 就是通过溢出 `vuln obj` 这个 kmem_cache 来影响 `victim slub` 中的 `victim obj` 的攻击手法。
 
-![](https://oss.nova.gal/img/heap_layout2.gif)
+![](https://cdn.nova.gal/img/heap_layout2.gif)
 
 非常推荐阅读笑尘的 [CVE-2022-27666: Exploit esp6 modules in Linux kernel - ETenal](https://etenal.me/archives/1825)，他用（尽管不是那么）精美（但是）浅显易懂的 PPT 做了动画，解释了整个 Cross Cache 的过程。
 
@@ -78,7 +78,7 @@ overflow_vulnerable_obj()  # 堆溢出，自然会有位于 `vuln slub` 末尾�
 
 题目本身非常简单，提供了 add 和 edit 的功能，存在 6bytes 的溢出。其中，这个溢出的 cache 是 SLAB_ACCOUNT 标志位的，因此它占用一个独立的 slub。
 
-![image-20241106160439301](https://oss.nova.gal/img/image-20241106160439301.png)
+![image-20241106160439301](https://cdn.nova.gal/img/image-20241106160439301.png)
 
 而溢出 6bytes，显然也支持我们将 cred 的 UID 写为 0。恰巧 cred_jar 显然也在 ACCOUNT 的独立 slub 里，因此我们其实能够排除一部分噪声。
 
@@ -332,7 +332,7 @@ int main() {
 
 
 
-![image-20241106201611213](https://oss.nova.gal/img/image-20241106201611213.png)
+![image-20241106201611213](https://cdn.nova.gal/img/image-20241106201611213.png)
 
 最终 exp：
 

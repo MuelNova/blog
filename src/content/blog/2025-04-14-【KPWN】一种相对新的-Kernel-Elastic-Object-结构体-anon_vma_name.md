@@ -15,7 +15,7 @@ authors:
 
 可以看到两次系统调用之间只有一次 `__kmalloc` 调用
 
-![image-20250414155042759](https://oss.nova.gal/img/image-20250414155042759.png)
+![image-20250414155042759](https://cdn.nova.gal/img/image-20250414155042759.png)
 
 <!--truncate-->
 

@@ -367,7 +367,7 @@ Poky (Yocto Project Reference Distro) 2.3 qemux86 /dev/hvc0
 qemux86 login: root
 ```
 
-![image-20240714220741790](https://oss.nova.gal/img/image-20240714220741790.png)
+![image-20240714220741790](https://cdn.nova.gal/img/image-20240714220741790.png)
 
 ```bash
 root@qemux86:~/skels/kernel_modules/1-2-test-mod# insmod hello_mod.ko
@@ -904,13 +904,13 @@ echo g > /proc/sysrq-trigger
 # 或者用 Ctrl+O g
 ```
 
-![image-20240715233154679](https://oss.nova.gal/img/image-20240715233154679.png)
+![image-20240715233154679](https://cdn.nova.gal/img/image-20240715233154679.png)
 
 我这里有 BUG，显示不全，就这样吧。
 
 利用 echo 写入就会直接进入 KDB 里
 
-![image-20240715233319670](https://oss.nova.gal/img/image-20240715233319670.png)
+![image-20240715233319670](https://cdn.nova.gal/img/image-20240715233319670.png)
 
 看堆栈 bt 就可以知道是 dummy_func1+0x8 的地方出了问题。还可以看到 current=0xc42b2b40，我们用 lsmod 可以看到基地址 0xd0880000。但是我们 bt 的时候看不到回溯栈，所以就搁置了。
 
@@ -3505,7 +3505,7 @@ irqreturn_t kbd_interrupt_handler(int irq_no, void *dev_id) {
 }
 ```
 
-![image-20240726185825523](https://oss.nova.gal/img/image-20240726185825523.png)
+![image-20240726185825523](https://cdn.nova.gal/img/image-20240726185825523.png)
 
 可以看到，此时按下就有响应了，666
 
@@ -3751,7 +3751,7 @@ static ssize_t kbd_read(struct file *file,  char __user *user_buffer,
 
 修修补补，谈笑风生间写了一堆有问题的（例如没有错误检查，没有 kfree 等等，还写出了 off-by-null 的），最后留下一个每次都 copy_to_user 的，至少可以用嘛。
 
-![image-20240726233116401](https://oss.nova.gal/img/image-20240726233116401.png)
+![image-20240726233116401](https://cdn.nova.gal/img/image-20240726233116401.png)
 
 ### 5. 重置缓冲区[¶](https://linux-kernel-labs-zh.xyz/labs/interrupts.html#section-21)
 
@@ -3982,7 +3982,7 @@ module_exit(timer_exit);
 
 ```
 
-![image-20241015005017159](https://oss.nova.gal/img/image-20241015005017159.png)
+![image-20241015005017159](https://cdn.nova.gal/img/image-20241015005017159.png)
 
 没问题，所以我们这个就是 1S 后执行。
 
@@ -4268,9 +4268,9 @@ module_exit(deferred_exit);
 
 我们可以尝试一下：
 
-![image-20241015011408858](https://oss.nova.gal/img/image-20241015011408858.png)
+![image-20241015011408858](https://cdn.nova.gal/img/image-20241015011408858.png)
 
-![image-20241015011506593](https://oss.nova.gal/img/image-20241015011506593.png)
+![image-20241015011506593](https://cdn.nova.gal/img/image-20241015011506593.png)
 
 没有问题，那么我们就继续来完成 pid 相关的内容。引用 linux/sched.h，我们就可以使用 current 宏拿到当前进程的 struct task_struct*
 
@@ -4281,7 +4281,7 @@ static void timer_handler(struct timer_list *tl)
 	pr_info("PID: %d, name: %s\n", current->pid, current->comm);
 ```
 
-![image-20241015011935969](https://oss.nova.gal/img/image-20241015011935969.png)
+![image-20241015011935969](https://cdn.nova.gal/img/image-20241015011935969.png)
 
 可以看到，其实定时器运行基于的都是 swapper/0 这个进程。
 
@@ -4521,7 +4521,7 @@ module_exit(deferred_exit);
 
 ```
 
-![image-20241015012808968](https://oss.nova.gal/img/image-20241015012808968.png)
+![image-20241015012808968](https://cdn.nova.gal/img/image-20241015012808968.png)
 
 ### 5. 工作队列[¶](https://linux-kernel-labs-zh.xyz/labs/deferred_work.html#section-12)
 
@@ -4775,7 +4775,7 @@ module_exit(deferred_exit);
 
 所以写成这样估计会比较好一些
 
-![image-20241015014130271](https://oss.nova.gal/img/image-20241015014130271.png)
+![image-20241015014130271](https://cdn.nova.gal/img/image-20241015014130271.png)
 
 ### 6. 内核线程[¶](https://linux-kernel-labs-zh.xyz/labs/deferred_work.html#section-13)
 
@@ -4871,7 +4871,7 @@ static void __exit kthread_exit(void)
 }
 ```
 
-![image-20241016225730830](https://oss.nova.gal/img/image-20241016225730830.png)
+![image-20241016225730830](https://cdn.nova.gal/img/image-20241016225730830.png)
 
 ### 7. 定时器和进程之间共享的缓冲区[¶](https://linux-kernel-labs-zh.xyz/so2/lab5-deferred-work.html?highlight=waiting queue#section-13)
 
@@ -5102,7 +5102,7 @@ static void deferred_exit(void)
 }
 ```
 
-![image-20241016234211312](https://oss.nova.gal/img/image-20241016234211312.png)目测感觉没啥问题，但是不知道有没有锁之类乱七八糟的问题。
+![image-20241016234211312](https://cdn.nova.gal/img/image-20241016234211312.png)目测感觉没啥问题，但是不知道有没有锁之类乱七八糟的问题。
 
 ## 块设备驱动程序
 
@@ -5534,7 +5534,7 @@ static void __exit my_block_exit(void)
 }
 ```
 
-![image-20241017234629149](https://oss.nova.gal/img/image-20241017234629149.png)
+![image-20241017234629149](https://cdn.nova.gal/img/image-20241017234629149.png)
 
 ### 2. 磁盘注册[¶](https://linux-kernel-labs-zh.xyz/labs/block_device_drivers.html#section-18)
 
@@ -5852,7 +5852,7 @@ out:
 }
 ```
 
-![image-20241018004336664](https://oss.nova.gal/img/image-20241018004336664.png)
+![image-20241018004336664](https://cdn.nova.gal/img/image-20241018004336664.png)
 
 bro 一个样例没过，甚至还把 kernel 干 panic 了，也是顶尖了。
 
@@ -6332,7 +6332,7 @@ static void __exit myfs_exit(void)
 }
 ```
 
-![image-20241018225118645](https://oss.nova.gal/img/image-20241018225118645.png)
+![image-20241018225118645](https://cdn.nova.gal/img/image-20241018225118645.png)
 
 因为我们还没有实现 fill_super 的操作，所以现在其实只能在 /proc/filesystems 里看到它，而不能挂载。
 
@@ -6344,7 +6344,7 @@ static void __exit myfs_exit(void)
 
 正确的应该是这样的？（大概）
 
-![image-20241018232158071](https://oss.nova.gal/img/image-20241018232158071.png)
+![image-20241018232158071](https://cdn.nova.gal/img/image-20241018232158071.png)
 
 :::
 
@@ -6523,7 +6523,7 @@ struct inode *myfs_get_inode(struct super_block *sb, const struct inode *dir,
 }
 ```
 
-![image-20241018232340078](https://oss.nova.gal/img/image-20241018232340078.png)
+![image-20241018232340078](https://cdn.nova.gal/img/image-20241018232340078.png)
 
 #### 4. 测试 myfs 的挂载和卸载[¶](https://linux-kernel-labs-zh.xyz/labs/filesystems_part1.html#myfs-4)
 
@@ -6601,4 +6601,4 @@ Binary file /linux/fs/cifs/dir.o matches
 
 
 
-![image-20241018232800944](https://oss.nova.gal/img/image-20241018232800944.png)
+![image-20241018232800944](https://cdn.nova.gal/img/image-20241018232800944.png)

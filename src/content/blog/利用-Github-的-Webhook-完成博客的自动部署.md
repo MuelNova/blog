@@ -23,9 +23,9 @@ authors:
 
 直接看这个就完事了，在 REPO->Settings->Webhooks->Add webhook 处添加一个新的 Webhook
 
-![image-20230511190219973](https://oss.nova.gal/img/image-20230511190219973.png)
+![image-20230511190219973](https://cdn.nova.gal/img/image-20230511190219973.png)
 
-![image-20230511190315524](https://oss.nova.gal/img/image-20230511190315524.png)
+![image-20230511190315524](https://cdn.nova.gal/img/image-20230511190315524.png)
 
 URL 就直接填公网 IP 就行，content type 我选了 json。
 

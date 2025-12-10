@@ -22,7 +22,7 @@ authors:
 
 在虚拟机上添加 arch linux 镜像，一切默认即可。开启虚拟机后，把 USB 连接。
 
-![image-20240328154735717](https://oss.nova.gal/img/image-20240328154735717.png)
+![image-20240328154735717](https://cdn.nova.gal/img/image-20240328154735717.png)
 
 ### 分区
 
@@ -90,7 +90,7 @@ Command (m for help): t  # 修改分区类型
 
 使用 `p` 打印分区表，应该是如下的情况
 
-![image-20240328155834271](https://oss.nova.gal/img/image-20240328155834271.png)
+![image-20240328155834271](https://cdn.nova.gal/img/image-20240328155834271.png)
 
 使用 `w` 保存退出
 
@@ -127,7 +127,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 检查文件内容是否正确
 
-![image-20240328160656125](https://oss.nova.gal/img/image-20240328160656125.png)
+![image-20240328160656125](https://cdn.nova.gal/img/image-20240328160656125.png)
 
 ### 设置密码以及配置新用户
 
@@ -247,7 +247,7 @@ vim /etc/locale.gen
 locale-gen
 ```
 
-![image-20240328161233665](https://oss.nova.gal/img/image-20240328161233665.png)
+![image-20240328161233665](https://cdn.nova.gal/img/image-20240328161233665.png)
 
 设置 local.conf 到 `en_SG.UTF-8`
 
@@ -285,7 +285,7 @@ vim /etc/hosts
 # ::1		    localhost
 ```
 
-![image-20240328162059643](https://oss.nova.gal/img/image-20240328162059643.png)
+![image-20240328162059643](https://cdn.nova.gal/img/image-20240328162059643.png)
 
 ### 配置 initramfs
 

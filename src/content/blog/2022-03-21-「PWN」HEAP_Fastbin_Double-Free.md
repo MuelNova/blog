@@ -33,31 +33,31 @@ gcc -g -m64 -no-pie fastbin_dup.c -o fastbin_dup
 
 这里它先填充了 tcache，以便接下来的操作在 fastbin 中进行。
 
-![prefill of tcache](https://oss.nova.gal/img/image-20220321115447065.png)
+![prefill of tcache](https://cdn.nova.gal/img/image-20220321115447065.png)
 
 直接把断点下在`line 20`，一步一步看他是怎么运行的
 
-![image-20220321140323823](https://oss.nova.gal/img/image-20220321140323823.png)
+![image-20220321140323823](https://cdn.nova.gal/img/image-20220321140323823.png)
 
 首先`calloc`了三个`chunk`，并释放掉第一个`chunk`。可以看到第一个`a`已经进入了 fastbins
 
-![image-20220321141109457](https://oss.nova.gal/img/image-20220321141109457.png)
+![image-20220321141109457](https://cdn.nova.gal/img/image-20220321141109457.png)
 
 此时如果我们再次释放`a`，程序会崩溃，因为 fastbin 的检测会检查头部是否和释放的这个`chunk`一致
 
 bypass 的方法很简单，释放之前再释放一个别的 chunk 不就好了？直接跳到`line 40`来看
 
-![image-20220321141752410](https://oss.nova.gal/img/image-20220321141752410.png)
+![image-20220321141752410](https://cdn.nova.gal/img/image-20220321141752410.png)
 
-现在的链表结构参考`ctf-wiki`![img](https://oss.nova.gal/img/fastbin_free_chunk3.png)
+现在的链表结构参考`ctf-wiki`![img](https://cdn.nova.gal/img/fastbin_free_chunk3.png)
 
 接下来我们再次`calloc`，由`alloc`的机制我们知道他会先从 fastbin 的头部去取。
 
-![image-20220321142120620](https://oss.nova.gal/img/image-20220321142120620.png)
+![image-20220321142120620](https://cdn.nova.gal/img/image-20220321142120620.png)
 
-![image-20220321142135871](https://oss.nova.gal/img/image-20220321142135871.png)
+![image-20220321142135871](https://cdn.nova.gal/img/image-20220321142135871.png)
 
-![image-20220321142159911](https://oss.nova.gal/img/image-20220321142159911.png)
+![image-20220321142159911](https://cdn.nova.gal/img/image-20220321142159911.png)
 
 可以看到，`a`和`c`指向了同一个 chunk
 
@@ -87,7 +87,7 @@ patchelf --set-rpath /home/nova/Desktop/CTF/glibc-all-in-one/libs/2.23-0ubuntu11
 
 这个 stack_var 设置成`0x20`是为了伪造一个`fake_chunk`，由于检查时要求大小要一致所以这样设置。
 
-![image-20220321144456020](https://oss.nova.gal/img/image-20220321144456020.png)
+![image-20220321144456020](https://cdn.nova.gal/img/image-20220321144456020.png)
 
 ```c
 *d = (unsigned long long) (((char*)&stack_var) - sizeof(d));
@@ -95,11 +95,11 @@ patchelf --set-rpath /home/nova/Desktop/CTF/glibc-all-in-one/libs/2.23-0ubuntu11
 
 这段话做了什么呢？
 
-![image-20220321143928311](https://oss.nova.gal/img/image-20220321143928311.png)
+![image-20220321143928311](https://cdn.nova.gal/img/image-20220321143928311.png)
 
 它将`d`的`contents`修改为了`&stack_var-8`，可`d`代表的 chunk 实际上还在 fastbin 中，而 fastbin 中这个位置的数据代表着也正好代表着`fd`
 
-![image-20220321144048053](https://oss.nova.gal/img/image-20220321144048053.png)
+![image-20220321144048053](https://cdn.nova.gal/img/image-20220321144048053.png)
 
 可以看到，链表上多出了一项，也就是`0x40500`的`fd`指针所指的位于栈上的地址。
 
@@ -117,7 +117,7 @@ patchelf --set-rpath /home/nova/Desktop/CTF/glibc-all-in-one/libs/2.23-0ubuntu11
 patchelf --set-rpath /home/nova/Desktop/CTF/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/ --set-interpreter /home/nova/Desktop/CTF/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/ld-2.23.so samsara
 ```
 
-![image-20220321150904705](https://oss.nova.gal/img/image-20220321150904705.png)
+![image-20220321150904705](https://cdn.nova.gal/img/image-20220321150904705.png)
 
 通过分析，我们可以知道几个功能的用途分别是`add`，`delete`，`edit`，值得注意的是，`delete`并不会修改`cnt`，也没有把指针置 0
 
@@ -125,7 +125,7 @@ patchelf --set-rpath /home/nova/Desktop/CTF/glibc-all-in-one/libs/2.23-0ubuntu11
 
 观察可以发现，`lair`与`pwn`隔得很近
 
-![image-20220321151231353](https://oss.nova.gal/img/image-20220321151231353.png)
+![image-20220321151231353](https://cdn.nova.gal/img/image-20220321151231353.png)
 
 我们能输出`lair`的地址，那么`pwn`的地址也自然可以获得了。
 
@@ -187,11 +187,11 @@ def pwn():
 
 先写好功能菜单，根据我们的想法，我们应该先申请 2 个 chunk，然后再删除 idx 为`0, 1, 0`的 chunk
 
-![image-20220321152623422](https://oss.nova.gal/img/image-20220321152623422.png)
+![image-20220321152623422](https://cdn.nova.gal/img/image-20220321152623422.png)
 
 此时我们再次 add 一下，这个 chunk 的 fd 和 bk 指针就是可控的了。我们将其修改为`lair-0x08`，也就是`pwn-0x10`的位置——这样对这个 chunk 修改时，修改的地方正好是`pwn`的位置。并修改 lair 的值为`0x20`以 bypass 检查。
 
-![image-20220321153500569](https://oss.nova.gal/img/image-20220321153500569.png)
+![image-20220321153500569](https://cdn.nova.gal/img/image-20220321153500569.png)
 
 此时我们拿到这个位于栈上的 chunk 并修改其值为`0xdeadbeef`即可拿到 shell
 
@@ -282,7 +282,7 @@ pwn()
 
 在`delete`时程序释放时没有对指针进行置零，只对 size 位置零
 
-![image-20220321160539186](https://oss.nova.gal/img/image-20220321160539186.png)
+![image-20220321160539186](https://cdn.nova.gal/img/image-20220321160539186.png)
 
 根据`show`和`edit`函数，我们如果能修改`array[4 * idx + 2]`的内容，那么也就可以做到任意地址读写。
 
@@ -360,7 +360,7 @@ add(0x10, p64(0x602060-0x08))  # 3
 
 可以看到，我们在`0x602060-0x08`的地方构造了一个`fake_chunk`，如此一来，`0x602060`便可以作为`chunk_size`，而`0`的`chunk_addr`也就可以由`fake_chunk`修改，`chunk_addr`的内容也能由`0`来读
 
-![image-20220321165333289](https://oss.nova.gal/img/image-20220321165333289.png)
+![image-20220321165333289](https://cdn.nova.gal/img/image-20220321165333289.png)
 
 ```python
 add(0x10, b'aaaaaa')  # 4
@@ -368,7 +368,7 @@ add(0x10, b'aaaaaa')  # 5
 add(0x10, b'aaaaaa')  # 6 -> fake
 ```
 
-![image-20220321165836827](https://oss.nova.gal/img/image-20220321165836827.png)
+![image-20220321165836827](https://cdn.nova.gal/img/image-20220321165836827.png)
 
 此时已经可以任意读任意写了，这时候，只需要搞出`libc_base`就可以了
 
@@ -391,7 +391,7 @@ print(hex(libc_base))
 
 这样，我们只需要把`6`的`content`改为`__free_hook()`，并把`0`的`content`改为`system()`，便实现了篡改
 
-![__free_hook()有write权限](https://oss.nova.gal/img/image-20220321173758716.png)
+![__free_hook()有write权限](https://cdn.nova.gal/img/image-20220321173758716.png)
 
 ```python
 system = libc_base + libc.sym['system']
@@ -402,7 +402,7 @@ edit(6, p64(free_hook))
 edit(0, p64(system))
 ```
 
-![image-20220321173952320](https://oss.nova.gal/img/image-20220321173952320.png)
+![image-20220321173952320](https://cdn.nova.gal/img/image-20220321173952320.png)
 
 接下来，新建一个内容为`/bin/sh`的 chunk 并释放就可以拿到 shell 了。
 

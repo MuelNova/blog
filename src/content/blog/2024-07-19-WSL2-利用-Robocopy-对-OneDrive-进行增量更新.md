@@ -101,7 +101,7 @@ OneDrive 拉下来似乎是 0777 的权限，反正对于其他的也无所谓�
 
 - 存在几个无法上传的文件，强迫症
 
-![image-20240719162224812](https://oss.nova.gal/img/image-20240719162224812.png)
+![image-20240719162224812](https://cdn.nova.gal/img/image-20240719162224812.png)
 
 ## ~~Implementation~~
 
@@ -111,7 +111,7 @@ OneDrive 拉下来似乎是 0777 的权限，反正对于其他的也无所谓�
 
 见 [2wsync](https://github.com/MuelNova/2wsync)
 
-![image-20240719234343397](https://oss.nova.gal/img/image-20240719234343397.png)
+![image-20240719234343397](https://cdn.nova.gal/img/image-20240719234343397.png)
 
 ## Implementation
 

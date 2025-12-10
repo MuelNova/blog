@@ -45,17 +45,17 @@ BIOS 能改的其实就是启动时 BIOS 的 LOGO，在这之前，我已经把�
 
 为了方便，我将它们解压到一起。
 
-![image-20230128115232640](https://oss.nova.gal/img/image-20230128115232640.png)
+![image-20230128115232640](https://cdn.nova.gal/img/image-20230128115232640.png)
 
 打开 UEFITool，Ctrl+F 在 `GUID` 中输入 `7BB28B99-61BB-11D5-9A5D-0090273FC14D`，这个 File GUID 是固定的，双击软件下方 `Search` 中的结果即可跳转到 LOGO 的位置。
 
-![image-20230128115739129](https://oss.nova.gal/img/image-20230128115739129.png)
+![image-20230128115739129](https://cdn.nova.gal/img/image-20230128115739129.png)
 
 展开 `Logo` 到可以看到 `Raw section`，确定替换 logo 的位置。
 
 在我的 BIOS 下，只存在一个 `Raw section`，不同的 BIOS 可能存在复数个 `Raw section`，如果存在这样的情况请一个一个确定究竟需要替换哪个文件，通过右键 `Extract body` 保存为 `.bmp` 文件可以预览（当然，你也可以通过 `Body hex view` 肉眼辨 bytes）
 
-![image-20230128120347864](https://oss.nova.gal/img/image-20230128120347864.png)
+![image-20230128120347864](https://cdn.nova.gal/img/image-20230128120347864.png)
 
 之后，准备好你要替换的 `Logo` 文件，`Replace body...`
 
@@ -67,31 +67,31 @@ BIOS 能改的其实就是启动时 BIOS 的 LOGO，在这之前，我已经把�
 
 现在，如果替换成功，你应该在原来 `Raw section` 这里看到一个 `Remove` 和一个 `Replace`，之后只需要保存这个 BIOS，并刷入即可。不同 BIOS 的刷写方法不同，不再赘述~~其实是不好截图，手机拍屏又太脏了~~
 
-![image-20230128124020832](https://oss.nova.gal/img/image-20230128124020832.png)
+![image-20230128124020832](https://cdn.nova.gal/img/image-20230128124020832.png)
 
 效果的话，~~用 `画图` 模拟了一下~~好吧 `画图` 用不明白用 `photoshop` 了
 
-![image-20230128125530928](https://oss.nova.gal/img/image-20230128125530928.png)
+![image-20230128125530928](https://cdn.nova.gal/img/image-20230128125530928.png)
 
 ## 任务栏
 
 这里就不重新弄了，`Taskbar` 设置如图
 
-![image-20230128125621445](https://oss.nova.gal/img/image-20230128125621445.png)
+![image-20230128125621445](https://cdn.nova.gal/img/image-20230128125621445.png)
 
 配合上 [Start11](https://store.steampowered.com/app/1811010/Start11/)，搞一个透明底栏，改一个开始菜单图标，差不多够用。
 
-![image-20230128131119243](https://oss.nova.gal/img/image-20230128131119243.png)
+![image-20230128131119243](https://cdn.nova.gal/img/image-20230128131119243.png)
 
-![image-20230128131447072](https://oss.nova.gal/img/image-20230128131447072.png)
+![image-20230128131447072](https://cdn.nova.gal/img/image-20230128131447072.png)
 
 ## 开始菜单
 
 还是 [Start11](https://store.steampowered.com/app/1811010/Start11/)，搞一个毛玻璃 + 二次元背景
 
-![image-20230128132019936](https://oss.nova.gal/img/image-20230128132019936.png)
+![image-20230128132019936](https://cdn.nova.gal/img/image-20230128132019936.png)
 
-![image-20230128132329849](https://oss.nova.gal/img/image-20230128132329849.png)
+![image-20230128132329849](https://cdn.nova.gal/img/image-20230128132329849.png)
 
 ## 右键菜单
 
@@ -99,7 +99,7 @@ BIOS 能改的其实就是启动时 BIOS 的 LOGO，在这之前，我已经把�
 
 好吧，我使用 [ExplorerPatcher](https://github.com/valinet/ExplorerPatcher) 把 windows11 的右键菜单禁用了，然后由于它和 `Start11` 有兼容性问题我又给 `ExplorerPatcher` 卸了，不过这个右键菜单禁用的策略仍然是生效的，乐。现在可以使用这个软件了。
 
-![image-20230128141052232](https://oss.nova.gal/img/image-20230128141052232.png)
+![image-20230128141052232](https://cdn.nova.gal/img/image-20230128141052232.png)
 
 ## 资源浏览器
 
@@ -111,11 +111,11 @@ BIOS 能改的其实就是启动时 BIOS 的 LOGO，在这之前，我已经把�
 
 它也支持毛玻璃效果，但是似乎有 BUG，在全屏情况下我设置的背景混合色就不生效了，导致泛白戳眼睛。
 
-![image-20230128141826265](https://oss.nova.gal/img/image-20230128141826265.png)
+![image-20230128141826265](https://cdn.nova.gal/img/image-20230128141826265.png)
 
-![image-20230128141859779](https://oss.nova.gal/img/image-20230128141859779.png)
+![image-20230128141859779](https://cdn.nova.gal/img/image-20230128141859779.png)
 
-![image-20230128140324894](https://oss.nova.gal/img/image-20230128140324894.png)
+![image-20230128140324894](https://cdn.nova.gal/img/image-20230128140324894.png)
 
 ## 其它
 

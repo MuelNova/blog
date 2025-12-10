@@ -33,15 +33,15 @@ win+r 输入 `virtmgmt.msc` 打开 `Hyper-V Manager`，不得不吐槽微软这�
 
 一图流操作新建一个外部虚拟交换机
 
-![image-20230603224458330](https://oss.nova.gal/img/image-20230603224458330.png)
+![image-20230603224458330](https://cdn.nova.gal/img/image-20230603224458330.png)
 
-![image-20230603225101822](https://oss.nova.gal/img/image-20230603225101822.png)
+![image-20230603225101822](https://cdn.nova.gal/img/image-20230603225101822.png)
 
 ## 修改 WSL2 配置文件
 
 我平常使用的配置文件是 `%USERPROFILE%` 下的，你也可以根据你自己的来选，下面就说下我的。
 
-![image-20230603224655913](https://oss.nova.gal/img/image-20230603224655913.png)
+![image-20230603224655913](https://cdn.nova.gal/img/image-20230603224655913.png)
 
 在 `.wslconfig` 里的 `[wsl2]` 下面添加几项
 
@@ -61,7 +61,7 @@ wsl --shutdown && wsl
 
 如果一切顺利，你应该已经拥有桥接网络的 wsl2 了
 
-![image-20230603230219190](https://oss.nova.gal/img/image-20230603230219190.png)
+![image-20230603230219190](https://cdn.nova.gal/img/image-20230603230219190.png)
 
 ## 一些问题
 

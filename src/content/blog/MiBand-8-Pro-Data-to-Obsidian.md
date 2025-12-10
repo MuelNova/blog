@@ -583,7 +583,7 @@ return Json.encodeToJsonElement(SerializableDailyStepReport.serializer(), conver
 
 于是放弃了，然后，我又开始思考 HTTP Restful API。我利用 Ktor 很快的实现了一个（利用 GPT）。
 
-![image-20240203140011022](https://oss.nova.gal/img/image-20240203140011022.png)
+![image-20240203140011022](https://cdn.nova.gal/img/image-20240203140011022.png)
 
 但是此时又有一个问题：我们这个数据的获取频次是非常低的，却有这么一个特点：时间不固定。因此，为了稳定性，我们必须时刻保持 HTTP 服务器的开启，而 HTTP 服务器因为要维护的东西非常多，所以耗电量是非常可观的（虽然我没有测试）
 
@@ -718,6 +718,6 @@ override fun run() {
     }
 ```
 
-![非常健康的睡眠状态](https://oss.nova.gal/img/image-20240203141224260.png)
+![非常健康的睡眠状态](https://cdn.nova.gal/img/image-20240203141224260.png)
 
 源码后面再上传吧，现在纯半成品，评价是随便偷我的睡眠数据。

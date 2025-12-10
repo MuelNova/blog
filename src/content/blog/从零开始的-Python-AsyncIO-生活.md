@@ -98,7 +98,7 @@ for i in iterable:
 
 可以看到，相比于 `Iterable` 多了一个 `__next__` 方法，从名字也能看出来，这便是用于在下一次迭代中返回数据的接口。
 
-![Iterator](https://oss.nova.gal/img/image-20220825212925388.png)
+![Iterator](https://cdn.nova.gal/img/image-20220825212925388.png)
 
 我们下断点查看，发现 `list_iterator` 的 `__iter__` 显然是返回了它本身，而 `__next__` 则会返回数据（在这里应该是 `'This'`，但由于它再运行了一次 `__iter__` 所以变成了下一个 `'Is'）
 
@@ -189,7 +189,7 @@ assert hasattr(my_generator, "__next__") and hasattr(my_generator, "__iter__")
 
 接下来我们重点关注 `yield` 这个表达式
 
-![test_yield_0](https://oss.nova.gal/img/image-20220825220913423.png)
+![test_yield_0](https://cdn.nova.gal/img/image-20220825220913423.png)
 
 从图中我们可以发现，第一次执行 `next(my_generator)` 时，函数执行到了 `yield 1` 便被 `挂起`，等到下一次的 `next(my_generator)` 后才会执行接下来的代码块。
 
@@ -210,7 +210,7 @@ def count(start: int = 0, step: int = 1):
 
 在遇到 `return` 后，`next(my_generator)` 则直接抛出了 `StopIteration` 的异常（且 `StopIteration.value` 就是我们 return 的值），且 `return` 之后的代码块不再执行（哪怕你处理了 `#line:28` 的错误执行到了 `#line:29` 也仍会抛出 `StopIteration`）
 
-![test_yield_1](https://oss.nova.gal/img/image-20220825220957420.png)
+![test_yield_1](https://cdn.nova.gal/img/image-20220825220957420.png)
 
 此时，我们可以将我们的 `MyIterator` 对象重写成 `Generator` 形式
 
@@ -251,11 +251,11 @@ print(foo.__code__)
 
 如上的代码打印了 `foo()` 函数的代码对象，代码对象保存了函数的一些静态信息。
 
-![code_obj](https://oss.nova.gal/img/image-20220825223328598.png)
+![code_obj](https://cdn.nova.gal/img/image-20220825223328598.png)
 
 ## 帧对象
 
-![frame_obj](https://oss.nova.gal/img/image-20220825223517564.png)
+![frame_obj](https://cdn.nova.gal/img/image-20220825223517564.png)
 
 使用 `inspect` 返回当前 `frame`，需要注意的是一般情况下函数运行完毕 `frame` 就会自动销毁，因此我们使用变量保存。
 
@@ -263,7 +263,7 @@ print(foo.__code__)
 
 你可以预想到的，正常的函数执行是一个 `先进后出` 的 _栈_ 结构，在这里不做进一步的解释。（详情请去看 _C 语言函数调用栈_）
 
-![function_stack](https://oss.nova.gal/img/image-20220825225721661.png)
+![function_stack](https://cdn.nova.gal/img/image-20220825225721661.png)
 
 而 `Generator` 不同，它自带了一个帧，每次调用 `__next__` 时都会使用这个帧。换句话说，每次这个帧都会执行出栈入栈操作。
 
@@ -290,7 +290,7 @@ def c(g):
 a()
 ```
 
-![generator_stack](https://oss.nova.gal/img/image-20220825230136192.png)
+![generator_stack](https://cdn.nova.gal/img/image-20220825230136192.png)
 
 > 这部分可能有点难理解，推荐是用自己下断点调一调啃一下。
 
@@ -1104,7 +1104,7 @@ print(f"total: {total}")
 
 ```
 
-![image-20220830143812689](https://oss.nova.gal/img/image-20220830143812689.png)
+![image-20220830143812689](https://cdn.nova.gal/img/image-20220830143812689.png)
 
 可以看到，我们正常运行这么多任务需要的时间应该是 `509.3s`，但是由于多任务的调度实现的并发执行，我们实际上在 `1s` 以内便运行完成了这所有的 1000 个任务。
 

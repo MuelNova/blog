@@ -316,9 +316,9 @@ int main(int argc, char *argv[])
 
 所以我们把 qemu 拖进去看看。这题恶心的地方在于它删了符号表，我们从 strings 入手来看，通过搜索 vn_ 找到起始位置。
 
-![image-20250507023938705](https://oss.nova.gal/img/image-20250507023938705.png)
+![image-20250507023938705](https://cdn.nova.gal/img/image-20250507023938705.png)
 
-![image-20250507024051221](https://oss.nova.gal/img/image-20250507024051221.png)
+![image-20250507024051221](https://cdn.nova.gal/img/image-20250507024051221.png)
 
 可以想到这就是一个注册函数，但是具体这些是啥呢？我们可以找一个没被干掉符号表的来看看。
 
@@ -344,7 +344,7 @@ void __fastcall hitb_class_init(ObjectClass_0 *a1, void *data)
 
 我们很容易猜到这个 sub_6D9166 就是一个 realize 函数指针（或者可以恢复一下 qemu 的符号表，然后把它丢个结构体 `PCIDeviceClass` 来看）
 
-![image-20250507024657578](https://oss.nova.gal/img/image-20250507024657578.png)
+![image-20250507024657578](https://cdn.nova.gal/img/image-20250507024657578.png)
 
 进入到 realize，我们继续对比。
 
@@ -370,7 +370,7 @@ void __fastcall pci_hitb_realize(HitbState *pdev, Error_0 **errp)
 
 对于 read 函数，我们很容易解析。首先 a1 肯定是结构体的指针我们不管，a2 则是我们读的地址（通过观察其他的 qemu pci 设备，或者对 read 的经验来说），其实还有应该一个 a3 用于表示大小，但是他没写，可能不需要吧）
 
-![image-20250507025258616](https://oss.nova.gal/img/image-20250507025258616.png)
+![image-20250507025258616](https://cdn.nova.gal/img/image-20250507025258616.png)
 
 很简单，让我们读的地址的 `>> 20 & 0xf = 1`，`>> 16 & 0xf = 0xf` 即可把 vnctf 拷贝到一个地址上
 
@@ -378,7 +378,7 @@ void __fastcall pci_hitb_realize(HitbState *pdev, Error_0 **errp)
 
 对于 write 函数，这个也是很简单了。我们显然要在 read 操作完之后 write 两次，第一次让 `a2 >> 20 & 0xf = 1`，第二次再让 `a2 >> 20 & 0xf = 2，a2 >> 16 & 0xf == 0xf`，就能执行 `system("cat flag")`
 
-![image-20250507025803578](https://oss.nova.gal/img/image-20250507025803578.png)
+![image-20250507025803578](https://cdn.nova.gal/img/image-20250507025803578.png)
 
 
 
@@ -581,7 +581,7 @@ root@98f8c96b09be:/home/ctf# cat run.sh
 
 那自然就是找这个 ccb-dev-pci 了。我们 ida 看一眼。
 
-![image-20250509232134631](https://oss.nova.gal/img/image-20250509232134631.png)
+![image-20250509232134631](https://cdn.nova.gal/img/image-20250509232134631.png)
 
 
 
@@ -589,9 +589,9 @@ root@98f8c96b09be:/home/ctf# cat run.sh
 
 感觉这个 mmio_read 一眼越界读，不确定，再看看
 
-![image-20250509232646863](https://oss.nova.gal/img/image-20250509232646863.png)
+![image-20250509232646863](https://cdn.nova.gal/img/image-20250509232646863.png)
 
-![image-20250509232746265](https://oss.nova.gal/img/image-20250509232746265.png)
+![image-20250509232746265](https://cdn.nova.gal/img/image-20250509232746265.png)
 
 
 
@@ -1062,11 +1062,11 @@ docker run -it -v .:/mnt --rm --privileged nopwnv2:18.04
 
 直接丢 ida 研究一下，有符号，直接搜题目名字看看，直接一眼顶针了。
 
-![image-20250512163919166](https://oss.nova.gal/img/image-20250512163919166.png)
+![image-20250512163919166](https://cdn.nova.gal/img/image-20250512163919166.png)
 
  但是这个不好看，显然是因为这里是 ObjectClass 的原因，给他修一下改成 PCIDeviceClass。
 
-![image-20250512164422658](https://oss.nova.gal/img/image-20250512164422658.png)
+![image-20250512164422658](https://cdn.nova.gal/img/image-20250512164422658.png)
 
 自然对应我们 `lspci -v` 里的这个设备
 
@@ -1116,11 +1116,11 @@ printf("srand_addr = %x\n", srand_addr);
 
 显然是有高水平的东西在作怪，观察 realize 函数我们可以发现，它在 memory_region_init 的时候，竟然设置了大小为 **256**，显然，qemu 在这里存在一个检查，让我们没有办法越界访问。
 
-![image-20250512174042840](https://oss.nova.gal/img/image-20250512174042840.png)
+![image-20250512174042840](https://cdn.nova.gal/img/image-20250512174042840.png)
 
 因此我们得使用 pmio，因为正如上文分析的，pmio 用的是 `opaque->addr`，而这个东西是我们可以控制的。
 
-![image-20250512174211402](https://oss.nova.gal/img/image-20250512174211402.png)
+![image-20250512174211402](https://cdn.nova.gal/img/image-20250512174211402.png)
 
 那么就是用 PMIO 来打咯。
 

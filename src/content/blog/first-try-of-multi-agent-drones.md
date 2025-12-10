@@ -64,6 +64,6 @@ for i in drones:
         client.takeoffAsync(vehicle_name=i)
 ```
 
-于是能动了![](https://oss.nova.gal/img/20210930153706.png)
+于是能动了![](https://cdn.nova.gal/img/20210930153706.png)
 
 那就激情尼尔机械纪元去啦，打大折直接进行一手**劲爆购买**

@@ -16,7 +16,7 @@ authors:
 
 ### noteadd
 
-![image-20241031142916722](https://oss.nova.gal/img/image-20241031142916722.png)
+![image-20241031142916722](https://cdn.nova.gal/img/image-20241031142916722.png)
 
 显然有一个非常奇怪的逻辑：在拿到 size 之后，它首先设置了 notebook[idx].size，如果不合法再把它设置回来，那么不难想到，如果我们有一个地方根据这个 size 来做一些逻辑，那么我们就有竞争的窗口，或者说把一个不合法的 size 修改为合法的。
 
@@ -28,7 +28,7 @@ authors:
 
 ### notedel
 
-![image-20241031143209266](https://oss.nova.gal/img/image-20241031143209266.png)
+![image-20241031143209266](https://cdn.nova.gal/img/image-20241031143209266.png)
 
 同样奇怪的逻辑。只有在 size 域存在的时候才会清空 v3->note。那么显然如果 del 的时候这个 note size 域为 0 就不会清空它。但是他拿的是写锁，所以不能和 add 联动造 uaf
 
@@ -36,7 +36,7 @@ authors:
 
 ### noteedit
 
-![image-20241031143856161](https://oss.nova.gal/img/image-20241031143856161.png)
+![image-20241031143856161](https://cdn.nova.gal/img/image-20241031143856161.png)
 
 对于 edit，它拿的也是读锁，并且会调用 krealloc。如果 v5->size 是 0，那么就会清理 note 字段。值得注意的是，这里没有对 size 域的限制。
 
@@ -58,7 +58,7 @@ authors:
 
 ### mynote_read
 
-![image-20241031144311861](https://oss.nova.gal/img/image-20241031144311861.png)
+![image-20241031144311861](https://cdn.nova.gal/img/image-20241031144311861.png)
 
 读，没有锁
 
@@ -66,7 +66,7 @@ authors:
 
 ### mynote_write
 
-![image-20241031144354846](https://oss.nova.gal/img/image-20241031144354846.png)
+![image-20241031144354846](https://cdn.nova.gal/img/image-20241031144354846.png)
 
 写，也没锁。
 

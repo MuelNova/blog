@@ -22,11 +22,11 @@ authors:
 
 检查一下保护，没有 Canary 也没有 PIE，32 位 ELF
 
-![](https://oss.nova.gal/img/image-20211212102309182.png)
+![](https://cdn.nova.gal/img/image-20211212102309182.png)
 
 在 string 列表里即看得到`system`也看得到`/bin/sh`
 
-![](https://oss.nova.gal/img/image-20211212102632678.png)
+![](https://cdn.nova.gal/img/image-20211212102632678.png)
 
 简单的构造一个函数覆盖返回地址即可
 
@@ -59,7 +59,7 @@ sh.interactive()
 
   - 这里附上 mark 爹的解答
 
-    ![](https://oss.nova.gal/img/image-20211212105927823.png)
+    ![](https://cdn.nova.gal/img/image-20211212105927823.png)
 
   - 那如何计算偏移呢？这里提供 gdb 和 pwndbg 的两种方法
 
@@ -67,7 +67,7 @@ sh.interactive()
 
       - 找到 call \_gets 的地址，可以看到上面就是 s
 
-      ![](https://oss.nova.gal/img/image-20211212110511113.png)
+      ![](https://cdn.nova.gal/img/image-20211212110511113.png)
 
       - 我们在 0x0804867B 这里下一个断点
 
@@ -187,11 +187,11 @@ sh.interactive()
 0x804a000  0x804b000 rw-p     1000 1000   /home/nova/Desktop/CTF/ctf-wiki/ret2libc/ret2libc2
 ```
 
-![](https://oss.nova.gal/img/image-20211214121414814.png)
+![](https://cdn.nova.gal/img/image-20211214121414814.png)
 
 那么我们考虑将`/bin/sh`写入到 bss 段上的`buf2`处
 
-![image-20211214121848183](https://oss.nova.gal/img/image-20211214121848183.png)
+![image-20211214121848183](https://cdn.nova.gal/img/image-20211214121848183.png)
 
 思路很明显了：
 
@@ -263,7 +263,7 @@ sh.interactive()
 
 在这里我们泄露`puts`的地址好了
 
-![](https://oss.nova.gal/img/image-20211214151738631.png)
+![](https://cdn.nova.gal/img/image-20211214151738631.png)
 
 首先搞到`puts`的 plt 和 got 表地址
 
@@ -379,7 +379,7 @@ sh.interactive()
 
 使用方法很简单，因为 libc 的低十二位不会变，所以给出已泄露的函数的地址，就可以在这里找到对应的 libc.so 版本及相关 Offset
 
-![image-20211214164955101](https://oss.nova.gal/img/image-20211214164955101.png)
+![image-20211214164955101](https://cdn.nova.gal/img/image-20211214164955101.png)
 
 ## ciscn_2019_c_1
 

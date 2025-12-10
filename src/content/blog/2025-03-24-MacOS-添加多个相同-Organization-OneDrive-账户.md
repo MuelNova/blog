@@ -14,7 +14,7 @@ authors:
 
 首先正常添加用户 A，完成后，你应该能在 `~/Library/CloudStorage` 下看到对应的 OneDrive 文件
 
-![image-20250324131551356](https://oss.nova.gal/img/image-20250324131551356.png)
+![image-20250324131551356](https://cdn.nova.gal/img/image-20250324131551356.png)
 
 
 
@@ -26,7 +26,7 @@ authors:
 
 :::
 
-![image-20250324132225033](https://oss.nova.gal/img/image-20250324132225033.png)
+![image-20250324132225033](https://cdn.nova.gal/img/image-20250324132225033.png)
 
 打开这个文件，你应该能看到这里有一个写了你组织名的地方，把它修改成你想的东西（例如说 OneDrive - Photos），不要和组织名重合。
 
@@ -34,10 +34,10 @@ authors:
 
 保存，然后打开 OneDrive，此时它应该会报错找不到这个文件了，点击重试，等一会之后再重启 OneDrive。
 
-![image-20250324133325460](https://oss.nova.gal/img/image-20250324133325460.png)
+![image-20250324133325460](https://cdn.nova.gal/img/image-20250324133325460.png)
 
 此时 OneDrive 应该已经正常工作了，并且你可以看到新的 OneDrive 文件夹
 
-![image-20250324133536785](https://oss.nova.gal/img/image-20250324133536785.png)
+![image-20250324133536785](https://cdn.nova.gal/img/image-20250324133536785.png)
 
 现在可以加新号了，它会保存在 `~/Library/Containers/com.microsoft.OneDrive-mac/Data/Library/Application Support/OneDrive/settings/Business2`，之后就以此类推。
