@@ -7,6 +7,7 @@
 import Card from './Card.astro';
 import CardHeader from './CardHeader.astro';
 import type { Social } from '../types';
+import { Icon } from 'astro-icon/components';
 
 interface Props {
 	socials: Social[];
@@ -27,14 +28,11 @@ const { socials } = Astro.props;
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					<svg 
-						class="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" 
-						style="filter: drop-shadow(0 0 4px var(--color-primary))" 
-						fill="currentColor" 
-						viewBox="0 0 24 24"
-					>
-						<path d={social.icon} />
-					</svg>
+					<Icon
+						name={social.icon}
+						class="w-5 h-5 text-[var(--color-primary)] flex-shrink-0 iconify"
+						style="filter: drop-shadow(0 0 4px var(--color-primary))"
+					/>
 					<span>{social.name}</span>
 				</a>
 			</li>

@@ -19,6 +19,7 @@
     "@types/react-dom": "^19.2.3",
     "astro": "^5.16.4",
     "astro-expressive-code": "^0.41.3",
+    "astro-icon": "^1.1.5",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "sharp": "^0.34.3",
@@ -26,6 +27,7 @@
   },
   "packageManager": "yarn@4.12.0",
   "devDependencies": {
+    "@iconify-json/ph": "^1.2.2",
     "@tailwindcss/vite": "^4.1.17",
     "chrome-launcher": "^1.2.1",
     "tailwindcss": "^4.1.17",

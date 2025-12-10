@@ -6,6 +6,7 @@
  * Supports keyboard shortcuts (Ctrl+K / ⌘+K) and theme persistence.
  */
 
+import { Icon } from 'astro-icon/components';
 import { getThemes, getDarkThemes, getLightThemes } from '../config/themes';
 
 // Load all themes at build time
@@ -23,9 +24,7 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 		aria-label="Theme"
 		title="Theme (Ctrl+K)"
 	>
-		<svg class="w-5 h-5 nav-trigger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-		</svg>
+		<Icon name="ph:swatches-duotone" class="w-5 h-5 nav-trigger-icon" />
 		<span class="sr-only">Theme</span>
 		<span class="nav-label-mobile">Theme</span>
 	</button>
@@ -37,9 +36,7 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 		aria-label="Theme"
 		title="Theme"
 	>
-		<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-		</svg>
+		<Icon name="ph:swatches-duotone" class="w-5 h-5" />
 	</button>
 
 	<dialog
@@ -50,9 +47,7 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 			<div class="flex items-center justify-between p-4 border-b border-accent/40">
 				<div class="flex items-center gap-3 flex-wrap header-actions">
 					<h2 class="text-lg font-semibold text-foreground flex items-center gap-2">
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-						</svg>
+						<Icon name="ph:swatches-duotone" class="w-5 h-5" />
 						<span class="header-text">Theme</span>
 					</h2>
 					<label class="flex items-center gap-2 cursor-pointer group lock-switch">
@@ -64,12 +59,8 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 						/>
 						<div class="relative w-10 h-5 bg-foreground/20 rounded-full transition-colors duration-150">
 							<div class="lock-indicator absolute top-0.5 left-0.5 w-4 h-4 bg-foreground rounded-full transition-transform duration-150 flex items-center justify-center">
-								<svg class="lock-icon-open w-3 h-3 text-background" fill="currentColor" viewBox="0 0 20 20">
-									<path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" />
-								</svg>
-								<svg class="lock-icon-closed w-3 h-3 text-background hidden" fill="currentColor" viewBox="0 0 20 20">
-									<path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-								</svg>
+								<Icon name="ph:lock-open-duotone" class="lock-icon-open w-3 h-3 text-background" />
+								<Icon name="ph:lock-duotone" class="lock-icon-closed w-3 h-3 text-background hidden" />
 							</div>
 						</div>
 						<span class="text-xs text-foreground/70 header-text">Lock</span>
@@ -83,12 +74,8 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 						/>
 						<div class="relative w-10 h-5 bg-foreground/20 rounded-full intro-track">
 							<div class="intro-indicator absolute top-0.5 left-0.5 w-4 h-4 bg-foreground rounded-full transition-transform duration-150 flex items-center justify-center">
-								<svg class="intro-icon-on w-3 h-3 text-background" fill="currentColor" viewBox="0 0 20 20">
-									<path d="M4 5a3 3 0 013-3h6a3 3 0 013 3v10a2 2 0 11-4 0V8a1 1 0 10-2 0v7a2 2 0 11-4 0V5z" />
-								</svg>
-								<svg class="intro-icon-off w-3 h-3 text-background hidden" fill="currentColor" viewBox="0 0 20 20">
-									<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0l10 10a1 1 0 01-1.414 1.414l-2.51-2.51A2.999 2.999 0 0110 16a3 3 0 01-3-3V8.414L4.293 6.707a1 1 0 010-1.414zm9.283 6.455L7.252 4.424C7.737 4.16 8.348 4 9 4h2a3 3 0 013 3v3.748a1 1 0 01-.424.82z" clip-rule="evenodd" />
-								</svg>
+								<Icon name="ph:sparkle-duotone" class="intro-icon-on w-3 h-3 text-background" />
+								<Icon name="ph:prohibit-inset-duotone" class="intro-icon-off w-3 h-3 text-background hidden" />
 							</div>
 						</div>
 						<span class="text-xs text-foreground/70 header-text">Intro</span>
@@ -100,12 +87,8 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 						aria-label="Lock theme"
 						aria-pressed="false"
 					>
-						<svg class="lock-icon-open w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-							<path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z" />
-						</svg>
-						<svg class="lock-icon-closed w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-						</svg>
+						<Icon name="ph:lock-open-duotone" class="lock-icon-open w-4 h-4" />
+						<Icon name="ph:lock-duotone" class="lock-icon-closed w-4 h-4 hidden" />
 					</button>
 					<button
 						class="w-9 h-9 flex items-center justify-center rounded-md border border-accent/40 hover:border-primary hover:text-primary transition-colors duration-150 intro-icon-compact hidden"
@@ -114,12 +97,8 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 						aria-label="Intro animation"
 						aria-pressed="true"
 					>
-						<svg class="intro-icon-on w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-							<path d="M4 5a3 3 0 013-3h6a3 3 0 013 3v10a2 2 0 11-4 0V8a1 1 0 10-2 0v7a2 2 0 11-4 0V5z" />
-						</svg>
-						<svg class="intro-icon-off w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0l10 10a1 1 0 01-1.414 1.414l-2.51-2.51A2.999 2.999 0 0110 16a3 3 0 01-3-3V8.414L4.293 6.707a1 1 0 010-1.414zm9.283 6.455L7.252 4.424C7.737 4.16 8.348 4 9 4h2a3 3 0 013 3v3.748a1 1 0 01-.424.82z" clip-rule="evenodd" />
-						</svg>
+						<Icon name="ph:sparkle-duotone" class="intro-icon-on w-4 h-4" />
+						<Icon name="ph:prohibit-inset-duotone" class="intro-icon-off w-4 h-4 hidden" />
 					</button>
 				</div>
 				<div class="flex items-center gap-2 overflow-x-auto">
@@ -148,9 +127,7 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 					data-close-modal
 					aria-label="Close"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-					</svg>
+					<Icon name="ph:x-duotone" class="w-5 h-5" />
 				</button>
 			</div>
 

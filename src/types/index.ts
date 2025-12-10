@@ -8,7 +8,7 @@
 export interface Social {
 	name: string;
 	url: string;
-	icon: string; // SVG path data
+	icon: string; // Iconify name (e.g., "ph:github-logo-duotone")
 }
 
 /**
