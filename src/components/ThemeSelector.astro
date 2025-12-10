@@ -44,7 +44,7 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 		data-theme-dialog
 	>
 		<div class="flex flex-col h-full">
-			<div class="flex items-center justify-between p-4 border-b border-accent/40">
+			<div class="flex items-center justify-between p-4 border-b border-accent/40" data-theme-header>
 				<div class="flex items-center gap-3 flex-wrap header-actions">
 					<h2 class="text-lg font-semibold text-foreground flex items-center gap-2">
 						<Icon name="ph:swatches-duotone" class="w-5 h-5" />
@@ -131,7 +131,7 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 				</button>
 			</div>
 
-			<div class="flex-1 overflow-y-auto p-4">
+			<div class="flex-1 overflow-y-auto p-4" data-theme-scroll>
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2" data-theme-list>
 					{allThemes.map((theme) => (
 						<button
@@ -158,6 +158,35 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 	button[data-tab][data-active="true"] {
 		border-color: var(--color-primary);
 		color: var(--color-primary);
+	}
+
+	dialog[data-theme-dialog][open] {
+		display: grid;
+		grid-template-rows: auto 1fr;
+		height: min(80vh, 720px);
+		overflow: hidden;
+	}
+
+	dialog[data-theme-dialog] > div {
+		height: 100%;
+		min-height: 0; /* allow inner flex to shrink for scrolling */
+	}
+
+	[data-theme-header] {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		background: var(--color-background);
+	}
+
+	[data-theme-scroll] {
+		overflow-y: auto;
+		scrollbar-width: none;
+		min-height: 0; /* allow flex child to shrink and scroll */
+	}
+
+	[data-theme-scroll]::-webkit-scrollbar {
+		display: none;
 	}
 
 	.theme-option.current-theme {
@@ -218,8 +247,9 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 			padding: 0.35rem 0.6rem;
 			font-size: 0.8rem;
 		}
-		dialog {
+		dialog[data-theme-dialog][open] {
 			min-height: 80vh;
+			height: 90vh;
 			max-height: 100vh;
 		}
 	}
