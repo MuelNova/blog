@@ -2,8 +2,19 @@
 import ThemeSelector from './ThemeSelector.astro';
 import { Icon } from 'astro-icon/components';
 import { SITE_TITLE } from '../consts';
+import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
 
-const path = Astro.url.pathname;
+type NavItem = 
+	| { type: 'link'; name: string; href: string }
+	| { type: 'component'; component: AstroComponentFactory; class?: string };
+
+const items = [
+	{ type: 'link', name: 'Home', href: '/' },
+	{ type: 'link', name: 'Blog', href: '/blog' },
+	{ type: 'link', name: 'About', href: '/about' },
+	{ type: 'link', name: 'Friends', href: '/links' },
+	{ type: 'component', component: ThemeSelector, class: 'w-full sm:w-auto sm:pl-1 theme-selector-li' },
+] satisfies NavItem[];
 ---
 
 <nav
@@ -18,27 +29,24 @@ const path = Astro.url.pathname;
 			id="primary-nav"
 			class="nav-list hidden flex-col absolute left-0 right-0 top-full z-[40] p-4 gap-0 bg-[color:var(--color-background)] shadow-xl opacity-0 pointer-events-none transition-all duration-200 ease-out sm:static sm:flex sm:flex-row sm:items-center sm:gap-4 sm:p-0 sm:opacity-100 sm:pointer-events-auto sm:shadow-none"
 		>
-			<li class="w-full sm:w-auto">
-				<a href="/" class="nav-link">
-					Home
-				</a>
-			</li>
-			<li class="nav-separator hidden sm:inline text-[color-mix(in_srgb,var(--color-foreground)_70%,transparent)] select-none">/</li>
-			<li class="w-full sm:w-auto">
-				<a href="/blog" class="nav-link">
-					Blog
-				</a>
-			</li>
-			<li class="nav-separator hidden sm:inline text-[color-mix(in_srgb,var(--color-foreground)_70%,transparent)] select-none">/</li>
-			<li class="w-full sm:w-auto">
-				<a href="/about" class="nav-link">
-					About
-				</a>
-			</li>
-			<li class="nav-separator hidden sm:inline text-[color-mix(in_srgb,var(--color-foreground)_70%,transparent)] select-none">/</li>
-			<li class="w-full sm:w-auto sm:pl-1 theme-selector-li">
-				<ThemeSelector />
-			</li>
+			{items.map((item, index) => (
+				<>
+					{item.type === 'link' ? (
+						<li class="w-full sm:w-auto">
+							<a href={item.href} class="nav-link">
+								{item.name}
+							</a>
+						</li>
+					) : (
+						<li class={item.class}>
+							<item.component />
+						</li>
+					)}
+					{index < items.length - 1 && (
+						<li class="nav-separator hidden sm:inline text-[color-mix(in_srgb,var(--color-foreground)_70%,transparent)] select-none">/</li>
+					)}
+				</>
+			))}
 		</ul>
 
 		<button

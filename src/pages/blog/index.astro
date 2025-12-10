@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { Icon } from 'astro-icon/components';
+import { Image } from 'astro:assets';
 import PageLayout from '../../layouts/PageLayout.astro';
 import Card from '../../components/Card.astro';
 import CardHeader from '../../components/CardHeader.astro';
@@ -28,7 +29,7 @@ const sortedTags = Array.from(tagCounts.entries())
 <PageLayout 
 	title={SITE_TITLE} 
 	description={SITE_DESCRIPTION}
-	class="w-full max-w-[960px] mx-auto py-3 md:py-8 px-1 md:px-4"
+	class="w-full max-w-[960px] mx-auto py-3 md:py-8 px-0 md:px-4"
 >
 	<!-- Mobile Filter Button - Geek Style -->
 	{sortedTags.length > 0 && (
@@ -110,6 +111,18 @@ const sortedTags = Array.from(tagCounts.entries())
 						class="post-container"
 						data-tags={(post.data.tags || []).join(',')}
 					>
+						{post.data.heroImage && (
+							<div class="post-hero-image">
+								<Image 
+									src={post.data.heroImage} 
+									alt={post.data.title}
+									width={800}
+									height={400}
+									loading="lazy"
+									class="hero-img"
+								/>
+							</div>
+						)}
 						<div class="post-header">
 							<h3>{post.data.title}</h3>
 							<span class="post-date">
@@ -207,6 +220,37 @@ const sortedTags = Array.from(tagCounts.entries())
 		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 		position: relative;
 		margin: 0;
+		overflow: hidden;
+	}
+
+	/* Hero Image Styles */
+	.post-hero-image {
+		width: 100%;
+		margin-bottom: 0.75rem;
+		border-radius: 4px;
+		overflow: hidden;
+		border: 1px solid color-mix(in srgb, var(--color-foreground) 8%, transparent);
+		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.hero-img {
+		width: 100%;
+		height: auto;
+		display: block;
+		transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+		object-fit: cover;
+		aspect-ratio: 2 / 1;
+	}
+
+	.post-container:hover .post-hero-image,
+	.post-container:focus-visible .post-hero-image {
+		border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+		box-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 15%, transparent);
+	}
+
+	.post-container:hover .hero-img,
+	.post-container:focus-visible .hero-img {
+		transform: scale(1.05);
 	}
 
 	@media (min-width: 640px) {
