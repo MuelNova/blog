@@ -1,13 +1,27 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import PageLayout from '../../layouts/PageLayout.astro';
+import Card from '../../components/Card.astro';
+import CardHeader from '../../components/CardHeader.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { stripMarkdown } from '../../utils/markdown';
 
 const posts = (await getCollection('blog'))
 	.filter((post) => !post.data.unlisted)
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// Collect all tags with their counts and sort by count (descending)
+const tagCounts = new Map<string, number>();
+posts.forEach((post) => {
+	(post.data.tags || []).forEach((tag) => {
+		tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+	});
+});
+
+const sortedTags = Array.from(tagCounts.entries())
+	.sort((a, b) => b[1] - a[1]) // Sort by count descending
+	.map(([tag, count]) => ({ tag, count }));
 ---
 
 <PageLayout 
@@ -15,34 +29,304 @@ const posts = (await getCollection('blog'))
 	description={SITE_DESCRIPTION}
 	class="w-full max-w-[960px] mx-auto py-8 px-4"
 >
-	<section>
-		<ul class="flex flex-wrap gap-8 list-none m-0 p-0">
-					{
-						posts.map((post, index) => (
-							<li class={index === 0 ? "w-full mb-4 text-center" : "w-full md:w-[calc(50%-1rem)]"}>
-								<a 
-									href={`/blog/${post.id}/`}
-									class="block no-underline group transition-all duration-200"
-								>
-									{post.data.heroImage && (
-										<Image 
-											width={720} 
-											height={360} 
-											src={post.data.heroImage} 
-											alt="" 
-											class="mb-2 rounded-xl group-hover:shadow-[0_4px_12px_rgba(var(--color-primary-rgb),0.3)] transition-shadow duration-200"
-										/>
-									)}
-									<h4 class={`m-0 text-foreground leading-tight group-hover:text-primary transition-colors duration-200 ${index === 0 ? 'text-4xl' : 'text-xl'}`}>
-										{post.data.title}
-									</h4>
-									<p class="m-0 text-foreground/70 group-hover:text-primary transition-colors duration-200 mt-2">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-					))
-				}
-			</ul>
-		</section>
+	<div class="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-4">
+		<!-- Filter Card -->
+		{sortedTags.length > 0 && (
+			<Card class="lg:sticky lg:top-4 lg:self-start">
+				<CardHeader title="Filter" icon="folder" />
+				<ul class="tags-list">
+					{sortedTags.map(({ tag, count }) => (
+						<li>
+							<button
+								class="blog-tag"
+								data-tag={tag}
+							>
+								<span class="tag-name">{tag}</span>
+								<span class="tag-count">{count}</span>
+							</button>
+						</li>
+					))}
+				</ul>
+			</Card>
+		)}
+
+		<!-- Posts Card -->
+		<Card>
+			<CardHeader title="Blog Posts" icon="rss" />
+			<div class="content-container">
+				{posts.map((post) => (
+					<a 
+						href={`/blog/${post.id}/`}
+						class="post-container"
+						data-tags={(post.data.tags || []).join(',')}
+					>
+						<div class="post-header">
+							<h3>{post.data.title}</h3>
+							<span class="post-date">
+								<FormattedDate date={post.data.pubDate} />
+							</span>
+						</div>
+						{post.data.description && (
+							<span class="post-description">
+								{stripMarkdown(post.data.description)}
+							</span>
+						)}
+					</a>
+				))}
+			</div>
+		</Card>
+	</div>
 </PageLayout>
+
+<style>
+	/* Tags List */
+	.tags-list {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: wrap;
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		gap: 0.5rem;
+	}
+
+	.blog-tag {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.375rem 0.75rem;
+		background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
+		color: var(--color-foreground);
+		text-decoration: none;
+		border: 1px solid color-mix(in srgb, var(--color-foreground) 15%, transparent);
+		cursor: pointer;
+		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+		font-size: 0.875rem;
+		border-radius: 0.375rem;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.blog-tag::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-primary) 10%, transparent),
+			transparent
+		);
+		opacity: 0;
+		transition: opacity 200ms ease;
+	}
+
+	.blog-tag:hover::before,
+	.blog-tag:focus-visible::before {
+		opacity: 1;
+	}
+
+	.blog-tag:hover,
+	.blog-tag:focus-visible {
+		border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 15%, transparent);
+	}
+
+	.blog-tag.active {
+		background: var(--color-primary);
+		color: var(--color-background);
+		border-color: var(--color-primary);
+		box-shadow: 0 4px 16px color-mix(in srgb, var(--color-primary) 30%, transparent);
+	}
+
+	.blog-tag.active::before {
+		opacity: 0;
+	}
+
+	.tag-name {
+		position: relative;
+		z-index: 1;
+	}
+
+	.tag-count {
+		position: relative;
+		z-index: 1;
+		font-size: 0.75rem;
+		padding: 0.125rem 0.375rem;
+		background: color-mix(in srgb, var(--color-foreground) 15%, transparent);
+		border-radius: 0.25rem;
+		font-weight: 600;
+		min-width: 1.25rem;
+		text-align: center;
+	}
+
+	.blog-tag.active .tag-count {
+		background: color-mix(in srgb, var(--color-background) 30%, transparent);
+		color: var(--color-background);
+	}
+
+	/* Content Container */
+	.content-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.post-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0.625rem;
+		padding: 1.25rem;
+		border-bottom: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
+		text-decoration: none;
+		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+		position: relative;
+		border-radius: 0.5rem;
+		margin: 0 -0.5rem;
+	}
+
+	.post-container::before {
+		content: '';
+		position: absolute;
+		inset: -20px;
+		background: radial-gradient(
+			ellipse 80% 50% at 50% 50%,
+			color-mix(in srgb, var(--color-primary) 15%, transparent),
+			transparent 70%
+		);
+		opacity: 0;
+		transition: opacity 400ms ease;
+		pointer-events: none;
+		filter: blur(20px);
+	}
+
+	.post-container:last-child {
+		border-bottom: none;
+	}
+
+	.post-container:hover,
+	.post-container:focus-visible {
+		background-color: color-mix(in srgb, var(--color-primary) 3%, transparent);
+		border-color: transparent;
+		box-shadow: 
+			0 0 40px color-mix(in srgb, var(--color-primary) 12%, transparent),
+			inset 0 0 20px color-mix(in srgb, var(--color-primary) 5%, transparent);
+	}
+
+	.post-container:hover::before,
+	.post-container:focus-visible::before {
+		opacity: 1;
+	}
+
+	.post-header {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+
+	.post-header h3 {
+		margin: 0;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: var(--color-foreground);
+		line-height: 1.5;
+		transition: color 200ms ease;
+	}
+
+	.post-container:hover .post-header h3,
+	.post-container:focus-visible .post-header h3 {
+		color: var(--color-primary-light);
+	}
+
+	.post-date {
+		font-size: 0.8125rem;
+		color: color-mix(in srgb, var(--color-foreground) 55%, transparent);
+		font-weight: 500;
+		letter-spacing: 0.01em;
+		transition: color 200ms ease;
+	}
+
+	.post-container:hover .post-date,
+	.post-container:focus-visible .post-date {
+		color: color-mix(in srgb, var(--color-primary) 70%, var(--color-foreground) 30%);
+	}
+
+	.post-description {
+		font-size: 0.875rem;
+		line-height: 1.65;
+		color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
+		margin: 0;
+		transition: color 200ms ease;
+	}
+
+	.post-container:hover .post-description,
+	.post-container:focus-visible .post-description {
+		color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+	}
+
+	@media (min-width: 640px) {
+		.post-header {
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: baseline;
+		}
+
+		.post-date {
+			flex-shrink: 0;
+		}
+	}
+</style>
+
+<script>
+	const tags = document.querySelectorAll<HTMLButtonElement>('.blog-tag');
+	const posts = document.querySelectorAll<HTMLAnchorElement>('.post-container');
+	const url = new URL(window.location.href);
+	const initialTags = url.searchParams.get('tags')?.split(',').filter((tag) => tag.length > 0) || [];
+	const selectedTags = new Set(initialTags);
+
+	function updatePostsVisibility() {
+		posts.forEach((post) => {
+			const postTags = post.dataset.tags!.split(',').filter(t => t.length > 0);
+			// If there are selected tags and the post does not have all of them, hide the post
+			if (selectedTags.size > 0 && ![...selectedTags].every((tag) => postTags.includes(tag))) {
+				post.style.display = 'none';
+			} else {
+				post.style.display = '';
+			}
+		});
+	}
+
+	function updateURL() {
+		// Create a "clean" URL for the current page before adding the new query parameters
+		const newUrl = new URL(window.location.pathname, window.location.origin);
+		if (selectedTags.size > 0) {
+			newUrl.searchParams.set('tags', [...selectedTags].join(','));
+		}
+		history.pushState({ tags: [...selectedTags] }, '', newUrl);
+	}
+
+	tags.forEach((tag) => {
+		const tagValue = tag.dataset.tag!;
+		if (selectedTags.has(tagValue)) {
+			tag.classList.add('active');
+		}
+
+		tag.addEventListener('click', (event) => {
+			event.preventDefault();
+
+			tag.classList.toggle('active');
+
+			if (selectedTags.has(tagValue)) {
+				selectedTags.delete(tagValue);
+			} else {
+				selectedTags.add(tagValue);
+			}
+
+			updatePostsVisibility();
+			updateURL();
+		});
+	});
+
+	updatePostsVisibility();
+</script>
