@@ -6,4 +6,4 @@ export const SITE_DESCRIPTION = 'Hacking 4 fun!';
 export const USER_NAME = 'Muir Nova';
 export const AVATAR_URL = 'https://github.com/MuelNova.png';
 
-export const SITE_URL = 'https://astro.nova.gal';
+export const SITE_URL = 'https://nova.gal';
