@@ -1,0 +1,68 @@
+---
+import type { MarkdownHeading } from 'astro'
+
+interface Props {
+  heading: MarkdownHeading
+}
+
+const {
+  heading: { depth, slug, text },
+} = Astro.props
+---
+
+<li class="flex items-stretch">
+  <div class="flex items-stretch">
+    {
+      Array.from({ length: depth - 1 }, (_v, _k) => (
+        <div class="toc-lines flex flex-col items-stretch">
+          <span class="top-box" style="width: 0.75rem; flex-basis: 1rem; border-bottom-width: 1px;" />
+          <span class="bottom-box" style="width: 0.75rem; min-height: 50%; flex: 1; border-top-width: 1px;" />
+        </div>
+      ))
+    }
+  </div>
+  <a
+    class="toc-link"
+    href={`#${slug}`}
+    style="display: inline-block; margin-left: 0.5rem; padding: 0.25rem 0 0.25rem 0.25rem; line-clamp: 2;"
+  >{text}</a>
+</li>
+
+<style>
+  .toc-lines span {
+    border-color: color-mix(in srgb, var(--color-foreground) 20%, transparent);
+  }
+  
+  .toc-lines:first-child span {
+    border-left-width: 2px;
+  }
+  
+  li:last-child .toc-lines:first-child span.bottom-box {
+    border-left-width: 0 !important;
+  }
+  
+  li.active-heading a {
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+  
+  .toc-link {
+    color: var(--color-foreground);
+    text-decoration: none;
+  }
+  
+  .toc-link:hover {
+    color: var(--color-accent);
+  }
+  
+  @media (min-width: 1280px) {
+    .toc-lines span {
+      border-color: color-mix(in srgb, var(--color-foreground) 15%, transparent);
+    }
+    
+    .toc-lines span.top-box,
+    .toc-lines span.bottom-box {
+      width: 0.75rem;
+    }
+  }
+</style>
