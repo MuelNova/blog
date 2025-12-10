@@ -16,11 +16,11 @@ const lightThemes = await getLightThemes();
 const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 ---
 
-<theme-selector class="inline-flex">
+<div class="inline-flex theme-selector-wrapper">
 	<!-- Trigger Button -->
 	<button
 		class="flex items-center justify-center px-[0.5rem] py-[0.25rem] rounded-md text-foreground hover:text-accent transition-colors duration-150 cursor-pointer nav-trigger"
-		data-open-modal
+		id="theme-selector-btn"
 		aria-label="Theme"
 		title="Theme (Ctrl+K)"
 	>
@@ -152,7 +152,7 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 			</div>
 		</div>
 	</dialog>
-</theme-selector>
+</div>
 
 <style>
 	button[data-tab][data-active="true"] {
@@ -255,230 +255,152 @@ const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 	}
 </style>
 
-<script>
-	class ThemeSelector extends HTMLElement {
-		constructor() {
-			super();
+<script is:inline>
+	(function() {
+		const openBtn = document.getElementById('theme-selector-btn');
+		const closeBtn = document.querySelector('[data-close-modal]');
+		const dialog = document.querySelector('[data-theme-dialog]');
+		const tabButtons = document.querySelectorAll('[data-tab]');
+		const themeOptions = document.querySelectorAll('.theme-option');
+		const lockToggle = document.querySelector('[data-theme-lock-toggle]');
+		const lockButton = document.querySelector('[data-lock-button]');
+		const introToggle = document.querySelector('[data-intro-toggle]');
+		const introButton = document.querySelector('[data-intro-button]');
 
-			this.openBtn = this.querySelector('[data-open-modal]');
-			this.openBtnMobile = this.querySelector('[data-open-modal-mobile]');
-			this.closeBtn = this.querySelector('[data-close-modal]');
-			this.dialog = this.querySelector('[data-theme-dialog]');
-			this.tabButtons = this.querySelectorAll('[data-tab]');
-			this.themeOptions = this.querySelectorAll('.theme-option');
-			this.lockToggle = this.querySelector('[data-theme-lock-toggle]');
-			this.lockButton = this.querySelector('[data-lock-button]');
-			this.introToggle = this.querySelector('[data-intro-toggle]');
-			this.introButton = this.querySelector('[data-intro-button]');
-			this.controller = new AbortController();
-			this.dialogSupported = true; // native dialog path only
-
-			const savedTab = localStorage.getItem('theme-preference') || 'all';
-			this.setupEventListeners();
-			this.loadLockState();
-			this.loadIntroState();
-			this.switchTab(savedTab);
-		}
-
-		setupEventListeners() {
-			// Open modal
-			this.openBtn?.addEventListener('click', () => this.openModal());
-			this.openBtnMobile?.addEventListener('click', () => this.openModal());
-
-			// Close modal
-			this.closeBtn?.addEventListener('click', () => this.closeModal());
-			this.dialog?.addEventListener('click', (e) => {
-				if (e.target === this.dialog) {
-					this.closeModal();
-				}
-			});
-
-			// Tab switching
-			this.tabButtons.forEach((tab) => {
-				tab.addEventListener('click', () => {
-					const tabType = tab.dataset.tab;
-					if (tabType) {
-						this.switchTab(tabType);
-					}
-				});
-			});
-
-			// Theme selection - MultiTerm style: just set data-theme!
-			this.themeOptions.forEach((option) => {
-				option.addEventListener('click', () => {
-					const themeId = option.dataset.themeId;
-					if (themeId) {
-						this.selectTheme(themeId);
-					}
-				});
-			});
-
-			// Lock toggle (switch and compact button)
-			this.lockToggle?.addEventListener('change', (e) => {
-				this.toggleLock(e.target.checked);
-			});
-			this.lockButton?.addEventListener('click', () => {
-				const current = localStorage.getItem('theme-locked') === 'true';
-				this.toggleLock(!current);
-			});
-
-			// Intro toggle
-			this.introToggle?.addEventListener('change', (e) => {
-				this.toggleIntro(e.target.checked);
-			});
-			this.introButton?.addEventListener('click', () => {
-				const current = localStorage.getItem('intro-enabled') !== 'false';
-				this.toggleIntro(!current);
-			});
-		}
-
-		loadLockState() {
-			const isLocked = localStorage.getItem('theme-locked') === 'true';
-			if (this.lockToggle) {
-				this.lockToggle.checked = isLocked;
-			}
-			this.updateLockUI(isLocked);
-		}
-
-		loadIntroState() {
-			const introEnabled = localStorage.getItem('intro-enabled') !== 'false';
-			if (this.introToggle) { 
-				this.introToggle.checked = introEnabled;
-			}
-			this.updateIntroUI(introEnabled);
-		}
-
-		toggleLock(isLocked) {
-			localStorage.setItem('theme-locked', isLocked.toString());
-			if (this.lockToggle) {
-				this.lockToggle.checked = isLocked;
-			}
-			this.updateLockUI(isLocked);
-		}
-
-		updateLockUI(isLocked) {
-			const indicator = this.querySelector('.lock-indicator');
-			const openIcon = this.querySelectorAll('.lock-icon-open');
-			const closedIcon = this.querySelectorAll('.lock-icon-closed');
-
-			indicator?.classList.toggle('translate-x-5', isLocked);
-			indicator?.parentElement?.classList.toggle('bg-primary', isLocked);
-			indicator?.parentElement?.classList.toggle('bg-foreground/20', !isLocked);
-
-			openIcon.forEach((icon) => icon.classList.toggle('hidden', isLocked));
-			closedIcon.forEach((icon) => icon.classList.toggle('hidden', !isLocked));
-
-			this.lockToggle?.setAttribute('aria-pressed', isLocked ? 'true' : 'false');
-			this.lockButton?.setAttribute('aria-pressed', isLocked ? 'true' : 'false');
-			this.lockButton?.classList.toggle('border-primary', isLocked);
-			this.lockButton?.classList.toggle('text-primary', isLocked);
-		}
-
-		updateIntroUI(isEnabled) {
-			const indicator = this.querySelector('.intro-indicator');
-			const onIcon = this.querySelectorAll('.intro-icon-on');
-			const offIcon = this.querySelectorAll('.intro-icon-off');
-			const compact = this.introButton;
-
-			indicator?.classList.toggle('translate-x-5', isEnabled);
-			indicator?.parentElement?.classList.toggle('bg-primary', isEnabled);
-			indicator?.parentElement?.classList.toggle('bg-foreground/20', !isEnabled);
-
-			onIcon.forEach((icon) => icon.classList.toggle('hidden', !isEnabled));
-			offIcon.forEach((icon) => icon.classList.toggle('hidden', isEnabled));
-
-			this.introToggle?.setAttribute('aria-pressed', isEnabled ? 'true' : 'false');
-			compact?.setAttribute('aria-pressed', isEnabled ? 'true' : 'false');
-			compact?.classList.toggle('border-primary', isEnabled);
-			compact?.classList.toggle('text-primary', isEnabled);
-		}
-
-		toggleIntro(isEnabled) {
-			localStorage.setItem('intro-enabled', isEnabled ? 'true' : 'false');
-			if (this.introToggle) {
-				this.introToggle.checked = isEnabled;
-			}
-			this.updateIntroUI(isEnabled);
-		}
-
-		connectedCallback() {
-			// Keyboard shortcut (Ctrl+K / ⌘+K)
-			window.addEventListener('keydown', (e) => {
-				if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-					e.preventDefault();
-					if (this.dialog?.open) {
-						this.closeModal();
-					} else {
-						this.openModal();
-					}
-				}
-			}, { signal: this.controller.signal });
-		}
-
-		disconnectedCallback() {
-			this.controller.abort();
-		}
-
-		openModal() {
-			this.highlightCurrentTheme();
-			this.dialog?.showModal();
+		function openModal() {
+			highlightCurrentTheme();
+			dialog?.showModal();
 			document.body.classList.add('overflow-hidden');
 		}
 
-		closeModal() {
-			this.dialog?.close();
+		function closeModal() {
+			dialog?.close();
 			document.body.classList.remove('overflow-hidden');
 		}
 
-		switchTab(tabType) {
-			this.tabButtons.forEach((tab) => {
-				if (tab.dataset.tab === tabType) {
-					tab.dataset.active = 'true';
-				} else {
-					delete tab.dataset.active;
-				}
+		function switchTab(tabType) {
+			tabButtons.forEach((tab) => {
+				tab.dataset.active = tab.dataset.tab === tabType ? 'true' : '';
 			});
-
 			localStorage.setItem('theme-preference', tabType);
-
-			this.themeOptions.forEach((option) => {
+			themeOptions.forEach((option) => {
 				const optionType = option.dataset.themeType;
-				if (tabType === 'all' || optionType === tabType) {
-					option.classList.remove('hidden');
-				} else {
-					option.classList.add('hidden');
-				}
+				option.classList.toggle('hidden', tabType !== 'all' && optionType !== tabType);
 			});
 		}
 
-		selectTheme(themeId) {
+		function selectTheme(themeId) {
 			document.documentElement.setAttribute('data-theme', themeId);
 			localStorage.setItem('theme', themeId);
-
-			const themeOption = Array.from(this.themeOptions).find((opt) => opt.dataset.themeId === themeId);
-			if (themeOption) {
-				const themeType = themeOption.dataset.themeType;
-				if (themeType) {
-					localStorage.setItem('theme-preference', themeType);
-				}
+			const themeOption = Array.from(themeOptions).find((opt) => opt.dataset.themeId === themeId);
+			if (themeOption?.dataset.themeType) {
+				localStorage.setItem('theme-preference', themeOption.dataset.themeType);
 			}
-
-			this.closeModal();
-			this.highlightCurrentTheme();
+			closeModal();
+			highlightCurrentTheme();
 		}
 
-		highlightCurrentTheme() {
+		function highlightCurrentTheme() {
 			const currentTheme = document.documentElement.getAttribute('data-theme') || 'andromeeda';
-			
-			this.themeOptions.forEach((option) => {
-				if (option.dataset.themeId === currentTheme) {
-					option.classList.add('current-theme');
-				} else {
-					option.classList.remove('current-theme');
-				}
+			themeOptions.forEach((option) => {
+				option.classList.toggle('current-theme', option.dataset.themeId === currentTheme);
 			});
 		}
-	}
 
-	customElements.define('theme-selector', ThemeSelector);
+		function updateLockUI(isLocked) {
+			const indicator = document.querySelector('.lock-indicator');
+			const openIcons = document.querySelectorAll('.lock-icon-open');
+			const closedIcons = document.querySelectorAll('.lock-icon-closed');
+			
+			indicator?.classList.toggle('translate-x-5', isLocked);
+			indicator?.parentElement?.classList.toggle('bg-primary', isLocked);
+			indicator?.parentElement?.classList.toggle('bg-foreground/20', !isLocked);
+			openIcons.forEach((icon) => icon.classList.toggle('hidden', isLocked));
+			closedIcons.forEach((icon) => icon.classList.toggle('hidden', !isLocked));
+			lockToggle?.setAttribute('aria-pressed', String(isLocked));
+			lockButton?.setAttribute('aria-pressed', String(isLocked));
+			lockButton?.classList.toggle('border-primary', isLocked);
+			lockButton?.classList.toggle('text-primary', isLocked);
+		}
+
+		function updateIntroUI(isEnabled) {
+			const indicator = document.querySelector('.intro-indicator');
+			const onIcons = document.querySelectorAll('.intro-icon-on');
+			const offIcons = document.querySelectorAll('.intro-icon-off');
+			
+			indicator?.classList.toggle('translate-x-5', isEnabled);
+			indicator?.parentElement?.classList.toggle('bg-primary', isEnabled);
+			indicator?.parentElement?.classList.toggle('bg-foreground/20', !isEnabled);
+			onIcons.forEach((icon) => icon.classList.toggle('hidden', !isEnabled));
+			offIcons.forEach((icon) => icon.classList.toggle('hidden', isEnabled));
+			introToggle?.setAttribute('aria-pressed', String(isEnabled));
+			introButton?.setAttribute('aria-pressed', String(isEnabled));
+			introButton?.classList.toggle('border-primary', isEnabled);
+			introButton?.classList.toggle('text-primary', isEnabled);
+		}
+
+		// Event listeners
+		openBtn?.addEventListener('click', openModal);
+		closeBtn?.addEventListener('click', closeModal);
+		dialog?.addEventListener('click', (e) => {
+			if (e.target === dialog) closeModal();
+		});
+
+		tabButtons.forEach((tab) => {
+			tab.addEventListener('click', () => {
+				if (tab.dataset.tab) switchTab(tab.dataset.tab);
+			});
+		});
+
+		themeOptions.forEach((option) => {
+			option.addEventListener('click', () => {
+				if (option.dataset.themeId) selectTheme(option.dataset.themeId);
+			});
+		});
+
+		lockToggle?.addEventListener('change', (e) => {
+			const isLocked = e.target.checked;
+			localStorage.setItem('theme-locked', String(isLocked));
+			updateLockUI(isLocked);
+		});
+
+		lockButton?.addEventListener('click', () => {
+			const isLocked = localStorage.getItem('theme-locked') !== 'true';
+			localStorage.setItem('theme-locked', String(isLocked));
+			if (lockToggle) lockToggle.checked = isLocked;
+			updateLockUI(isLocked);
+		});
+
+		introToggle?.addEventListener('change', (e) => {
+			const isEnabled = e.target.checked;
+			localStorage.setItem('intro-enabled', String(isEnabled));
+			updateIntroUI(isEnabled);
+		});
+
+		introButton?.addEventListener('click', () => {
+			const isEnabled = localStorage.getItem('intro-enabled') === 'false';
+			localStorage.setItem('intro-enabled', String(isEnabled));
+			if (introToggle) introToggle.checked = isEnabled;
+			updateIntroUI(isEnabled);
+		});
+
+		// Keyboard shortcut (Ctrl+K / ⌘+K)
+		window.addEventListener('keydown', (e) => {
+			if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+				e.preventDefault();
+				dialog?.open ? closeModal() : openModal();
+			}
+		});
+
+		// Initialize
+		const savedTab = localStorage.getItem('theme-preference') || 'all';
+		const isLocked = localStorage.getItem('theme-locked') === 'true';
+		const introEnabled = localStorage.getItem('intro-enabled') !== 'false';
+		
+		if (lockToggle) lockToggle.checked = isLocked;
+		if (introToggle) introToggle.checked = introEnabled;
+		updateLockUI(isLocked);
+		updateIntroUI(introEnabled);
+		switchTab(savedTab);
+	})();
 </script>
