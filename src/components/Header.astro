@@ -1,212 +1,130 @@
 ---
-import { SITE_TITLE } from '../consts';
 import ThemeSelector from './ThemeSelector.astro';
 import { Icon } from 'astro-icon/components';
+import { SITE_TITLE } from '../consts';
 
 const path = Astro.url.pathname;
 ---
 
-<nav>
-	<a class="site-title" href="/">{SITE_TITLE}</a>
-	<ul id="primary-nav">
-		<li>
-			<a href="/" class:list={{ active: path === '/' }}>Home</a>
+<nav
+	class="header-nav relative z-[50] w-full max-w-[1280px] mx-auto px-4 pt-8 flex items-center justify-between"
+	data-open="false"
+>
+	<a class="font-extrabold text-xl no-underline z-[2]" href="/">{SITE_TITLE}</a>
+
+	<ul
+		id="primary-nav"
+		class="nav-list hidden flex-col absolute left-0 right-0 top-[calc(2rem+2.5rem)] z-[40] p-4 gap-0 bg-[color:var(--color-background)] shadow-xl opacity-0 pointer-events-none transition-all duration-200 ease-out sm:static sm:flex sm:flex-row sm:items-center sm:gap-4 sm:p-0 sm:opacity-100 sm:pointer-events-auto sm:shadow-none"
+	>
+		<li class="w-full sm:w-auto">
+			<a href="/" class="nav-link">
+				Home
+			</a>
 		</li>
-		<li class="nav-separator">/</li>
-		<li>
-			<a href="/blog" class:list={{ active: path.startsWith('/blog') }}>Blog</a>
+		<li class="nav-separator hidden sm:inline text-[color-mix(in_srgb,var(--color-foreground)_70%,transparent)] select-none">/</li>
+		<li class="w-full sm:w-auto">
+			<a href="/blog" class="nav-link">
+				Blog
+			</a>
 		</li>
-		<li class="nav-separator">/</li>
-		<li>
-			<a href="/about" class:list={{ active: path.startsWith('/about') }}>About</a>
+		<li class="nav-separator hidden sm:inline text-[color-mix(in_srgb,var(--color-foreground)_70%,transparent)] select-none">/</li>
+		<li class="w-full sm:w-auto">
+			<a href="/about" class="nav-link">
+				About
+			</a>
 		</li>
-		<li class="nav-separator theme-separator">/</li>
-		<li class="theme-nav-item">
+		<li class="nav-separator hidden sm:inline text-[color-mix(in_srgb,var(--color-foreground)_70%,transparent)] select-none">/</li>
+		<li class="w-full sm:w-auto sm:pl-1">
 			<ThemeSelector />
 		</li>
 	</ul>
+
 	<button
-		class="mobile-nav-toggle"
+		class="inline-flex h-10 w-10 items-center justify-center border-2 border-[color-mix(in_srgb,var(--color-accent)_20%,transparent)] bg-[color:var(--color-background)] text-[color:var(--color-accent)] transition-colors duration-150 sm:hidden z-[50]"
+		data-nav-toggle
 		aria-label="Mobile menu"
 		aria-expanded="false"
 		aria-controls="primary-nav"
 	>
 		<Icon name="ph:list-duotone" class="menu-closed w-6 h-6" />
-		<Icon name="ph:x-duotone" class="menu-open w-6 h-6" />
+		<Icon name="ph:x-duotone" class="menu-open w-6 h-6 hidden" />
 	</button>
 </nav>
 
-<script is:inline>
-	const navToggle = document.querySelector('.mobile-nav-toggle');
-	const nav = document.querySelector('nav');
-
-	navToggle?.addEventListener('click', () => {
-		navToggle.classList.toggle('active');
-		nav?.classList.toggle('active');
-		const expanded = navToggle.classList.contains('active');
-		navToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-	});
-</script>
-
 <style>
-	nav {
-		width: 100%;
-		max-width: 1280px;
-		margin: 0 auto;
-		padding: 2rem 1rem 0;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		font-family: 'Geist Mono', 'Courier New', Courier, monospace;
-		z-index: 50;
-	}
-
-	.site-title {
-		font-weight: 800;
-		text-decoration: none;
-		font-size: 1.25rem;
-		z-index: 2;
-		color: var(--color-foreground);
-	}
-
-	nav ul {
-		display: flex;
-		gap: 1rem;
-		margin: 0;
-		padding: 0;
-		list-style-type: none;
-		align-items: center;
-	}
-
-	nav ul li {
-		position: relative;
-	}
-
-	nav a {
+	.header-nav a {
 		color: var(--color-foreground);
 		text-decoration: none;
+	}
+
+	.header-nav li:hover > a,
+	.header-nav li:focus-within > a {
+		color: var(--color-foreground);
+		background-color: var(--color-accent)
+	}
+
+	.nav-link {
+		display: block;
 		padding: 0.25rem 0.5rem;
-		transition: all 150ms ease;
+		font-size: 1.125rem;
+		line-height: 1.5;
+		color: var(--color-foreground);
+		transition: color 150ms ease, background-color 150ms ease;
 	}
 
-	nav a:hover,
-	nav a:focus-visible {
-		color: var(--color-accent);
-		background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
-		outline: none;
+	@media (min-width: 640px) {
+		.nav-link {
+			padding: 0.25rem 0.5rem;
+			font-size: 1rem;
+		}
 	}
 
-	nav a.active {
-		color: var(--color-background);
-		background-color: var(--color-accent);
-		outline: none;
+	@media (min-width: 640px) {
+		.nav-list {
+			display: flex !important;
+		}
 	}
 
-	.nav-separator {
-		color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
-		user-select: none;
-	}
-
-	.mobile-nav-toggle {
-		display: none;
-		width: 40px;
-		height: 40px;
-		background-color: var(--color-background);
-		border: 2px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		z-index: 2;
-		color: var(--color-accent);
-		transition: all 150ms ease;
-	}
-
-	.mobile-nav-toggle:hover {
-		background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
-	}
-
-	.menu-open {
-		display: none;
-	}
-
-	.mobile-nav-toggle.active .menu-open {
+	[data-open='true'] .nav-list {
 		display: flex;
+		opacity: 1;
+		pointer-events: auto;
 	}
 
-	.mobile-nav-toggle.active .menu-closed {
+	[data-open='true'] .menu-closed {
 		display: none;
 	}
 
-	@media screen and (max-width: 640px) {
-		nav {
-			padding-top: 1rem;
-			transition: all 0.25s ease;
+	[data-open='true'] .menu-open {
+		display: block;
+	}
+
+	@media (max-width: 639px) {
+		.nav-list {
+			height: calc(100vh - 2rem - 2.5rem);
+			overflow: auto;
 		}
 
-		.mobile-nav-toggle {
-			display: flex;
-		}
-
-		:global(.nav-separator),
-		nav :global(.theme-separator) {
-			display: none;
-		}
-
-		nav ul {
-			flex-direction: column;
-			gap: 0;
-			position: absolute;
+		.nav-list li {
 			width: 100%;
-			top: calc(1rem + 40px);
-			left: 0;
-			padding: 1rem;
-			z-index: 1;
-			opacity: 0;
-			pointer-events: none;
-			transition: all 0.25s ease;
-			user-select: none;
-			height: calc(100vh - 1rem - 40px);
-			align-items: start;
-		}
-
-		nav.active {
-			background-color: var(--color-background);
-		}
-
-		nav.active ul {
-			opacity: 1;
-			pointer-events: all;
-			background-color: var(--color-background);
-		}
-
-		nav ul li {
-			position: relative;
-			transition: all 0.25s ease-out;
-			top: -1.5rem;
 			border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
-			width: 100%;
-			max-width: none;
-			padding: 0;
-			font-size: 1.125rem;
 		}
 
-		nav ul li:last-child {
+		.nav-list li:last-child {
 			border-bottom: none;
-		}
-
-		nav ul li a {
-			display: block;
-			padding: 0.75rem 0;
-			width: 100%;
-			padding-left: 1rem;
-		}
-
-		nav ul li:first-child {
-			border-top: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
-		}
-
-		nav.active ul li {
-			top: 0;
 		}
 	}
 </style>
+
+<script is:inline>
+	const nav = document.querySelector('nav[data-open]');
+	const toggle = document.querySelector('[data-nav-toggle]');
+
+	if (nav && toggle) {
+		toggle.addEventListener('click', () => {
+			const isOpen = nav.getAttribute('data-open') === 'true';
+			nav.setAttribute('data-open', isOpen ? 'false' : 'true');
+			toggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+		});
+	}
+</script>

@@ -20,11 +20,11 @@
 	--theme-separator: #353535;
 	
 	/* Semantic colors */
-	--theme-accent: var(--theme-primary);
-	--theme-link: var(--theme-primary-light);
+	--theme-accent: var(--color-primary);
+	--theme-link: var(--color-primary-light);
 	
 	/* Legacy variables for compatibility */
-	--accent: var(--theme-primary);
+	--accent: var(--color-primary);
 	--accent-dark: #6b3fd4;
 }
 
@@ -44,15 +44,15 @@
 	--font-mono: GeistMono, ui-monospace, 'SFMono-Regular', Monaco, 'Cascadia Code', 'Segoe UI Mono', 'Courier New', monospace;
 	
 	/* Box shadows for glow effects */
-	--shadow-glow-sm: 0 0 2px var(--theme-primary);
-	--shadow-glow: 0 0 4px var(--theme-primary);
-	--shadow-glow-md: 0 0 8px var(--theme-primary);
-	--shadow-glow-lg: 0 0 12px var(--theme-primary);
-	--shadow-glow-xl: 0 0 16px var(--theme-primary);
+	--shadow-glow-sm: 0 0 2px var(--color-primary);
+	--shadow-glow: 0 0 4px var(--color-primary);
+	--shadow-glow-md: 0 0 8px var(--color-primary);
+	--shadow-glow-lg: 0 0 12px var(--color-primary);
+	--shadow-glow-xl: 0 0 16px var(--color-primary);
 	
 	/* Drop shadows for text glow */
-	--drop-shadow-glow: drop-shadow(0 0 4px var(--theme-primary));
-	--drop-shadow-glow-lg: drop-shadow(0 0 12px var(--theme-primary));
+	--drop-shadow-glow: drop-shadow(0 0 4px var(--color-primary));
+	--drop-shadow-glow-lg: drop-shadow(0 0 12px var(--color		-primary));
 	
 	/* Animations */
 	--animate-fade-in: fade-in 150ms ease-in;
@@ -384,35 +384,35 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-	background: rgba(var(--theme-primary-rgb), 0.4);
+	background: rgba(var(--color-primary-rgb), 0.4);
 	border-radius: 4px;
 	transition: background 150ms ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background: rgba(var(--theme-primary-rgb), 0.6);
+	background: rgba(var(--color-primary-rgb), 0.6);
 }
 
 /* Firefox scrollbar */
 * {
 	scrollbar-width: thin;
-	scrollbar-color: rgba(var(--theme-primary-rgb), 0.4) transparent;
+	scrollbar-color: rgba(var(--color-primary-rgb), 0.4) transparent;
 }
 
 /* Selection styling */
 ::selection {
-	background: var(--theme-primary);
-	color: var(--theme-foreground);
+	background: var(--color-primary);
+	color: var(--color-foreground);
 }
 
 ::-moz-selection {
-	background: var(--theme-primary);
-	color: var(--theme-foreground);
+	background: var(--color-primary);
+	color: var(--color-foreground);
 }
 
 /* Focus visible for accessibility */
 :focus-visible {
-	outline: 2px solid var(--theme-primary);
+	outline: 2px solid var(--color-primary);
 	outline-offset: 2px;
 	border-radius: 2px;
 }
