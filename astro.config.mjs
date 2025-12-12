@@ -13,12 +13,16 @@ import tailwindcss from '@tailwindcss/vite';
 import viteCompression from 'vite-plugin-compression';
 
 import icon from 'astro-icon';
+import remarkDirective from 'remark-directive';
+import { remarkAdmonitions } from './src/plugins/remark-admonitions.ts';
 
 // https://astro.build/config
 export default defineConfig({
   output: 'static',
   site: 'https://astro.nova.gal',
-  integrations: [expressiveCode(), mdx(), sitemap(), react(), icon()],
+  integrations: [expressiveCode(), mdx({
+    remarkPlugins: [remarkDirective, remarkAdmonitions],
+  }), sitemap(), react(), icon()],
   adapter: cloudflare({
     imageService: 'cloudflare',
     

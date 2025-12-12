@@ -4360,7 +4360,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hastscript@npm:^9.0.0":
+"hastscript@npm:^9.0.0, hastscript@npm:^9.0.1":
   version: 9.0.1
   resolution: "hastscript@npm:9.0.1"
   dependencies:
@@ -5217,6 +5217,21 @@ __metadata:
     micromark-util-types: "npm:^2.0.0"
     parse-entities: "npm:^4.0.0"
   checksum: 10c0/74137485375f02c1b640c2120dd6b9f6aa1e39ca5cd2463df7974ef1cc80203f5ef90448ce009973355a49ba169ef1441eabe57a36877c7b86373788612773da
+  languageName: node
+  linkType: hard
+
+"micromark-extension-directive@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "micromark-extension-directive@npm:4.0.0"
+  dependencies:
+    devlop: "npm:^1.0.0"
+    micromark-factory-space: "npm:^2.0.0"
+    micromark-factory-whitespace: "npm:^2.0.0"
+    micromark-util-character: "npm:^2.0.0"
+    micromark-util-symbol: "npm:^2.0.0"
+    micromark-util-types: "npm:^2.0.0"
+    parse-entities: "npm:^4.0.0"
+  checksum: 10c0/b4aef0f44339543466ae186130a4514985837b6b12d0c155bd1162e740f631e58f0883a39d0c723206fa0ff53a9b579965c79116f902236f6f123c3340b5fefb
   languageName: node
   linkType: hard
 
@@ -6425,6 +6440,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"remark-directive@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "remark-directive@npm:4.0.0"
+  dependencies:
+    "@types/mdast": "npm:^4.0.0"
+    mdast-util-directive: "npm:^3.0.0"
+    micromark-extension-directive: "npm:^4.0.0"
+    unified: "npm:^11.0.0"
+  checksum: 10c0/ab1f71ae220913f62833464d483f29de7b4af0dcf1ff626d33cdb5dd81eda1c553a11f779de9fd9b641802586c5f070175824d70f14d53e451a484850705d53a
+  languageName: node
+  linkType: hard
+
 "remark-gfm@npm:^4.0.1":
   version: 4.0.1
   resolution: "remark-gfm@npm:4.0.1"
@@ -6662,12 +6689,16 @@ __metadata:
     astro-expressive-code: "npm:^0.41.3"
     astro-icon: "npm:^1.1.5"
     chrome-launcher: "npm:^1.2.1"
+    hastscript: "npm:^9.0.1"
+    mdast-util-to-string: "npm:^4.0.0"
     react: "npm:^19.2.1"
     react-dom: "npm:^19.2.1"
+    remark-directive: "npm:^4.0.0"
     sharp: "npm:^0.34.3"
     shiki: "npm:^3.19.0"
     tailwindcss: "npm:^4.1.17"
     tsx: "npm:^4.21.0"
+    unist-util-visit: "npm:^5.0.0"
     vite-plugin-compression: "npm:^0.5.1"
   languageName: unknown
   linkType: soft
