@@ -6,7 +6,7 @@ interface Props extends LinkCardProps {}
 const { link, linkText, description, icon } = Astro.props;
 
 // Fallback icon
-const fallbackIcon = '/favicon.svg';
+const fallbackIcon = '/favicon.png';
 ---
 
 <a 
@@ -20,7 +20,7 @@ const fallbackIcon = '/favicon.svg';
 			src={icon || fallbackIcon} 
 			alt={linkText}
 			loading="lazy"
-			onerror="this.src='/favicon.svg'"
+			onerror="this.src='/favicon.png'"
 		/>
 	</div>
 	<div class="link-content">
