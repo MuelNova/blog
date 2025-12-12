@@ -21,7 +21,9 @@
     "astro-expressive-code": "^0.41.3",
     "astro-icon": "^1.1.5",
     "hastscript": "^9.0.1",
+    "html-to-image": "^1.11.13",
     "mdast-util-to-string": "^4.0.0",
+    "qrcode": "^1.5.4",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "remark-directive": "^4.0.0",
@@ -33,6 +35,7 @@
   "devDependencies": {
     "@iconify-json/ph": "^1.2.2",
     "@tailwindcss/vite": "^4.1.17",
+    "@types/qrcode": "^1",
     "chrome-launcher": "^1.2.1",
     "tailwindcss": "^4.1.17",
     "tsx": "^4.21.0",

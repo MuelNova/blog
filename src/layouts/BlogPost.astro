@@ -8,6 +8,7 @@ import Header from '../components/Header.astro';
 import TableOfContents from '../components/TableOfContents.astro';
 import Background from '../components/Background.astro';
 import Giscus from '../components/Giscus.astro';
+import ShareButton from '../components/ShareButton.astro';
 
 type Props = Partial<CollectionEntry<'blog'>['data']> & {
 	title: string;
@@ -56,6 +57,7 @@ const { title, description, pubDate, updatedDate, heroImage, headings = [], show
 			</article>
 			<TableOfContents headings={headings} />
 		</main>
+		<ShareButton />
 		<Giscus />
 		<Footer />
 	</body>

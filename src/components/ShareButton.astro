@@ -1,0 +1,667 @@
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<!-- Share Button - Fixed at article bottom -->
+<div class="share-button-container">
+	<button
+		id="share-button"
+		class="share-btn"
+		aria-label="Share article as image"
+		title="Share article"
+	>
+		<Icon name="ph:share-network" class="w-5 h-5 md:w-6 md:h-6 text-accent glow-icon" />
+		<span class="share-btn-text">Share</span>
+	</button>
+</div>
+
+<!-- Share Modal Overlay -->
+<div id="share-overlay" class="share-overlay pointer-events-none">
+	<div class="share-panel">
+		<!-- Header -->
+		<div class="share-header">
+			<div class="flex items-center gap-2">
+				<Icon name="ph:share-network" class="w-5 h-5 text-accent glow-icon" />
+				<h3 class="text-base md:text-lg font-semibold text-foreground">Share</h3>
+			</div>
+			<button id="share-close" class="share-close" aria-label="Close">
+				<Icon name="ph:x" class="w-5 h-5 text-foreground" />
+			</button>
+		</div>
+
+		<!-- Options -->
+		<div class="share-options">
+			<label class="share-option">
+				<input type="checkbox" id="border-toggle" checked />
+				<span class="text-sm md:text-base text-foreground">Add Border</span>
+			</label>
+			<label class="share-option">
+				<input type="checkbox" id="watermark-toggle" checked />
+				<span class="text-sm md:text-base text-foreground">Add Watermark</span>
+			</label>
+		</div>
+
+		<!-- Action Buttons -->
+		<div class="share-actions">
+			<button id="generate-screenshot" class="share-action-btn">
+				<Icon name="ph:camera" class="w-4 h-4 md:w-5 md:h-5" />
+				<span class="text-sm md:text-base">Generate Preview</span>
+			</button>
+		</div>
+
+		<!-- Preview -->
+		<div id="share-preview" class="share-preview hidden">
+			<img id="preview-image" alt="Preview" />
+			<div class="preview-actions">
+				<button id="download-image" class="preview-action-btn">
+					<Icon name="ph:download" class="w-4 h-4 md:w-5 md:h-5" />
+					<span class="text-sm md:text-base">Download Image</span>
+				</button>
+			</div>
+		</div>
+
+		<!-- Loading & Status -->
+		<div id="share-status" class="share-status hidden">
+			<span class="text-sm text-foreground">Generating...</span>
+		</div>
+	</div>
+</div>
+
+<style>
+	/* Share Button Container */
+	.share-button-container {
+		margin-top: 2rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
+		display: flex;
+		justify-content: center;
+	}
+
+	/* Share Button */
+	.share-btn {
+		padding: 0.75rem 1.5rem;
+		background: var(--color-background);
+		border: 1px solid var(--color-accent);
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 30%, transparent);
+		cursor: pointer;
+	}
+
+	.share-btn-text {
+		color: var(--color-accent);
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+
+	.share-btn:hover {
+		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+		box-shadow: 0 0 16px color-mix(in srgb, var(--color-accent) 40%, transparent);
+	}
+
+	.share-btn:active {
+		transform: scale(0.98);
+	}
+
+	/* Glow icon effect */
+	.glow-icon {
+		filter: drop-shadow(0 0 4px var(--color-accent));
+	}
+
+	/* Overlay */
+	.share-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 60;
+		background: color-mix(in srgb, var(--color-background) 80%, transparent);
+		backdrop-filter: blur(4px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		opacity: 0;
+		transition: opacity 0.2s ease;
+		padding: 1rem;
+	}
+
+	.share-overlay:not(.pointer-events-none) {
+		opacity: 1;
+		pointer-events: all;
+	}
+
+	/* Panel */
+	.share-panel {
+		background: var(--color-background);
+		border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
+		padding: 1rem;
+		max-width: 90vw;
+		width: 400px;
+		box-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 20%, transparent);
+		transform: translateY(20px);
+		transition: transform 0.2s ease;
+	}
+
+	.share-overlay:not(.pointer-events-none) .share-panel {
+		transform: translateY(0);
+	}
+
+	/* Header */
+	.share-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
+	}
+
+	.share-close {
+		padding: 0.25rem;
+		background: transparent;
+		border: none;
+		opacity: 0.7;
+		transition: opacity 0.2s;
+	}
+
+	.share-close:hover {
+		opacity: 1;
+	}
+
+	/* Options */
+	.share-options {
+		margin-bottom: 1rem;
+	}
+
+	.share-option {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		padding: 0.5rem;
+		border: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
+		transition: all 0.2s;
+	}
+
+	.share-option:hover {
+		border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+		background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+	}
+
+	.share-option input[type="checkbox"] {
+		width: 1rem;
+		height: 1rem;
+		accent-color: var(--color-accent);
+	}
+
+	/* Action Buttons */
+	.share-actions {
+		display: flex;
+		gap: 0.5rem;
+		flex-direction: column;
+	}
+
+	.share-action-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.625rem 1rem;
+		background: var(--color-background);
+		border: 1px solid var(--color-accent);
+		color: var(--color-accent);
+		transition: all 0.2s;
+		font-weight: 500;
+	}
+
+	.share-action-btn:hover {
+		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+		box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 30%, transparent);
+	}
+
+	.share-action-btn:active {
+		transform: scale(0.98);
+	}
+
+	/* Preview */
+	.share-preview {
+		margin-top: 1rem;
+	}
+
+	.share-preview.hidden {
+		display: none;
+	}
+
+	.share-preview img {
+		width: 100%;
+		max-height: 400px;
+		object-fit: contain;
+		border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
+		margin-bottom: 0.75rem;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.share-preview img:hover {
+		box-shadow: 0 0 16px color-mix(in srgb, var(--color-accent) 40%, transparent);
+	}
+
+	.preview-actions {
+		display: flex;
+		gap: 0.5rem;
+		flex-direction: column;
+	}
+
+	.preview-action-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.625rem 1rem;
+		background: var(--color-background);
+		border: 1px solid var(--color-accent);
+		color: var(--color-accent);
+		transition: all 0.2s;
+		font-weight: 500;
+	}
+
+	.preview-action-btn.secondary {
+		border-color: color-mix(in srgb, var(--color-foreground) 20%, transparent);
+		color: var(--color-foreground);
+	}
+
+	.preview-action-btn:hover {
+		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+		box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 30%, transparent);
+	}
+
+	.preview-action-btn.secondary:hover {
+		background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
+		box-shadow: none;
+	}
+
+	.preview-action-btn:active {
+		transform: scale(0.98);
+	}
+
+	/* Status */
+	.share-status {
+		margin-top: 1rem;
+		padding: 0.75rem;
+		background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
+		text-align: center;
+	}
+
+	.share-status.hidden {
+		display: none;
+	}
+
+	/* Mobile optimizations */
+	@media (max-width: 640px) {
+		.share-btn {
+			right: 0.5rem;
+			bottom: 4rem;
+			padding: 0.5rem;
+		}
+
+		.share-panel {
+			padding: 0.75rem;
+		}
+
+		.share-header {
+			margin-bottom: 0.75rem;
+			padding-bottom: 0.5rem;
+		}
+	}
+</style>
+
+<script>
+	import * as htmlToImage from 'html-to-image';
+	import QRCode from 'qrcode';
+	import { SHARE_CONFIG } from '../config/share';
+
+	const shareBtn = document.getElementById('share-button');
+	const shareOverlay = document.getElementById('share-overlay');
+	const shareClose = document.getElementById('share-close');
+	const borderToggle = document.getElementById('border-toggle') as HTMLInputElement;
+	const watermarkToggle = document.getElementById('watermark-toggle') as HTMLInputElement;
+	const generateBtn = document.getElementById('generate-screenshot');
+	const previewDiv = document.getElementById('share-preview');
+	const previewImg = document.getElementById('preview-image') as HTMLImageElement;
+	const downloadBtn = document.getElementById('download-image');
+	const statusDiv = document.getElementById('share-status');
+	const shareActionsDiv = document.querySelector('.share-actions') as HTMLElement;
+
+	let currentDataUrl = '';
+
+	// Open share modal
+	function openShare() {
+		shareOverlay?.classList.remove('pointer-events-none');
+		// Reset state
+		previewDiv?.classList.add('hidden');
+		shareActionsDiv?.classList.remove('hidden');
+	}
+
+	// Close share modal
+	function closeShare() {
+		shareOverlay?.classList.add('pointer-events-none');
+	}
+
+	// Toggle share modal
+	function toggleShare() {
+		if (shareOverlay?.classList.contains('pointer-events-none')) {
+			openShare();
+		} else {
+			closeShare();
+		}
+	}
+
+	// Generate screenshot
+	async function generateScreenshot() {
+		const article = document.querySelector('.blog-article-wrapper') as HTMLElement;
+		if (!article) {
+			alert('Article content not found!');
+			return;
+		}
+
+		// Show loading, hide actions and preview
+		statusDiv?.classList.remove('hidden');
+		if (statusDiv) statusDiv.textContent = 'Generating...';
+		shareActionsDiv?.classList.add('hidden');
+		previewDiv?.classList.add('hidden');
+
+		try {
+			const addBorder = borderToggle?.checked ?? false;
+			const addWatermark = watermarkToggle?.checked ?? false;
+			
+			// Get computed colors
+			const computedStyle = getComputedStyle(document.documentElement);
+			const bgColor = computedStyle.getPropertyValue('--color-background').trim() || '#000000';
+			const accentColor = computedStyle.getPropertyValue('--color-accent').trim() || '#00ff00';
+			const fgColor = computedStyle.getPropertyValue('--color-foreground').trim() || '#ffffff';
+			
+			// Create a wrapper for the screenshot - Use fixed width for consistency
+			const wrapper = document.createElement('div');
+			wrapper.style.cssText = `
+				position: absolute;
+				left: 0;
+				top: 0;
+				z-index: -1;
+				background: ${bgColor};
+				width: ${SHARE_CONFIG.screenshotWidth}px;
+				box-sizing: border-box;
+				${addBorder ? `
+					padding: 2rem;
+					border: 2px solid ${accentColor};
+				` : 'padding: 1rem;'}
+			`;
+
+			// Clone the article with fixed width
+			const clone = article.cloneNode(true) as HTMLElement;
+			clone.style.cssText = `
+				width: 100%;
+				box-sizing: border-box;
+				max-width: 100%;
+				overflow-wrap: break-word;
+			`;
+			
+			wrapper.appendChild(clone);
+			
+			// Add watermark if enabled
+			if (addWatermark) {
+				const title = document.querySelector('.blog-post-title h1')?.textContent || '文章分享';
+				const date = document.querySelector('.blog-post-date')?.textContent?.trim() || '';
+				const url = window.location.href;
+				
+				const watermark = document.createElement('div');
+				watermark.style.cssText = `
+					margin-top: 2rem;
+					padding-top: 1rem;
+					border-top: 1px solid ${accentColor};
+					font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+					display: flex;
+					gap: 1rem;
+					align-items: flex-start;
+				`;
+				
+				// Left side: Text info
+				const textInfo = document.createElement('div');
+				textInfo.style.cssText = `
+					flex: 1;
+					min-width: 0;
+				`;
+				
+				// Title with favicon
+				const titleContainer = document.createElement('div');
+				titleContainer.style.cssText = `
+					display: flex;
+					align-items: center;
+					gap: 0.5rem;
+					margin-bottom: 0.5rem;
+				`;
+				
+				// Favicon
+				const favicon = document.createElement('img');
+				favicon.src = SHARE_CONFIG.faviconPath;
+				favicon.style.cssText = `
+					width: ${SHARE_CONFIG.faviconSize}px;
+					height: ${SHARE_CONFIG.faviconSize}px;
+					flex-shrink: 0;
+				`;
+				favicon.onerror = () => {
+					// If favicon fails to load, hide it
+					favicon.style.display = 'none';
+				};
+				titleContainer.appendChild(favicon);
+				
+				// Title text
+				const titleEl = document.createElement('div');
+				titleEl.style.cssText = `
+					font-size: 16px;
+					font-weight: 600;
+					color: ${fgColor};
+					word-wrap: break-word;
+					flex: 1;
+				`;
+				titleEl.textContent = title;
+				titleContainer.appendChild(titleEl);
+				
+				textInfo.appendChild(titleContainer);
+				
+				// Date and URL
+				const metaEl = document.createElement('div');
+				metaEl.style.cssText = `
+					font-size: 12px;
+					color: ${fgColor};
+					opacity: 0.7;
+					display: flex;
+					flex-direction: column;
+					gap: 0.25rem;
+				`;
+				
+				if (date) {
+					const dateSpan = document.createElement('div');
+					dateSpan.textContent = `📅 ${date}`;
+					metaEl.appendChild(dateSpan);
+				}
+				
+				const urlSpan = document.createElement('div');
+				urlSpan.textContent = `🔗 ${decodeURIComponent(url)}`;
+				urlSpan.style.cssText = `
+					word-break: break-all;
+					font-size: 10px;
+				`;
+				metaEl.appendChild(urlSpan);
+				
+				// Signature
+				const signature = document.createElement('div');
+				signature.style.cssText = `
+					margin-top: 0.5rem;
+					font-size: 11px;
+					color: ${accentColor};
+					font-weight: 500;
+				`;
+				signature.textContent = SHARE_CONFIG.signature;
+				metaEl.appendChild(signature);
+				
+				textInfo.appendChild(metaEl);
+				watermark.appendChild(textInfo);
+				
+				// Right side: QR Code
+				if (SHARE_CONFIG.showQRCode) {
+					try {
+						const qrDataURL = await QRCode.toDataURL(url, {
+							width: SHARE_CONFIG.qrCodeSize,
+							margin: 1,
+							color: {
+								dark: fgColor,
+								light: bgColor,
+							},
+						});
+						
+						const qrContainer = document.createElement('div');
+						qrContainer.style.cssText = `
+							flex-shrink: 0;
+							display: flex;
+							flex-direction: column;
+							align-items: center;
+							gap: 0.25rem;
+						`;
+						
+						const qrImg = document.createElement('img');
+						qrImg.src = qrDataURL;
+						qrImg.style.cssText = `
+							width: ${SHARE_CONFIG.qrCodeSize}px;
+							height: ${SHARE_CONFIG.qrCodeSize}px;
+							border: 1px solid ${accentColor};
+						`;
+						
+						qrContainer.appendChild(qrImg);
+						watermark.appendChild(qrContainer);
+					} catch (error) {
+						console.error('Failed to generate QR code:', error);
+					}
+				}
+				
+				wrapper.appendChild(watermark);
+			}
+			
+			document.body.appendChild(wrapper);
+
+			// Wait for fonts and images to load
+			await document.fonts.ready;
+			
+			// Wait for all images in the clone to load
+			const images = wrapper.querySelectorAll('img');
+			const imagePromises = Array.from(images).map(img => {
+				if (img.complete) {
+					return Promise.resolve();
+				}
+				return new Promise((resolve, reject) => {
+					img.onload = resolve;
+					img.onerror = resolve; // Still resolve even if image fails to load
+					// Timeout after 10 seconds
+					setTimeout(resolve, 10000);
+				});
+			});
+			
+			await Promise.all(imagePromises);
+			
+			// Additional wait for layout to stabilize (especially on mobile)
+			await new Promise(resolve => setTimeout(resolve, 1000));
+
+			// Generate PNG using html-to-image (supports modern CSS)
+			const dataUrl = await htmlToImage.toPng(wrapper, {
+				quality: 0.95,
+				pixelRatio: 2, // Higher quality
+				backgroundColor: bgColor,
+				cacheBust: true,
+			});
+
+			// Remove wrapper
+			document.body.removeChild(wrapper);
+
+			// Store dataUrl and show preview
+			currentDataUrl = dataUrl;
+			if (previewImg) {
+				previewImg.src = dataUrl;
+				// Re-add click listener after setting src
+				previewImg.onclick = openPreviewInNewTab;
+			}
+			previewDiv?.classList.remove('hidden');
+			statusDiv?.classList.add('hidden');
+
+		} catch (error) {
+			console.error('Screenshot generation failed:', error);
+			if (statusDiv) statusDiv.textContent = 'Generation failed. Please try again.';
+			shareActionsDiv?.classList.remove('hidden');
+			setTimeout(() => {
+				statusDiv?.classList.add('hidden');
+			}, 3000);
+		}
+	}
+
+	// Download image
+	function downloadImage() {
+		if (!currentDataUrl) return;
+		
+		const link = document.createElement('a');
+		const title = document.querySelector('.blog-post-title h1')?.textContent || 'article';
+		link.download = `${title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}_share.png`;
+		link.href = currentDataUrl;
+		link.click();
+
+		if (statusDiv) {
+			statusDiv.classList.remove('hidden');
+			statusDiv.textContent = 'Screenshot saved!';
+			setTimeout(() => {
+				statusDiv.classList.add('hidden');
+			}, 2000);
+		}
+	}
+
+
+	// Open preview image in new tab
+	function openPreviewInNewTab() {
+		if (!currentDataUrl) return;
+		
+		// Convert data URL to blob URL for better browser support
+		fetch(currentDataUrl)
+			.then(res => res.blob())
+			.then(blob => {
+				const blobUrl = URL.createObjectURL(blob);
+				const newWindow = window.open(blobUrl, '_blank');
+				if (newWindow) {
+					// Clean up blob URL after window opens
+					newWindow.addEventListener('load', () => {
+						URL.revokeObjectURL(blobUrl);
+					});
+				}
+			})
+			.catch(error => {
+				console.error('Failed to open image:', error);
+			});
+	}
+
+	// Event listeners
+	shareBtn?.addEventListener('click', toggleShare);
+	shareClose?.addEventListener('click', closeShare);
+	generateBtn?.addEventListener('click', generateScreenshot);
+	downloadBtn?.addEventListener('click', downloadImage);
+	previewImg?.addEventListener('click', openPreviewInNewTab);
+
+	// Close on overlay click
+	shareOverlay?.addEventListener('click', (e) => {
+		if (e.target === shareOverlay) {
+			closeShare();
+		}
+	});
+
+	// Close on ESC key
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && !shareOverlay?.classList.contains('pointer-events-none')) {
+			closeShare();
+		}
+	});
+</script>
