@@ -16,7 +16,7 @@ function h(el: string, attrs: Properties = {}, children: any[] = []): P {
 }
 
 // Supported admonition types
-export type AdmonitionType = 'tip' | 'note' | 'important' | 'caution' | 'warning'
+export type AdmonitionType = 'tip' | 'note' | 'important' | 'caution' | 'warning' | 'info'
 
 const Admonitions = new Set<AdmonitionType>([
   'tip',
@@ -24,6 +24,7 @@ const Admonitions = new Set<AdmonitionType>([
   'important',
   'caution',
   'warning',
+  'info',
 ])
 
 /** Checks if a string is a supported admonition type. */
@@ -41,7 +42,7 @@ export const remarkAdmonitions: Plugin<[], Root> = () => (tree) => {
     let title: string = admonitionType
     let titleNode: PhrasingContent[] = [{ type: 'text', value: title }]
 
-    // Check if there's a custom title
+
     const firstChild = node.children[0]
     if (
       firstChild?.type === 'paragraph' &&
@@ -53,6 +54,23 @@ export const remarkAdmonitions: Plugin<[], Root> = () => (tree) => {
       title = mdastToString(firstChild.children)
       // The first paragraph contains a custom title, we can safely remove it.
       node.children.splice(0, 1)
+    }
+    // Check if there's a custom title without brackets (e.g., :::note[小插曲)]
+    // This is when the first child is a paragraph with only text/inline content
+    else if (
+      firstChild?.type === 'paragraph' &&
+      firstChild.children.length > 0 &&
+      !('directiveLabel' in (firstChild.data || {}))
+    ) {
+      // Check if this paragraph is a single-line title (heuristic: no nested block elements)
+      const paragraphText = mdastToString(firstChild).trim()
+      // If the paragraph is short (likely a title), use it as the title
+      if (paragraphText && paragraphText.split('\n').length === 1) {
+        titleNode = firstChild.children
+        title = paragraphText
+        // Remove this paragraph from content
+        node.children.splice(0, 1)
+      }
     }
 
     // Do not change prefix to AD, ADM, or similar, adblocks will block the content inside.

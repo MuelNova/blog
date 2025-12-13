@@ -20,6 +20,9 @@ import { remarkAdmonitions } from './src/plugins/remark-admonitions.ts';
 export default defineConfig({
   output: 'static',
   site: 'https://astro.nova.gal',
+  markdown: {
+    remarkPlugins: [remarkDirective, remarkAdmonitions],
+  },
   integrations: [expressiveCode(), mdx({
     remarkPlugins: [remarkDirective, remarkAdmonitions],
   }), sitemap(), react(), icon()],

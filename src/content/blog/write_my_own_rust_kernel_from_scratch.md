@@ -73,7 +73,7 @@ mkdir .cargo
 echo -e "[build]\ntarget = \"riscv64gc-unknown-none-elf\"" > .cargo/config.toml
 ```
 
-:::info riscv64gc-unknown-none-elf 代表什么？
+:::info[riscv64gc-unknown-none-elf 代表什么？]
 
 我们可以给出另一个 target 名称：`x86_64-unknown-linux-gnu`，现在你应该能够理解了这个名称了
 

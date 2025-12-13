@@ -251,7 +251,7 @@ locale-gen
 
 设置 local.conf 到 `en_SG.UTF-8`
 
-:::info 为什么不设置 zh_CN？或者是用 en_US
+:::info[为什么不设置 zh_CN？或者是用 en_US]
 
 主要是兼容性问题。zh_CN 容易导致 tty 输出为方块，且系统 log 使用英文，更容易找到报错的解决。
 

@@ -1124,7 +1124,7 @@ printf("srand_addr = %x\n", srand_addr);
 
 那么就是用 PMIO 来打咯。
 
-:::warning 注意
+:::warning[注意]
 
 在运行前，我们需要调用 `iopl(3)` 去允许用户态（即 RING3）访问 io 端口。我们也可以用 `ioperm` 去允许单个端口。
 
