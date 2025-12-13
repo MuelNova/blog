@@ -7,6 +7,7 @@ tags:
 - Investigate
 authors:
 - nova
+lang: zh
 math: true
 ---
 

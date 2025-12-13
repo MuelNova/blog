@@ -4,6 +4,7 @@ description: 一直没有看 cross cache，今天来看看
 pubDate: 2024-11-06
 authors:
 - nova
+lang: zh
 ---
 
 一直没有看 cross cache，今天来看看

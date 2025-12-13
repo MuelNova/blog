@@ -4,6 +4,7 @@ description: 我是 Kernel Pwn 新手
 pubDate: 2024-10-31
 authors:
 - nova
+lang: zh
 ---
 
 我是 Kernel Pwn 新手

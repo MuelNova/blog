@@ -7,6 +7,7 @@ tags:
 - Investigate
 authors:
 - nova
+lang: zh
 ---
 
 一直在用 `AsyncIO`在 `Python`里使用异步编程，但是从来没想过为什么，借这个机会浅浅搞一搞 `AsyncIO`

@@ -8,6 +8,7 @@ tags:
 - cheatsheet
 authors:
 - nova
+lang: zh
 ---
 
 # BUPT-SCSS-2021 大一上网安导论复习笔记

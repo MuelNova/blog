@@ -4,6 +4,7 @@ description: Nova在这篇文章中分享了一种解决使用Wayland系统在�
 pubDate: 2024-04-08
 authors:
 - nova
+lang: zh
 category: '[''arch'']'
 ---
 

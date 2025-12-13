@@ -6,6 +6,7 @@ tags:
 - 御宅訪問
 authors:
 - nova
+lang: en
 ---
 
 <div style="text-align: center;">"We are all walking for the loneliness."</div>

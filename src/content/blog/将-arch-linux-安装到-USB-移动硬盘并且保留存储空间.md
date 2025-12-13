@@ -4,6 +4,7 @@ description: nova详细描述了将Arch Linux安装到USB移动硬盘并保留�
 pubDate: 2024-03-28
 authors:
 - nova
+lang: zh
 ---
 
 苦于多端环境同步多年，突然想到我仍然有一个 SanDisk 256G Gen3.1 的 U 盘可以使用，因此研究一下如何将 arch linux 安装在 U 盘上

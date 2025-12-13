@@ -7,6 +7,7 @@ tags:
 - NoPaper
 authors:
 - nova
+lang: zh
 ---
 
 :::warning

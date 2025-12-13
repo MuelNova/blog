@@ -8,6 +8,7 @@ tags:
 - glibc
 authors:
 - nova
+lang: zh
 ---
 
 <div align='center'>

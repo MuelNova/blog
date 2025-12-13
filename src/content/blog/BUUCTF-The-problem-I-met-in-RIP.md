@@ -8,6 +8,7 @@ tags:
 - CTF
 authors:
 - nova
+lang: zh
 ---
 
 # Ubuntu18中64位ELF在调用system时候可能出现的问题

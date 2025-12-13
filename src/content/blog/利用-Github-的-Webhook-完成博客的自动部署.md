@@ -8,6 +8,7 @@ tags:
 - cheatsheet
 authors:
 - nova
+lang: zh
 ---
 
 突然厌烦了每次要登 ssh，然后 `git pull && npm run build` 来部署 blog，于是就想到了 webhook

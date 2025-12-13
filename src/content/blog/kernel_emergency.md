@@ -8,6 +8,7 @@ tags:
 - Kernel
 authors:
 - nova
+lang: zh
 ---
 
 最近在复现一些 kernel cve，但是发现 kernel 已经忘光光了。抓紧利用这三周进行复习。

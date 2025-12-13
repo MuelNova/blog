@@ -7,6 +7,7 @@ tags:
 - Blockchain
 authors:
 - nova
+lang: zh
 ---
 
 题目平台 [点这里](https://ethernaut.openzeppelin.com/)

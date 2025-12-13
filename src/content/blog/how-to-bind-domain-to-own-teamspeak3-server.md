@@ -5,7 +5,7 @@ pubDate: 2021-11-30
 tags:
 - teamspeak
 - Investigate
-
+lang: zh
 ---
 
 # TeamSpeak3 自建服务器使用域名替换 IP

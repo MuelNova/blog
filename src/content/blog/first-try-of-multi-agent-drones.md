@@ -7,6 +7,7 @@ tags:
 - Investigate
 authors:
 - nova
+lang: zh
 ---
 
 # 配置 settings.json 文件
