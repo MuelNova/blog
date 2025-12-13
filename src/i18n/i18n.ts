@@ -58,14 +58,27 @@ function getBaseNameFromFilePath(filePath: string): string {
 /**
  * 从文章对象中获取语言信息
  * 
+ * 优先级：
+ * 1. post.data.lang (frontmatter 中的 lang 字段) - 最高优先级
+ * 2. filePath 中的语言后缀（如 .zh.md）
+ * 3. defaultLang（回退）
+ * 
  * @param post - 文章对象
  * @returns 文章的语言
  */
 export function getPostLang(post: CollectionEntry<'blog'>): Lang {
-  if (!post.filePath) {
-    return defaultLang;
+  // 优先级 1: frontmatter 中明确指定的 lang
+  if (post.data.lang) {
+    return post.data.lang;
   }
-  return getLangFromFilePath(post.filePath);
+  
+  // 优先级 2: 从文件路径推断
+  if (post.filePath) {
+    return getLangFromFilePath(post.filePath);
+  }
+  
+  // 优先级 3: 默认语言
+  return defaultLang;
 }
 
 /**
