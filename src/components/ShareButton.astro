@@ -648,7 +648,7 @@ const t = useTranslations(lang);
 				if (img.complete) {
 					return Promise.resolve();
 				}
-				return new Promise((resolve, reject) => {
+				return new Promise((resolve) => {
 					img.onload = resolve;
 					img.onerror = resolve; // Still resolve even if image fails to load
 					// Timeout after 10 seconds

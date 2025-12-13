@@ -146,7 +146,7 @@
                 // Text Scramble
                 element.innerText = finalText
                     .split("")
-                    .map((letter, index) => {
+                    .map((_, index) => {
                         if (index < iterations) {
                             return finalText[index];
                         }

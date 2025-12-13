@@ -1,7 +1,7 @@
-import type { Lang } from '../locales';
+import type { SupportedLang } from '../locales';
 import { defaultLang } from '../locales';
 
-const quickInfo: Record<Lang, string[]> = {
+const quickInfo: Record<SupportedLang, string[]> = {
   en: [
     'Pwning Systems since 1895',
     'Full Queue Developer',
@@ -12,8 +12,8 @@ const quickInfo: Record<Lang, string[]> = {
     '全队列工程师',
     '计算机大师（使用 AI 时）',
   ],
-};
+} as const;
 
-export function getQuickInfo(lang: Lang) {
+export function getQuickInfo(lang: SupportedLang) {
   return quickInfo[lang] ?? quickInfo[defaultLang];
 }

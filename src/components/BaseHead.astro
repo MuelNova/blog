@@ -20,7 +20,6 @@ const { title, description, image = FallbackImage } = Astro.props;
 
 // Generate theme CSS at build time (MultiTerm style)
 const allThemes = await getThemes();
-const defaultTheme = allThemes[Math.floor(Math.random() * allThemes.length)];
 
 let cssLines: string[] = [];
 const plainIntroCss = `:root[data-theme="plain-intro"] {

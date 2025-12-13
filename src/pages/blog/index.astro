@@ -1,5 +1,4 @@
 ---
-import { getCollection } from 'astro:content';
 import { Icon } from 'astro-icon/components';
 import { Image } from 'astro:assets';
 import PageLayout from '../../layouts/PageLayout.astro';
@@ -889,8 +888,6 @@ const sortedDateGroups: YearData[] = Array.from(dateGroups.entries())
 	});
 
 	// Hide button while scrolling, show when stopped
-	let lastScrollY = window.scrollY;
-	let scrollThrottle: ReturnType<typeof setTimeout> | null = null;
 	let isScrolling = false;
 	let scrollStopTimer: ReturnType<typeof setTimeout> | null = null;
 

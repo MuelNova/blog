@@ -1,9 +1,8 @@
 ---
-import { type CollectionEntry, getCollection, render } from 'astro:content';
+import { type CollectionEntry, render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
-import { getAllPostsWithPreferredLang as getCollectionWithPreferredLang, getPostBaseId, getPostLang, getPostTranslation } from '../../i18n/i18n';
-import type { Lang } from '../../i18n/config';
-import { defaultLang, languages } from '../../i18n/config';
+import { getAllPostsWithPreferredLang as getCollectionWithPreferredLang, getPostBaseId } from '../../i18n/i18n';
+import { defaultLang } from '../../i18n/config';
 
 export async function getStaticPaths() {
   const posts = await getCollectionWithPreferredLang(defaultLang);

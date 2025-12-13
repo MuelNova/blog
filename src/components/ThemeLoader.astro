@@ -12,23 +12,21 @@ const darkThemes = await getDarkThemes();
 const lightThemes = await getLightThemes();
 const darkThemeIds = darkThemes.map(t => t.id);
 const lightThemeIds = lightThemes.map(t => t.id);
-const darkThemeIdsJson = JSON.stringify(darkThemeIds);
-const lightThemeIdsJson = JSON.stringify(lightThemeIds);
 ---
 
-<script is:inline define:vars={{ darkThemeIdsJson, lightThemeIdsJson }}>
+<script is:inline>
 	(function loadTheme() {
-		const darkThemeIds = JSON.parse(darkThemeIdsJson);
-		const lightThemeIds = JSON.parse(lightThemeIdsJson);
-		
+		const darkThemeIds = JSON.parse('{JSON.stringify(darkThemeIds)}');
+		const lightThemeIds = JSON.parse('{JSON.stringify(lightThemeIds)}');
+
 		// Check if theme is locked
 		const isLocked = localStorage.getItem('theme-locked') === 'true';
 		const storedTheme = localStorage.getItem('theme');
 		const themePreference = localStorage.getItem('theme-preference') || 'dark'; // 'dark' or 'light'
 		const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
-		
+
 		let themeToApply = storedTheme || 'spectre';
-		
+
 		// If on homepage and theme is not locked, pick a random theme based on preference
 		if (isHomePage && !isLocked) {
 			const themePool = themePreference === 'light' ? lightThemeIds : darkThemeIds;
@@ -37,7 +35,7 @@ const lightThemeIdsJson = JSON.stringify(lightThemeIds);
 			// Save the randomly selected theme
 			localStorage.setItem('theme', themeToApply);
 		}
-		
+
 		// Apply theme if exists
 		if (themeToApply) {
 			document.documentElement.setAttribute('data-theme', themeToApply);

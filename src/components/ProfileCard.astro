@@ -29,8 +29,8 @@ const infoIcons = ['ph:map-pin-line-duotone', 'ph:compass-duotone', 'ph:book-ope
 			height="96"
 			class="avatar-img"
 			decoding="async"
-			onload="const fb=this.nextElementSibling; if(fb) fb.classList.add('hide-fallback');"
-			onerror="const fb=this.nextElementSibling; if(fb) fb.classList.remove('hide-fallback');"
+			onload="const fbLoad=this.nextElementSibling; if(fbLoad) fbLoad.classList.add('hide-fallback');"
+			onerror="const fbError=this.nextElementSibling; if(fbError) fbError.classList.remove('hide-fallback');"
 		/>
 		<div class="avatar-fallback" aria-hidden="true">
 			<Icon name="ph:bowling-ball-duotone" class="w-12 h-12" />

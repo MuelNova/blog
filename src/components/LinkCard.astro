@@ -20,7 +20,7 @@ const fallbackIcon = '/favicon.png';
 			src={icon || fallbackIcon} 
 			alt={linkText}
 			loading="lazy"
-			onerror="this.src='/favicon.png'"
+			onerror={`this.onerror=null; this.src='${fallbackIcon}'`}
 		/>
 	</div>
 	<div class="link-content">

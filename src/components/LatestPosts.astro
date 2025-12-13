@@ -5,13 +5,13 @@
  */
 
 import FormattedDate from './FormattedDate.astro';
-import type { Post } from '../types';
+import type { CollectionEntry } from 'astro:content';
 import { stripMarkdown } from '../utils/markdown';
 import { getRelativeLocaleUrl } from '../i18n/config';
 import { getPostBaseId } from '../i18n/i18n';
 
 interface Props {
-	posts: Post[];
+	posts: CollectionEntry<'blog'>[];
 	lang?: import('../i18n/config').Lang;
 }
 
