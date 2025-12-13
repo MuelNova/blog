@@ -586,8 +586,6 @@ import { Icon } from 'astro-icon/components';
 			currentDataUrl = dataUrl;
 			if (previewImg) {
 				previewImg.src = dataUrl;
-				// Re-add click listener after setting src
-				previewImg.onclick = openPreviewInNewTab;
 			}
 			previewDiv?.classList.remove('hidden');
 			statusDiv?.classList.add('hidden');
