@@ -1,9 +1,13 @@
 ---
-const today = new Date();
----
+import { defaultLang, useTranslations } from '../i18n/config';
+import type { Lang } from '../i18n/config';
 
+const today = new Date();
+const { lang = defaultLang } = Astro.props as { lang?: Lang };
+const t = useTranslations(lang);
+---
 <footer>
-	&copy; {today.getFullYear()} Nova. All rights reserved.
+	&copy; {today.getFullYear()} Nova. {t('common.footer.rights')}
 	<!-- <div class="social-links">
 		<a href="https://m.webtoo.ls/@astro" target="_blank">
 			<span class="sr-only">Follow Astro on Mastodon</span>

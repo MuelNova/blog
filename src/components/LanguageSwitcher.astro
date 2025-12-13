@@ -1,0 +1,183 @@
+---
+import { defaultLang, getPathByLocale, getLocaleByPath, languages, pathHasLocale, prefixDefaultLocale } from '../i18n/config';
+import type { Lang } from '../i18n/config';
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = defaultLang } = Astro.props;
+const pathname = Astro.url?.pathname || '/';
+const entries = Object.entries(languages) as [Lang, string][];
+const currentLabel = languages[lang] ?? lang;
+
+const localeHref = (path: string, target: Lang) => {
+  const current = path || '/';
+
+  // If path already has a locale prefix, try helper first, then fall back.
+  if (pathHasLocale(current)) {
+    try {
+      return getPathByLocale(current, target);
+    } catch (_err) {
+      // Fallback to manual handling below
+    }
+  }
+
+  const base = current.startsWith('/') ? current : `/${current}`;
+  const segments = base.split('/').filter(Boolean);
+  // Strip existing locale segment if present
+  if (segments[0] && Object.hasOwn(languages, segments[0])) {
+    segments.shift();
+  }
+  const normalized = '/' + segments.join('/');
+  const isRoot = normalized === '/';
+
+  // Default locale without prefix when prefixDefaultLocale is false.
+  if (target === defaultLang && !prefixDefaultLocale) {
+    return normalized;
+  }
+
+  return `/${target}${isRoot ? '' : normalized}`;
+};
+---
+<details class="lang-dropdown" aria-label="Language switcher">
+  <summary class="lang-trigger" aria-haspopup="listbox">
+    <span class="lang-label">{currentLabel}</span>
+    <span class="lang-caret">▾</span>
+  </summary>
+  <ul class="lang-menu" role="listbox">
+    {entries.map(([code, label]) => {
+      const href = localeHref(pathname, code);
+      const isActive = code === lang;
+      return (
+        <li>
+          <a
+            href={href}
+            role="option"
+            aria-selected={isActive}
+            class={`lang-item ${isActive ? 'active' : ''}`}
+          >
+            {label}
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+</details>
+
+<style>
+  .lang-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .lang-dropdown[open] .lang-menu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .lang-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--color-foreground) 18%, transparent);
+    background: color-mix(in srgb, var(--color-background) 96%, transparent);
+    color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    border-radius: 0;
+  }
+
+  .lang-trigger:focus-visible {
+    outline: 1px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+
+  .lang-label {
+    letter-spacing: 0.01em;
+  }
+
+  .lang-caret {
+    font-size: 0.7rem;
+    color: color-mix(in srgb, var(--color-foreground) 60%, transparent);
+  }
+
+  .lang-menu {
+    position: absolute;
+    right: 0;
+    margin-top: 0.25rem;
+    min-width: 8rem;
+    background: color-mix(in srgb, var(--color-background) 98%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-foreground) 12%, transparent);
+    padding: 0.25rem 0.3rem;
+    display: grid;
+    gap: 0.15rem;
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    transition: opacity 120ms ease, transform 120ms ease;
+    z-index: 10;
+    border-radius: 0;
+  }
+
+  .lang-item {
+    display: block;
+    padding: 0.3rem 0.4rem;
+    text-decoration: none;
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+    border: 1px solid transparent;
+    transition: color 100ms ease, border-color 100ms ease, background-color 100ms ease;
+    font-size: 0.82rem;
+    border-radius: 0;
+  }
+
+  .lang-item:hover,
+  .lang-item:focus-visible {
+    color: var(--color-accent);
+    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+    outline: none;
+  }
+
+  .lang-item.active {
+    color: var(--color-accent);
+    border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    font-weight: 600;
+  }
+
+  /* Mobile: full-width touch targets inside nav list */
+  @media (max-width: 640px) {
+    .lang-dropdown {
+      width: 100%;
+    }
+
+    .lang-trigger {
+      width: 100%;
+      justify-content: space-between;
+      padding: 0.45rem 0.65rem;
+      border-width: 1px;
+    }
+
+    .lang-menu {
+      position: static;
+      transform: none;
+      opacity: 1;
+      pointer-events: auto;
+      margin-top: 0.35rem;
+      width: 100%;
+      background: transparent;
+      border: 1px solid color-mix(in srgb, var(--color-foreground) 12%, transparent);
+      padding: 0.25rem 0.1rem;
+    }
+
+    .lang-item {
+      width: 100%;
+      padding: 0.45rem 0.5rem;
+    }
+  }
+</style>

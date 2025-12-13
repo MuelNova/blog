@@ -1,18 +1,27 @@
 ---
 import ThemeSelector from './ThemeSelector.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
 import { Icon } from 'astro-icon/components';
 import { SITE_TITLE } from '../consts';
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+import { defaultLang, useTranslations, getRelativeLocaleUrl } from '../i18n/config';
+import type { Lang } from '../i18n/config';
 
 type NavItem = 
 	| { type: 'link'; name: string; href: string }
 	| { type: 'component'; component: AstroComponentFactory; class?: string };
 
+const { lang = defaultLang } = Astro.props as { lang?: Lang };
+const t = useTranslations(lang);
+
+const localized = (path: string) => getRelativeLocaleUrl(lang, path);
+
 const items = [
-	{ type: 'link', name: 'Home', href: '/' },
-	{ type: 'link', name: 'Blog', href: '/blog' },
-	{ type: 'link', name: 'About', href: '/about' },
-	{ type: 'link', name: 'Friends', href: '/links' },
+	{ type: 'link', name: t('common.nav.home'), href: localized('/') },
+	{ type: 'link', name: t('common.nav.blog'), href: localized('/blog') },
+	{ type: 'link', name: t('common.nav.about'), href: localized('/about') },
+	{ type: 'link', name: t('common.nav.friends'), href: localized('/links') },
+	{ type: 'component', component: LanguageSwitcher, class: 'w-full sm:w-auto sm:pl-1 language-switcher-li' },
 	{ type: 'component', component: ThemeSelector, class: 'w-full sm:w-auto sm:pl-1 theme-selector-li' },
 ] satisfies NavItem[];
 ---
@@ -39,7 +48,7 @@ const items = [
 						</li>
 					) : (
 						<li class={item.class}>
-							<item.component />
+							<item.component lang={lang} />
 						</li>
 					)}
 					{index < items.length - 1 && (
@@ -52,7 +61,7 @@ const items = [
 		<button
 			class="mobile-menu-toggle inline-flex h-10 w-10 items-center justify-center border-2 border-[color-mix(in_srgb,var(--color-accent)_20%,transparent)] bg-[color:var(--color-background)] text-[color:var(--color-accent)] transition-colors duration-150 sm:hidden"
 			data-nav-toggle
-			aria-label="Mobile menu"
+			aria-label={t('common.mobileMenu')}
 			aria-expanded="false"
 			aria-controls="primary-nav"
 		>
@@ -130,9 +139,19 @@ const items = [
 		width: 100%;
 	}
 
+	.language-switcher-li {
+		display: block;
+		width: 100%;
+	}
+
 	/* Make theme selector full width in mobile menu */
 	.theme-selector-li :global(theme-selector) {
 		display: block;
+		width: 100%;
+	}
+
+	.language-switcher-li :global(.language-switcher) {
+		display: flex;
 		width: 100%;
 	}
 
@@ -178,8 +197,16 @@ const items = [
 			width: auto;
 		}
 
+		.language-switcher-li {
+			width: auto;
+		}
+
 		.theme-selector-li :global(theme-selector) {
 			display: inline-block;
+			width: auto;
+		}
+
+		.language-switcher-li :global(.language-switcher) {
 			width: auto;
 		}
 

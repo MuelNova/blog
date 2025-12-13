@@ -8,16 +8,20 @@ import Card from './Card.astro';
 import CardHeader from './CardHeader.astro';
 import type { Social } from '../types';
 import { Icon } from 'astro-icon/components';
+import { defaultLang, type Lang, useTranslations } from '../i18n/config';
 
 interface Props {
 	socials: Social[];
+	lang?: Lang;
 }
 
-const { socials } = Astro.props;
+const { socials, lang: langProp } = Astro.props as Props;
+const lang = langProp ?? defaultLang;
+const t = useTranslations(lang);
 ---
 
 <Card>
-	<CardHeader title="Socials" />
+	<CardHeader title={t('home.socials.title')} />
 	
 	<ul class="list-none p-0 m-0">
 		{socials.map((social) => (

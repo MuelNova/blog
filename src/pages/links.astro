@@ -5,6 +5,8 @@ import CardHeader from '../components/CardHeader.astro';
 import LinkCard from '../components/LinkCard.astro';
 import { SITE_TITLE } from '../consts';
 import linksList from '../config/links';
+import { defaultLang, resolveLang, useTranslations } from '../i18n/config';
+import type { Lang } from '../i18n/config';
 
 // Seeded random number generator (using mulberry32)
 function seededRandom(seed: number) {
@@ -36,15 +38,20 @@ const seed = Math.floor(Date.now() / thirtyMinutesInMs);
 
 // Shuffle the links list
 const shuffledLinks = shuffleWithSeed(linksList, seed);
+
+const { lang: langProp } = Astro.props as { lang?: Lang };
+const lang = langProp ?? resolveLang(Astro.url.pathname) ?? defaultLang;
+const t = useTranslations(lang);
 ---
 
 <PageLayout 
-	title={`Friends - ${SITE_TITLE}`} 
-	description="友情链接 - 记录与分享优秀的博客和朋友们"
+	title={`${t('links.friends.title')} - ${SITE_TITLE}`} 
+	description={t('links.friends.description')}
+	lang={lang}
 	class="w-full max-w-[960px] mx-auto py-3 md:py-8 px-0 md:px-4"
 >
 	<Card>
-		<CardHeader title="Friends" icon="heart" />
+		<CardHeader title={t('links.friends.title')} icon="heart" />
 		<div class="links-container">
 			{shuffledLinks.map((link) => (
 				<LinkCard {...link} />

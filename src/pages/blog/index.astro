@@ -8,10 +8,17 @@ import CardHeader from '../../components/CardHeader.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 import { stripMarkdown } from '../../utils/markdown';
+import { defaultLang, getRelativeLocaleUrl, monthNames as monthNamesByLang, resolveLang, useTranslations } from '../../i18n/config';
+import type { Lang } from '../../i18n/config';
+import { getAllPostsWithPreferredLang, getPostBaseId } from '../../i18n/i18n';
 
-const posts = (await getCollection('blog'))
-	.filter((post) => !post.data.unlisted)
-	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const { lang: langProp } = Astro.props as { lang?: Lang };
+const lang = langProp ?? resolveLang(Astro.url.pathname) ?? defaultLang;
+
+const posts = await getAllPostsWithPreferredLang(lang);
+
+const t = useTranslations(lang);
+const monthNames = monthNamesByLang[lang];
 
 // Collect all tags with their counts and sort by count (descending)
 const tagCounts = new Map<string, number>();
@@ -61,16 +68,12 @@ const sortedDateGroups: YearData[] = Array.from(dateGroups.entries())
 			.map(([month, count]) => ({ month, count })),
 	}));
 
-// Month names for display
-const monthNames = [
-	'January', 'February', 'March', 'April', 'May', 'June',
-	'July', 'August', 'September', 'October', 'November', 'December'
-];
 ---
 
 <PageLayout 
 	title={SITE_TITLE} 
 	description={SITE_DESCRIPTION}
+	lang={lang}
 	class="w-full max-w-[1400px] xl:max-w-[1600px] mx-auto py-3 md:py-8 px-0 md:px-4"
 >
 	<!-- Mobile Filter Button - Geek Style -->
@@ -78,7 +81,7 @@ const monthNames = [
 		<button 
 			id="mobile-filter-btn"
 			class="lg:hidden fixed bottom-4 left-2 z-50 p-2.5 bg-background border border-accent/40 transition-all duration-200"
-			aria-label="Toggle filters"
+			aria-label={t('blog.filters')}
 			style="transform: translateX(0);"
 		>
 			<Icon name="ph:funnel" class="w-5 h-5 text-accent glow-icon" />
@@ -95,7 +98,7 @@ const monthNames = [
 				<div class="flex justify-between items-center mb-4 relative z-[61]">
 					<h2 class="text-xl font-semibold text-foreground flex items-center gap-2">
 						<Icon name="ph:funnel" class="w-5 h-5 text-accent glow-icon" />
-						Filters
+						{t('blog.filters')}
 					</h2>
 					<button 
 						id="mobile-filter-close"
@@ -111,12 +114,12 @@ const monthNames = [
 					<div class="flex items-center justify-between mb-3">
 						<h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
 							<Icon name="ph:folder" class="w-4 h-4 text-accent glow-icon" />
-							Tags
+							{t('blog.tags')}
 						</h3>
 						<button 
 							id="clear-tags-filter-mobile"
 							class="clear-filter-btn"
-							title="Clear tag filter"
+							title={t('blog.clearTags')}
 							style="visibility: hidden; opacity: 0; pointer-events: none;"
 						>
 							<Icon name="ph:x" class="w-3.5 h-3.5" />
@@ -143,12 +146,12 @@ const monthNames = [
 						<div class="flex items-center justify-between mb-3">
 							<h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
 								<Icon name="ph:calendar-blank" class="w-4 h-4 text-accent glow-icon" />
-								Date
+								{t('blog.date')}
 							</h3>
 							<button 
 								id="clear-date-filter-mobile"
 								class="clear-filter-btn"
-								title="Clear date filter"
+								title={t('blog.clearDate')}
 								style="visibility: hidden; opacity: 0; pointer-events: none;"
 							>
 								<Icon name="ph:x" class="w-3.5 h-3.5" />
@@ -197,11 +200,11 @@ const monthNames = [
 			<Card class="filter-card hidden lg:block lg:sticky lg:top-4 lg:self-start">
 				<div class="flex items-center gap-2 mb-3">
 					<Icon name="ph:folder" class="w-4 h-4 text-accent glow-icon" />
-					<span class="text-sm font-semibold text-foreground">Filter</span>
+					<span class="text-sm font-semibold text-foreground">{t('blog.filterLabel')}</span>
 					<button 
 						id="clear-tags-filter-desktop"
 						class="clear-filter-btn"
-						title="Clear tag filter"
+						title={t('blog.clearTags')}
 						style="visibility: hidden; opacity: 0; pointer-events: none;"
 					>
 						<Icon name="ph:x" class="w-3.5 h-3.5" />
@@ -225,11 +228,11 @@ const monthNames = [
 
 		<!-- Posts Card -->
 		<Card class="blog-posts-card">
-			<CardHeader title="Blog Posts" icon="rss" />
+			<CardHeader title={t('blog.posts')} icon="rss" />
 			<div class="content-container">
 				{posts.map((post) => (
 					<a 
-						href={`/blog/${post.id}/`}
+						href={getRelativeLocaleUrl(lang, `/blog/${getPostBaseId(post)}/`)}
 						class="post-container"
 						data-tags={(post.data.tags || []).join(',')}
 						data-year={post.data.pubDate.getFullYear()}
@@ -250,7 +253,7 @@ const monthNames = [
 						<div class="post-header">
 							<h3>{post.data.title}</h3>
 							<span class="post-date">
-								<FormattedDate date={post.data.pubDate} />
+								<FormattedDate date={post.data.pubDate} lang={lang} />
 							</span>
 						</div>
 						{post.data.description && (
@@ -269,12 +272,12 @@ const monthNames = [
 				<div class="date-filter-header">
 					<div class="flex items-center gap-2">
 						<Icon name="ph:calendar-blank" class="w-4 h-4 text-accent glow-icon" />
-						<span>Date Filter</span>
+						<span>{t('blog.dateFilter')}</span>
 					</div>
 					<button 
 						id="clear-date-filter-desktop"
 						class="clear-filter-btn"
-						title="Clear date filter"
+						title={t('blog.clearDate')}
 						style="visibility: hidden; opacity: 0; pointer-events: none;"
 					>
 						<Icon name="ph:x" class="w-3.5 h-3.5" />
