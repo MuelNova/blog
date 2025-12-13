@@ -4,7 +4,8 @@ description: 博客文章详细介绍了如何使用自己的域名来替换 Tea
 pubDate: 2021-11-30
 tags:
 - teamspeak
-- investigate
+- Investigate
+
 ---
 
 # TeamSpeak3 自建服务器使用域名替换 IP

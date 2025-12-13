@@ -4,7 +4,7 @@ description: Nova 在这篇博客中详细记录了他跟随 "Linux Kernel Lab" 
 pubDate: 2024-07-14
 updatedDate: 2024-10-18
 tags:
-- kernel
+- Kernel
 authors:
 - nova
 ---

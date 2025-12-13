@@ -4,7 +4,7 @@ description: nova在文章中分享了他第一次尝试使用无人机集群的
 pubDate: 2021-12-31
 tags:
 - AirSim
-- investigate
+- Investigate
 authors:
 - nova
 ---

@@ -4,7 +4,7 @@ description: 博客作者 nova 详细描述了如何搭建一个全自动的 STE
 pubDate: 2022-12-30
 tags:
 - steam
-- investigate
+- Investigate
 authors:
 - nova
 math: true

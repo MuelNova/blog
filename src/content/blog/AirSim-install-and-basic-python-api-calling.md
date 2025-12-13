@@ -4,7 +4,7 @@ description: nova在这篇文章中详细介绍了如何在Windows系统上配�
 pubDate: 2021-12-31
 tags:
 - AirSim
-- investigate
+- Investigate
 authors:
 - nova
 ---

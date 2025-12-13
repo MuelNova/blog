@@ -5,7 +5,7 @@ description: 在 Steam 更新至 3.0 版本后，原本在 2.X 版本下导出 S
 pubDate: 2022-11-20
 tags:
 - Reverse
-- investigate
+- Investigate
 authors:
 - nova
 ---

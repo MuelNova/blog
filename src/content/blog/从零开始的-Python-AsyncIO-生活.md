@@ -4,7 +4,7 @@ description: 从迭代器开始，一步一步进阶到 AsyncIO
 pubDate: 2022-12-31
 tags:
 - Python
-- investigate
+- Investigate
 authors:
 - nova
 ---

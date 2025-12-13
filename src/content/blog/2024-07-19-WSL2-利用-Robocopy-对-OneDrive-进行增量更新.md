@@ -5,7 +5,7 @@ description: Nova最近在进行开发项目时，将所有项目文件存储在
 pubDate: 2024-07-19
 updatedDate: 2024-07-19
 tags:
-- wsl2
+- WSL
 - cheatsheet
 authors:
 - nova

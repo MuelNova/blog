@@ -4,8 +4,8 @@ description: 作者nova最近在复现一些kernel CVE，但发现自己对kerne
   ROP（Return Oriented Programming）展开，逐步增强防护措施并探讨不同的绕过方法。
 pubDate: 2024-07-12
 tags:
-- pwn
-- kernel
+- Pwn
+- Kernel
 authors:
 - nova
 ---

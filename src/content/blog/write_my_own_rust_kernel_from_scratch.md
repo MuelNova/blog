@@ -4,7 +4,7 @@ description: 我们会在 [rCore](https://github.com/rcore-os/rCore-Tutorial-v3)
 pubDate: 2024-09-12
 updatedDate: 2024-09-17
 tags:
-- kernel
+- Kernel
 - rust
 authors:
 - nova

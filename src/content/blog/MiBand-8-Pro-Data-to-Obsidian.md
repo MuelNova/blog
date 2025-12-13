@@ -3,8 +3,8 @@ title: 小米手环 8 Pro 自动上传数据到 Obsidian 的思路
 description: 博客作者nova讲述了如何将小米手环8 Pro的数据自动上传到Obsidian的过程。起初，基于自己生活管理系统的需求，nova尝试通过逆向工程和抓包分析小米手环数据，最终发现利用API接口获取数据不可行，因为数据传输高度加密。
 pubDate: 2024-02-01
 tags:
-- reverse
-- investigate
+- Reverse
+- Investigate
 authors:
 - nova
 ---
