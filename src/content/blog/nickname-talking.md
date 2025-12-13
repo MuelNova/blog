@@ -6,6 +6,7 @@ tags:
 - 御宅訪問
 authors:
 - nova
+lang: zh
 ---
 
 如你所见，我的昵称叫做 `Nova Noir`(或者 `Nova No1R`、`Nova No1r` 等各种变体)，但是这个昵称后面有些什么故事呢？我的网名的前世今生以及未来又会是什么样子的呢

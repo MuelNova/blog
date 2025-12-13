@@ -9,6 +9,7 @@ tags:
 - cheatsheet
 authors:
 - nova
+lang: zh
 ---
 
 最近在做一些开发相关的项目，我项目全放在 OneDrive 上，利用 ln -s 做了一个软链接在 WSL2 上进行开发。

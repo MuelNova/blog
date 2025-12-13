@@ -1,28 +1,41 @@
 ---
 import { Icon } from 'astro-icon/components';
----
+import { defaultLang, type Lang, useTranslations } from '../i18n/config';
 
+const { lang: langProp } = Astro.props as { lang?: Lang };
+const lang = langProp ?? defaultLang;
+const t = useTranslations(lang);
+---
 <!-- Share Button - Fixed at article bottom -->
 <div class="share-button-container">
 	<button
 		id="share-button"
 		class="share-btn"
-		aria-label="Share article as image"
-		title="Share article"
+		aria-label={t('share.aria')}
+		title={t('share.tooltip')}
 	>
 		<Icon name="ph:share-network" class="w-5 h-5 md:w-6 md:h-6 text-accent glow-icon" />
-		<span class="share-btn-text">Share</span>
+		<span class="share-btn-text">{t('share.button')}</span>
 	</button>
 </div>
 
 <!-- Share Modal Overlay -->
-<div id="share-overlay" class="share-overlay pointer-events-none">
+<div
+	id="share-overlay"
+	class="share-overlay pointer-events-none"
+	data-placeholder-text={t('share.placeholder')}
+	data-placeholder-alt={t('share.placeholder')}
+	data-article-not-found={t('share.articleNotFound')}
+	data-generation-failed={t('share.generationFailed')}
+	data-screenshot-saved={t('share.screenshotSaved')}
+	data-generating={t('share.generating')}
+>
 	<div class="share-panel">
 		<!-- Header -->
 		<div class="share-header">
 			<div class="flex items-center gap-2">
 				<Icon name="ph:share-network" class="w-5 h-5 text-accent glow-icon" />
-				<h3 class="text-base md:text-lg font-semibold text-foreground">Share</h3>
+				<h3 class="text-base md:text-lg font-semibold text-foreground">{t('share.title')}</h3>
 			</div>
 			<button id="share-close" class="share-close" aria-label="Close">
 				<Icon name="ph:x" class="w-5 h-5 text-foreground" />
@@ -31,13 +44,14 @@ import { Icon } from 'astro-icon/components';
 
 		<!-- Options -->
 		<div class="share-options">
+		<div class="share-options">
 			<label class="share-option">
 				<input type="checkbox" id="border-toggle" checked />
-				<span class="text-sm md:text-base text-foreground">Add Border</span>
+				<span class="text-sm md:text-base text-foreground">{t('share.addBorder')}</span>
 			</label>
 			<label class="share-option">
 				<input type="checkbox" id="watermark-toggle" checked />
-				<span class="text-sm md:text-base text-foreground">Add Watermark</span>
+				<span class="text-sm md:text-base text-foreground">{t('share.addWatermark')}</span>
 			</label>
 		</div>
 
@@ -45,24 +59,24 @@ import { Icon } from 'astro-icon/components';
 		<div class="share-actions">
 			<button id="generate-screenshot" class="share-action-btn">
 				<Icon name="ph:camera" class="w-4 h-4 md:w-5 md:h-5" />
-				<span class="text-sm md:text-base">Generate Preview</span>
+				<span class="text-sm md:text-base">{t('share.generatePreview')}</span>
 			</button>
 		</div>
 
 		<!-- Preview -->
 		<div id="share-preview" class="share-preview hidden">
-			<img id="preview-image" alt="Preview" />
+			<img id="preview-image" alt={t('share.previewAlt')} />
 			<div class="preview-actions">
 				<button id="download-image" class="preview-action-btn">
 					<Icon name="ph:download" class="w-4 h-4 md:w-5 md:h-5" />
-					<span class="text-sm md:text-base">Download Image</span>
+					<span class="text-sm md:text-base">{t('share.downloadImage')}</span>
 				</button>
 			</div>
 		</div>
 
 		<!-- Loading & Status -->
 		<div id="share-status" class="share-status hidden">
-			<span class="text-sm text-foreground">Generating...</span>
+			<span class="text-sm text-foreground">{t('share.generating')}</span>
 		</div>
 	</div>
 </div>
@@ -336,7 +350,13 @@ import { Icon } from 'astro-icon/components';
 	let currentDataUrl = '';
 
 	const placeholderCache = new Map<string, string>();
-	const PLACEHOLDER_TEXT = 'Image Placeholder (CORS)';
+	const shareRoot = document.getElementById('share-overlay');
+	const PLACEHOLDER_TEXT = shareRoot?.getAttribute('data-placeholder-text') || 'Image Placeholder (CORS)';
+	const PLACEHOLDER_ALT = shareRoot?.getAttribute('data-placeholder-alt') || 'Image placeholder';
+	const MSG_ARTICLE_NOT_FOUND = shareRoot?.getAttribute('data-article-not-found') || 'Article content not found!';
+	const MSG_GENERATION_FAILED = shareRoot?.getAttribute('data-generation-failed') || 'Generation failed. Please try again.';
+	const MSG_SCREENSHOT_SAVED = shareRoot?.getAttribute('data-screenshot-saved') || 'Screenshot saved!';
+	const MSG_GENERATING = shareRoot?.getAttribute('data-generating') || 'Generating...';
 
 	function isAllowedImageSource(src: string) {
 		if (!src) return true;
@@ -399,7 +419,7 @@ import { Icon } from 'astro-icon/components';
 			img.dataset.placeholder = 'true';
 			img.dataset.originalSrc = img.src;
 			img.src = placeholder;
-			img.alt = img.alt ? `${img.alt} (placeholder)` : 'Image placeholder';
+			img.alt = img.alt ? `${img.alt} (${PLACEHOLDER_ALT})` : PLACEHOLDER_ALT;
 		});
 	}
 
@@ -429,13 +449,13 @@ import { Icon } from 'astro-icon/components';
 	async function generateScreenshot() {
 		const article = document.querySelector('.blog-article-wrapper') as HTMLElement;
 		if (!article) {
-			alert('Article content not found!');
+			alert(MSG_ARTICLE_NOT_FOUND);
 			return;
 		}
 
 		// Show loading, hide actions and preview
 		statusDiv?.classList.remove('hidden');
-		if (statusDiv) statusDiv.textContent = 'Generating...';
+		if (statusDiv) statusDiv.textContent = MSG_GENERATING;
 		shareActionsDiv?.classList.add('hidden');
 		previewDiv?.classList.add('hidden');
 
@@ -676,7 +696,7 @@ import { Icon } from 'astro-icon/components';
 				document.body.removeChild(existingWrapper);
 			}
 			
-			if (statusDiv) statusDiv.textContent = 'Generation failed. Please try again.';
+			if (statusDiv) statusDiv.textContent = MSG_GENERATION_FAILED;
 			shareActionsDiv?.classList.remove('hidden');
 			setTimeout(() => {
 				statusDiv?.classList.add('hidden');
@@ -696,7 +716,7 @@ import { Icon } from 'astro-icon/components';
 
 		if (statusDiv) {
 			statusDiv.classList.remove('hidden');
-			statusDiv.textContent = 'Screenshot saved!';
+			statusDiv.textContent = MSG_SCREENSHOT_SAVED;
 			setTimeout(() => {
 				statusDiv.classList.add('hidden');
 			}, 2000);

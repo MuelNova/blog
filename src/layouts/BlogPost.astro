@@ -9,25 +9,29 @@ import TableOfContents from '../components/TableOfContents.astro';
 import Background from '../components/Background.astro';
 import Giscus from '../components/Giscus.astro';
 import ShareButton from '../components/ShareButton.astro';
+import { defaultLang, resolveLang, useTranslations, type Lang } from '../i18n/config';
 
 type Props = Partial<CollectionEntry<'blog'>['data']> & {
 	title: string;
 	description: string;
 	headings?: any[];
 	showTitle?: boolean;
+  	lang?: Lang;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, headings = [], showTitle = true } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, headings = [], showTitle = true, lang: langProp } = Astro.props;
+const lang = langProp ?? resolveLang(Astro.url.pathname) ?? defaultLang;
+const t = useTranslations(lang);
 ---
 
-<html lang="en">
+<html lang={lang}>
 	<head>
 		<BaseHead title={title} description={description} />
 	</head>
 
 	<body>
 		<Background />
-		<Header />
+		<Header lang={lang} />
 		<main class="blog-post-main-with-toc">
 			<article class="blog-article-wrapper">
 				{heroImage && (
@@ -40,10 +44,10 @@ const { title, description, pubDate, updatedDate, heroImage, headings = [], show
 						<div class="title blog-post-title">
 							{(pubDate || updatedDate) && (
 								<div class="date blog-post-date">
-									{pubDate && <FormattedDate date={pubDate} />}
+									{pubDate && <FormattedDate date={pubDate} lang={lang} />}
 									{updatedDate && (
 										<div class="last-updated-on blog-post-last-updated">
-											Last updated on <FormattedDate date={updatedDate} />
+											{t('blog.lastUpdated')} <FormattedDate date={updatedDate} lang={lang} />
 										</div>
 									)}
 								</div>
@@ -55,10 +59,10 @@ const { title, description, pubDate, updatedDate, heroImage, headings = [], show
 					<slot />
 				</div>
 			</article>
-			<TableOfContents headings={headings} />
+			<TableOfContents headings={headings} lang={lang} />
 		</main>
-		<ShareButton />
+		<ShareButton lang={lang} />
 		<Giscus />
-		<Footer />
+		<Footer lang={lang} />
 	</body>
 </html>

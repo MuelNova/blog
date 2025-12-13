@@ -8,6 +8,7 @@ tags:
 - rust
 authors:
 - nova
+lang: zh
 ---
 
 ## 在此之前

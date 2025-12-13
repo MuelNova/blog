@@ -7,6 +7,7 @@ tags:
 - Kernel
 authors:
 - nova
+lang: zh
 ---
 
 ## 在此之前

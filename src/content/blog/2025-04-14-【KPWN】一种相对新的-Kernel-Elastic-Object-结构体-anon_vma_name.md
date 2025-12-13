@@ -5,6 +5,7 @@ description: 水一下。能用作堆喷结构体，可以喷 [kmalloc-8, kmallo
 pubDate: 2025-04-14
 authors:
 - nova
+lang: zh
 ---
 
 水一下。能用作堆喷结构体，可以喷 [kmalloc-8, kmalloc-96]，每次系统调用仅分配一个 obj，并且是 `GFP_KERNEL` flag，可以读取（但是 \0 截断），可以释放。

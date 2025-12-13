@@ -5,14 +5,8 @@
 
 import type { Social } from '../types';
 
-/**
- * Quick info displayed in profile card
- */
-export const QUICK_INFO = [
-	'Pwning Systems since 1895',
-	'Full Queue Developer',
-	'Computer Master when Using AI',
-];
+// Quick info localization helper
+export { getQuickInfo } from '../i18n/messages/profile';
 
 /**
  * Social media links

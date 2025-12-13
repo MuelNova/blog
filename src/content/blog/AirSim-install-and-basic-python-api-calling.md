@@ -7,6 +7,7 @@ tags:
 - Investigate
 authors:
 - nova
+lang: zh
 ---
 
 （因为找不到相关logo所以偷了个banner_img()）

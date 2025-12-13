@@ -4,6 +4,7 @@ description: 好久没水博客了，最近买了 Mac，遇到了这个问题，
 pubDate: 2025-03-24
 authors:
 - nova
+lang: zh
 ---
 
 好久没水博客了，最近买了 Mac，遇到了这个问题，解决一下。

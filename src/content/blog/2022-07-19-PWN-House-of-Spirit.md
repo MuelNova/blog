@@ -8,6 +8,7 @@ tags:
 - Pwn
 authors:
 - nova
+lang: zh
 ---
 
 看看`House_of_spirit`，这是一种依靠在栈上构造`fake_chunk`从而实现`(almost) arbitrary write`的技术。依赖`fastbin`

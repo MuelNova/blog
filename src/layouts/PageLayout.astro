@@ -9,29 +9,32 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Background from '../components/Background.astro';
+import { defaultLang, resolveLang } from '../i18n/config';
 
 interface Props {
 	title: string;
 	description: string;
 	class?: string;
 	showFooter?: boolean;
+	lang?: string;
 }
 
-const { title, description, class: className, showFooter = false } = Astro.props;
+const { title, description, class: className, showFooter = false, lang: langProp } = Astro.props;
+const lang = langProp ?? resolveLang(Astro.url.pathname) ?? defaultLang;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
 	<head>
 		<BaseHead title={title} description={description} />
 	</head>
 	<body class="font-sans">
 		<slot name="overlay" />
 		<Background />
-		<Header />
+		<Header lang={lang} />
 		<main class={className}>
 			<slot />
 		</main>
-		{showFooter && <Footer />}
+		{showFooter && <Footer lang={lang} />}
 	</body>
 </html>

@@ -7,6 +7,7 @@ tags:
 - Pwn
 authors:
 - nova
+lang: zh
 ---
 
 准备研究一下不同保护机制下的绕过，然后就准备进 heap 了

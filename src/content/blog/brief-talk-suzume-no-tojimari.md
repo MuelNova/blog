@@ -6,6 +6,7 @@ tags:
 - 御宅訪問
 authors:
 - nova
+lang: zh
 ---
 
 :::danger[读前必看]

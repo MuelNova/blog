@@ -7,24 +7,27 @@
 import FormattedDate from './FormattedDate.astro';
 import type { Post } from '../types';
 import { stripMarkdown } from '../utils/markdown';
+import { getRelativeLocaleUrl } from '../i18n/config';
+import { getPostBaseId } from '../i18n/i18n';
 
 interface Props {
 	posts: Post[];
+	lang?: import('../i18n/config').Lang;
 }
 
-const { posts } = Astro.props;
+const { posts, lang } = Astro.props;
 ---
 
 <div class="flex flex-col gap-3 post-list">
 		{posts.map((post) => (
 			<a 
-				href={`/blog/${post.id}/`}
+				href={lang ? getRelativeLocaleUrl(lang, `/blog/${getPostBaseId(post)}/`) : `/blog/${getPostBaseId(post)}/`}
 				class="flex flex-col gap-2 p-3 border border-accent/40 text-white transition-all duration-150 hover:bg-primary/12.5 hover:border-primary focus-visible:outline-none focus-visible:bg-primary/12.5 focus-visible:border-primary"
 			>
 				<div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
 					<h3 class="text-sm font-semibold text-foreground m-0">{post.data.title}</h3>
 					<time class="text-xs text-foreground/70 shrink-0">
-						<FormattedDate date={post.data.pubDate} />
+						<FormattedDate date={post.data.pubDate} lang={lang} />
 					</time>
 				</div>
 				{post.data.description && (

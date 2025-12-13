@@ -8,6 +8,7 @@ tags:
 - Pwn
 authors:
 - nova
+lang: zh
 ---
 
 # Basic ROP - Ret2libc

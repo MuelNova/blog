@@ -1,0 +1,49 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import BlogPost from '../../../layouts/BlogPost.astro';
+import type { Lang } from '../../../i18n/config';
+import { defaultLang, languages } from '../../../i18n/config';
+import { getPostBaseId, getPostTranslation, getPostLang } from '../../../i18n/i18n';
+
+export async function getStaticPaths() {
+  const locales = Object.keys(languages).filter((l) => l !== defaultLang) as Lang[];
+  const posts = await getCollection('blog');
+  
+  const paths = [];
+  
+  for (const post of posts) {
+    const baseId = getPostBaseId(post);
+    const postLang = getPostLang(post);
+    
+    // 为每个非默认语言生成路径
+    for (const locale of locales) {
+      // 查找该语言的翻译版本
+      const translation = await getPostTranslation(post, locale);
+      
+      if (translation) {
+        // 如果有翻译，使用翻译版本
+        paths.push({
+          params: { locale, slug: baseId },
+          props: { post: translation },
+        });
+      } else if (postLang === defaultLang) {
+        // 如果没有翻译但当前文章是默认语言，作为回退显示
+        paths.push({
+          params: { locale, slug: baseId },
+          props: { post },
+        });
+      }
+    }
+  }
+  
+  return paths;
+}
+
+const { post } = Astro.props as { post: CollectionEntry<'blog'> };
+const { locale } = Astro.params;
+const lang = (locale as Lang) ?? defaultLang;
+const { Content, headings } = await render(post);
+---
+<BlogPost {...post.data} headings={headings} lang={lang}>
+  <Content />
+</BlogPost>

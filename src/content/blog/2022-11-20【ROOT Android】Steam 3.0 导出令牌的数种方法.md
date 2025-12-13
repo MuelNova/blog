@@ -8,6 +8,7 @@ tags:
 - Investigate
 authors:
 - nova
+lang: zh
 ---
 
 # 【ROOT Android】Steam 3.0 导出令牌的数种方法

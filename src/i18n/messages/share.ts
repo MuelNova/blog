@@ -1,0 +1,36 @@
+import type { SupportedLang } from '../locales';
+
+export const share: Record<SupportedLang, Record<string, string>> = {
+  en: {
+    'share.title': 'Share',
+    'share.button': 'Share',
+    'share.aria': 'Share article as image',
+    'share.tooltip': 'Share article',
+    'share.addBorder': 'Add Border',
+    'share.addWatermark': 'Add Watermark',
+    'share.generatePreview': 'Generate Preview',
+    'share.downloadImage': 'Download Image',
+    'share.generating': 'Generating...',
+    'share.generationFailed': 'Generation failed. Please try again.',
+    'share.screenshotSaved': 'Screenshot saved!',
+    'share.articleNotFound': 'Article content not found!',
+    'share.placeholder': 'Image Placeholder (CORS)',
+    'share.previewAlt': 'Preview',
+  },
+  zh: {
+    'share.title': '分享',
+    'share.button': '分享',
+    'share.aria': '分享文章为图片',
+    'share.tooltip': '分享文章',
+    'share.addBorder': '添加边框',
+    'share.addWatermark': '添加水印',
+    'share.generatePreview': '生成预览',
+    'share.downloadImage': '下载图片',
+    'share.generating': '生成中...',
+    'share.generationFailed': '生成失败，请再试一次。',
+    'share.screenshotSaved': '已保存截图！',
+    'share.articleNotFound': '未找到文章内容！',
+    'share.placeholder': '图片占位（CORS）',
+    'share.previewAlt': '预览',
+  },
+};

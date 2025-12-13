@@ -4,6 +4,7 @@ description: 大概是需要 CPU Host 才行，具体可以看 cpuinfo
 pubDate: 2024-10-26
 authors:
 - nova
+lang: zh
 ---
 
 大概是需要 CPU Host 才行，具体可以看 cpuinfo

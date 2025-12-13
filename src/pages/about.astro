@@ -1,8 +1,78 @@
 ---
 import Layout from '../layouts/BlogPost.astro';
+import { defaultLang, resolveLang, type Lang, useTranslations } from '../i18n/config';
+
+const { lang: langProp } = Astro.props as { lang?: Lang };
+const lang = langProp ?? resolveLang(Astro.url.pathname) ?? defaultLang;
+const t = useTranslations(lang);
+
+const content = {
+	en: {
+		description: 'About me - security research, tools, and writing',
+		terminalTitle: 'who am i',
+		terminalLines: [
+			{ prompt: 'whoami', output: 'MuelNova (muir / Miao Zhao)' },
+			{ prompt: 'cat ~/fingerprint.txt', output: '6C4F 47DB A3A8 EB3B 5670 172A 6AC1 E2FC FE4A A441' },
+			{ prompt: 'check -d 2025 --short', output: 'PKU School of CS · Master 2025 · Security Research' },
+			{ prompt: 'open github', output: 'github.com/MuelNova' },
+			{ prompt: 'mail muel@nova.gal', output: '' },
+		],
+		timelineTitle: 'Milestones',
+		timeline: [
+			{ time: '2025 · Now', desc: 'PKU CS Master – Security Research' },
+			{ time: '2021 - 2025', desc: 'BUPT Cybersecurity B.S. – CTF / PWN' },
+			{ time: 'Earlier', desc: 'Building and breaking things' },
+		],
+		doingTitle: 'What I do',
+		doing: [
+			'Vul337 / PKU CCLab security research',
+			'Exploring memory-safety mitigations and offensive chains',
+			'Writing on systems security, toolchains, and workflows',
+		],
+		skillsTitle: 'Skills',
+		skills: ['Python / Go / TypeScript / C++', 'Linux / Arch', 'GDB / pwntools / angr', 'Rust (learning)', 'Astro / Tailwind / React'],
+		contactTitle: 'Contact',
+		contact: [
+			{ label: 'Email', value: 'muel@nova.gal', href: 'mailto:muel@nova.gal' },
+			{ label: 'GitHub', value: '@MuelNova', href: 'https://github.com/MuelNova' },
+		],
+	},
+	zh: {
+		description: '关于我 - 安全研究、工具与写作',
+		terminalTitle: 'who am i',
+		terminalLines: [
+			{ prompt: 'whoami', output: 'Muelnova (muir / Miao Zhao)' },
+			{ prompt: 'cat ~/fingerprint.txt', output: '6C4F 47DB A3A8 EB3B 5670 172A 6AC1 E2FC FE4A A441' },
+			{ prompt: 'check -d 2025 --short', output: '北京大学计算机学院 · 25 级硕士 · 安全研究' },
+			{ prompt: 'open github', output: 'github.com/MuelNova' },
+			{ prompt: 'mail muel@nova.gal', output: '' },
+		],
+		timelineTitle: '一些节点',
+		timeline: [
+			{ time: '2025 · 现在', desc: 'PKU CS 硕士 - 安全研究' },
+			{ time: '2021 - 2025', desc: 'BUPT 网络安全 本科 - CTF / PWN' },
+			{ time: '更早', desc: '玩泥巴' },
+		],
+		doingTitle: '正在做的事',
+		doing: [
+			'在 vul337 / pkucclab 做安全研究',
+			'探索内存安全缓解与渗透链路',
+			'写一些关于系统安全、工具链和工作流的文章',
+		],
+		skillsTitle: '技能',
+		skills: ['Python / Go / TypeScript / C++', 'Linux / Arch', 'GDB / pwntools / angr', 'Rust（路上）', 'Astro / Tailwind / React'],
+		contactTitle: '联系',
+		contact: [
+			{ label: 'Email', value: 'muel@nova.gal', href: 'mailto:muel@nova.gal' },
+			{ label: 'GitHub', value: '@MuelNova', href: 'https://github.com/MuelNova' },
+		],
+	},
+} as const;
+
+const copy = content[lang] ?? content[defaultLang];
 ---
 
-<Layout title="About Me" description="关于我 - MuelNova" showTitle={false}>
+<Layout title={t('about.title')} description={copy.description} showTitle={false} lang={lang}>
 	<div class="about-shell prose prose-invert max-w-none py-6">
 	<section class="about-hero">
 		<img
@@ -18,27 +88,17 @@ import Layout from '../layouts/BlogPost.astro';
 				<span class="dot red"></span>
 				<span class="dot yellow"></span>
 				<span class="dot green"></span>
-				<span class="terminal-title">who am i</span>
+				<span class="terminal-title">{copy.terminalTitle}</span>
 			</div>
 			<div class="terminal-body">
-				<div class="line">
-					<span class="prompt">root@nova.gal</span>:<span class="path">~</span>$ whoami
-				</div>
-				<div class="output">Muelnova (muir / Miao Zhao)</div>
-				<div class="line">
-					<span class="prompt">root@nova.gal</span>:<span class="path">~</span>$ cat ~/fingerprint.txt
-				</div>
-				<div class="output">6C4F 47DB A3A8 EB3B 5670 172A 6AC1 E2FC FE4A A441</div>
-				<div class="line">
-					<span class="prompt">root@nova.gal</span>:<span class="path">~/education</span>$ check -d 2025 --short
-				</div>
-				<div class="output">北京大学计算机学院 · 25 级硕士 · 安全研究</div>
-				<div class="line">
-					<span class="prompt">root@nova.gal</span>:<span class="path">~/contact</span>$ open github
-				</div>
-				<div class="output">
-					<a href="https://github.com/MuelNova" target="_blank" rel="noopener noreferrer">github.com/MuelNova</a>
-				</div>
+				{copy.terminalLines.map(({ prompt, output }) => (
+					<div>
+						<div class="line">
+							<span class="prompt">root@nova.gal</span>:<span class="path">~</span>$ {prompt}
+						</div>
+						{output && <div class="output">{prompt.includes('github') ? <a href="https://github.com/MuelNova" target="_blank" rel="noopener noreferrer">{output}</a> : output}</div>}
+					</div>
+				))}
 				<div class="line">
 					<span class="prompt">root@nova.gal</span>:<span class="path">~/contact</span>$ mail muel@nova.gal
 					<span class="cursor" aria-hidden="true"></span>
@@ -67,49 +127,44 @@ import Layout from '../layouts/BlogPost.astro';
 	</section> -->
 
 	<section class="timeline card">
-		<h3>一些节点</h3>
+		<h3>{copy.timelineTitle}</h3>
 		<ul>
-			<li>
-				<span class="time">2025 · 现在</span>
-				<span class="desc">PKU CS 硕士 - 安全研究</span>
-			</li>
-			<li>
-				<span class="time">2021 - 2025</span>
-				<span class="desc">BUPT 网络安全 本科 - CTF / PWN</span>
-			</li>
-			<li>
-				<span class="time">更早</span>
-				<span class="desc">玩泥巴</span>
-			</li>
+			{copy.timeline.map((item) => (
+				<li>
+					<span class="time">{item.time}</span>
+					<span class="desc">{item.desc}</span>
+				</li>
+			))}
 		</ul>
 	</section>
 
 	<section class="about-cards">
 		<div class="card">
-			<h3>正在做的事</h3>
+			<h3>{copy.doingTitle}</h3>
 			<ul class="bullet-list">
-				<li>在 <a href="https://netsec.ccert.edu.cn/vul337" target="_blank" rel="noopener noreferrer">vul337</a> / <a href="https://github.com/pkucclab" target="_blank" rel="noopener noreferrer">pkucclab</a> 做安全研究</li>
-				<li>探索内存安全缓解与渗透链路</li>
-				<li>写一些关于系统安全、工具链和工作流的文章</li>
+				{copy.doing.map((item) => (
+					<li>{item}</li>
+				))}
 			</ul>
 		</div>
 		<div class="card">
-			<h3>技能</h3>
+			<h3>{copy.skillsTitle}</h3>
 			<ul class="pill-list compact">
-				<li>Python / Go / TypeScript / C++</li>
-				<li>Linux / Arch</li>
-				<li>GDB / pwntools / angr</li>
-				<li>Rust（路上）</li>
-				<li>Astro / Tailwind / React</li>
+				{copy.skills.map((item) => (
+					<li>{item}</li>
+				))}
 			</ul>
 		</div>
 	</section>
 
 	<section class="contact card">
-		<h3>联系</h3>
+		<h3>{copy.contactTitle}</h3>
 		<ul class="bullet-list">
-			<li>Email: <a href="mailto:muel@nova.gal">muel@nova.gal</a></li>
-			<li>GitHub: <a href="https://github.com/MuelNova" target="_blank" rel="noopener noreferrer">@MuelNova</a></li>
+			{copy.contact.map((item) => (
+				<li>
+					{item.label}: <a href={item.href} target="_blank" rel="noopener noreferrer">{item.value}</a>
+				</li>
+			))}
 		</ul>
 	</section>
 	</div>

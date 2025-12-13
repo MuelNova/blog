@@ -8,6 +8,7 @@ tags:
 - CVE
 authors:
 - nova
+lang: zh
 unlisted: true
 ---
 

@@ -7,6 +7,7 @@ tags:
 - Pwn
 authors:
 - nova
+lang: zh
 ---
 
 Double Free 是 Fastbin 里比较容易的一个利用，搞一下

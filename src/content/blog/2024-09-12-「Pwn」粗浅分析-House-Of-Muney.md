@@ -8,6 +8,7 @@ tags:
 - heap
 authors:
 - nova
+lang: zh
 ---
 
 前几天 ZBR 发了这个 repo，我寻思没听过，看着攻击能力还挺强的，于是浅浅分析一下。

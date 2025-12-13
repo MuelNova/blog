@@ -20,6 +20,13 @@ import { remarkAdmonitions } from './src/plugins/remark-admonitions.ts';
 export default defineConfig({
   output: 'static',
   site: 'https://astro.nova.gal',
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'zh'],
+    routing: {
+        prefixDefaultLocale: false
+    }
+  },
   markdown: {
     remarkPlugins: [remarkDirective, remarkAdmonitions],
   },

@@ -6,10 +6,15 @@
 
 import Card from './Card.astro';
 import CardHeader from './CardHeader.astro';
+import { defaultLang, type Lang, useTranslations } from '../i18n/config';
+
+const { lang: langProp } = Astro.props as { lang?: Lang };
+const lang = langProp ?? defaultLang;
+const t = useTranslations(lang);
 ---
 
 <Card>
-	<CardHeader title="About Me" icon="user" />
+	<CardHeader title={t('about.title')} icon="user" />
 	
 	<div class="text-[var(--color-foreground)] leading-relaxed text-sm space-y-3">
 		<slot />

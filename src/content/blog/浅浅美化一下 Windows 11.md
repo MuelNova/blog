@@ -7,6 +7,7 @@ tags:
 - cheatsheet
 authors:
 - nova
+lang: zh
 ---
 
 # 浅浅~~美化~~一下 Windows 11
