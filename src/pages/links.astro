@@ -4,7 +4,7 @@ import Card from '../components/Card.astro';
 import CardHeader from '../components/CardHeader.astro';
 import LinkCard from '../components/LinkCard.astro';
 import { SITE_TITLE } from '../consts';
-import linksList from '../config/links';
+import { getLinksByLang } from '../config/links';
 import { defaultLang, resolveLang, useTranslations } from '../i18n/config';
 import type { Lang } from '../i18n/config';
 
@@ -36,11 +36,13 @@ function shuffleWithSeed<T>(array: T[], seed: number): T[] {
 const thirtyMinutesInMs = 30 * 60 * 1000;
 const seed = Math.floor(Date.now() / thirtyMinutesInMs);
 
-// Shuffle the links list
-const shuffledLinks = shuffleWithSeed(linksList, seed);
 
 const { lang: langProp } = Astro.props as { lang?: Lang };
 const lang = langProp ?? resolveLang(Astro.url.pathname) ?? defaultLang;
+
+// Shuffle the links list
+const shuffledLinks = shuffleWithSeed(getLinksByLang(lang), seed);
+
 const t = useTranslations(lang);
 ---
 
