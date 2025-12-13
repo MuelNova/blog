@@ -1,0 +1,211 @@
+---
+title: Off-by-null 的利用方法
+description: import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
+pubDate: 2024-09-13
+tags:
+- Pwn
+- heap
+authors:
+- nova
+
+---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+For some reason, I never documented these techniques before, and every time I solve them I forget to start from scratch.
+
+This post will focus on exploits in glibc versions 2.23 and 2.31. Version 2.27 is similar to 2.23 (just fill one extra tcache), and 2.29 is similar to 2.31 (adds one extra key).
+
+Therefore, you should already have a solid foundation in heap allocation. This article emphasizes methods over theory.
+
+The challenges covered here share these features:
+
+- An off-by-null vulnerability
+- Almost unlimited number of allocations
+- Allocation size is virtually unlimited or can reach largebin range
+- No edit function or only a single edit allowed
+- Only one show (view) operation—technically you can skip it, but setting up the heap becomes too tedious, better to sleep
+
+{/* truncate */}
+
+## Off-by-null
+
+Off-by-null vulnerabilities usually arise in scenarios such as:
+
+- Functions like `strcpy` that automatically append a `\x00` at the end
+- A loop using `read(0, buf, 1)` and breaking on `\n`, then setting `*buf = 0` after the loop
+
+This primitive only allows a single-byte out-of-bounds write, and only of `\x00`, so it is less powerful than an off-by-one.
+
+Typically, we use this to clear a chunk’s `prev_inuse` bit, or to tweak its `fd`/`bk` pointers to point to a chunk whose least significant byte is `\x00`. That can lead to chunk overlapping via `malloc_consolidate`, or to UAF by making the free list point to an already allocated chunk.
+
+## Source Code Analysis
+
+### malloc_consolidate
+
+<Tabs groupId="version">
+
+<TabItem value="2.23" label="2.23" default>
+
+When freeing a chunk larger than `get_max_fast()`, glibc consolidates adjacent free chunks. Here, "backward" means the lower-address chunk and "forward" means the higher-address chunk.
+
+#### backward_consolidate
+
+For the freed chunk `p`, if its `prev_inuse` bit is 0, it reads `prev_size`, locates the previous chunk, and unlinks it:
+
+```c title="malloc/malloc.c"
+/* consolidate backward */
+    if (!prev_inuse(p)) {
+      prevsize = p->prev_size;
+      size += prevsize;
+      p = chunk_at_offset(p, -((long) prevsize));
+      unlink(av, p, bck, fwd);
+    }
+
+    if (nextchunk != av->top) {
+      /* get and clear inuse bit */
+      nextinuse = inuse_bit_at_offset(nextchunk, nextsize);
+
+      /* consolidate forward */
+      if (!nextinuse) {
+        unlink(av, nextchunk, bck, fwd);
+        size += nextsize;
+      } else
+        clear_inuse_bit_at_offset(nextchunk, 0);
+```
+
+#### forward_consolidate
+
+If `nextchunk` is not `top`, it checks whether the next chunk is in use (by inspecting `prev_inuse` of `nextchunk + nextsize`). If not in use, it unlinks that chunk too.
+
+In version 2.23, there are no integrity checks during consolidation.
+
+</TabItem>
+
+<TabItem value="2.31" label="2.31" >
+
+In glibc 2.31, backward consolidation adds a critical check:
+
+```c title="malloc/malloc.c"
+      if (__glibc_unlikely (chunksize(p) != prevsize))
+        malloc_printerr ("corrupted size vs. prev_size while consolidating");
+```
+
+This prevents arbitrary forging of `prev_size`. We must instead create a fake chunk with a valid `size` field.
+
+However, since the check only compares `chunksize(p)` to the forged `prev_size`, we can set up `p->fd` to point to a controlled fake chunk whose `size` matches.
+
+</TabItem>
+
+</Tabs>
+
+### unlink
+
+<Tabs groupId="version">
+
+<TabItem value="2.23" label="2.23"  default>
+
+In 2.23, `unlink` only checks that `P->fd->bk == P` and `P->bk->fd == P`:
+
+```c title="malloc/malloc.c"
+#define unlink(AV, P, BK, FD) {
+    FD = P->fd;
+    BK = P->bk;
+    if (__builtin_expect (FD->bk != P || BK->fd != P, 0))
+      malloc_printerr ("corrupted double-linked list", P, AV);
+    else {
+        FD->bk = BK;
+        BK->fd = FD;
+        ...
+    }
+}
+```
+
+By leveraging the unsorted bin, where these pointers already form a valid double-linked list, we can bypass this check.
+
+</TabItem>
+
+<TabItem value="2.31" label="2.31" >
+
+In 2.31, `unlink_chunk` first checks:
+
+```c title="malloc/malloc.c"
+  if (chunksize(p) != prev_size(next_chunk(p)))
+    malloc_printerr ("corrupted size vs. prev_size");
+```
+
+Since this uses `chunksize(p)` and the next chunk’s `prev_size`, we can forge a fake chunk whose `size` matches its own `prev_size`, bypassing the check. The `fd->bk` check remains the same and can be bypassed similarly.
+
+</TabItem>
+
+</Tabs>
+
+## Exploitation Strategy
+
+With off-by-null, our intuitive approach is:
+
+1. Find a chunk `C` of size > 0x100 and clear its `prev_inuse` bit via a single-byte write.
+2. Free `C`, triggering backward consolidation. It unlinks the chunk at `C - prev_size`, which we control by setting `prev_size`.
+3. Overwrite that unlinked chunk’s `size` to overlap or to craft a free-list pointer into an allocated chunk.
+
+<Tabs groupId="version">
+
+<TabItem value="2.23" label="2.23"  default>
+
+### Method for 2.23 (using Unsorted Bin)
+
+1. Allocate four chunks: `A(0x90)`, `B(0x20)`, `C(0xf0)`, `D(0x10)`.
+2. Free `B` (prepare for later off-by-null) and free `A` to unsorted bin.
+3. Off-by-null on `B`: overwrite `C` header with `prev_size = 0x90+0x20` and clear `prev_inuse`.
+4. Free `C`: consolidation unlinks `A`, merging sizes into a large chunk that overlaps both `A` and `C`.
+5. Subsequent allocations return overlapping chunks.
+
+```python
+add(0x80)  # A
+add(0x18)  # B
+add(0xf0)  # C
+add(0x10)  # D
+
+free(B)
+free(A)
+# off-by-null write: A’s size into C.prev_size and clear C.prev_inuse
+add(0x18, b'A'*0x10 + p64(0x90+0x20) + b'\n')
+free(C)
+# Now A->size = 0x100+0x20+0x90, causing overlap
+add(0x80)  # reuse overlapping region
+add(0x18)  # reuse B
+```
+
+</TabItem>
+
+<TabItem value="2.31" label="2.31" >
+
+### Method 1: large + unsorted + smallbin
+
+1. Align heap and fill tcache to shape chunk `A`’s low bytes as `\x00\x00`.
+2. Create a largebin chunk at index 8 and free it, forcing it into the largebin.
+3. Prepare helper chunks `B`, `C`, `D`, `E`, `F` to craft `fakechunk->fd` and `fakechunk->bk` pointers using smallbin and fastbin.
+4. Use smallbin unlink to set `fakechunk->fd->bk` to `fakechunk`.
+5. Use fastbin unlink to set `fakechunk->bk->fd` to `fakechunk`.
+6. Finally, off-by-null on a small 0x28 chunk to overwrite `fakechunk`’s `size` and free it, triggering consolidation.
+
+(Python pseudo-code omitted for brevity; see Chinese version for full steps.)
+
+### Method 2: large + unsorted
+
+1. Allocate chunks `A(0x418)`, `Asst(0x418)`, `B(0x438)`, `C(0x428)`, etc.
+2. Free to form an unsorted list `C -> B -> A`.
+3. Off-by-null free `A` to merge `Asst` and form a large unsorted chunk.
+4. Reallocate to recover pointers, patch `A->bk` and `C->fd` by crafting small writes.
+5. Off-by-null final free to unlink and overlap.
+
+(See Chinese version for detailed pseudo-code.)
+
+</TabItem>
+
+</Tabs>
+
+:::info
+This content is generated by LLM and might be wrong/incomplete. Please refer to the original Chinese version if you find any discrepancies.
+:::
+
+{/* AI */}
