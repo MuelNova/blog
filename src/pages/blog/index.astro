@@ -108,10 +108,20 @@ const monthNames = [
 				
 				<!-- Tags Section -->
 				<div class="mb-6">
-					<h3 class="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-						<Icon name="ph:folder" class="w-4 h-4 text-accent glow-icon" />
-						Tags
-					</h3>
+					<div class="flex items-center justify-between mb-3">
+						<h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
+							<Icon name="ph:folder" class="w-4 h-4 text-accent glow-icon" />
+							Tags
+						</h3>
+						<button 
+							id="clear-tags-filter-mobile"
+							class="clear-filter-btn"
+							title="Clear tag filter"
+							style="visibility: hidden; opacity: 0; pointer-events: none;"
+						>
+							<Icon name="ph:x" class="w-3.5 h-3.5" />
+						</button>
+					</div>
 					<ul class="tags-list">
 						{sortedTags.map(({ tag, count }) => (
 							<li>
@@ -139,7 +149,7 @@ const monthNames = [
 								id="clear-date-filter-mobile"
 								class="clear-filter-btn"
 								title="Clear date filter"
-								style="display: none;"
+								style="visibility: hidden; opacity: 0; pointer-events: none;"
 							>
 								<Icon name="ph:x" class="w-3.5 h-3.5" />
 							</button>
@@ -185,7 +195,18 @@ const monthNames = [
 		<!-- Desktop Filter Card (Tags) -->
 		{sortedTags.length > 0 && (
 			<Card class="filter-card hidden lg:block lg:sticky lg:top-4 lg:self-start">
-				<CardHeader title="Filter" icon="folder" />
+				<div class="flex items-center gap-2 mb-3">
+					<Icon name="ph:folder" class="w-4 h-4 text-accent glow-icon" />
+					<span class="text-sm font-semibold text-foreground">Filter</span>
+					<button 
+						id="clear-tags-filter-desktop"
+						class="clear-filter-btn"
+						title="Clear tag filter"
+						style="visibility: hidden; opacity: 0; pointer-events: none;"
+					>
+						<Icon name="ph:x" class="w-3.5 h-3.5" />
+					</button>
+				</div>
 				<ul class="tags-list">
 					{sortedTags.map(({ tag, count }) => (
 						<li>
@@ -254,7 +275,7 @@ const monthNames = [
 						id="clear-date-filter-desktop"
 						class="clear-filter-btn"
 						title="Clear date filter"
-						style="display: none;"
+						style="visibility: hidden; opacity: 0; pointer-events: none;"
 					>
 						<Icon name="ph:x" class="w-3.5 h-3.5" />
 					</button>
@@ -308,34 +329,58 @@ const monthNames = [
 		gap: 0.5rem;
 	}
 
-	/* Geek Style Tag - Compact & Sharp */
+	/* Geek Style Tag - Glow Effect (No Border) */
 	.blog-tag {
 		display: flex;
 		align-items: center;
 		gap: 0.375rem;
 		padding: 0.25rem 0.5rem;
-		background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
+		background: transparent;
 		color: var(--color-foreground);
 		text-decoration: none;
-		border: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
+		border: none;
 		cursor: pointer;
-		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 		font-size: 0.8125rem;
 		position: relative;
 	}
 
-	.blog-tag:hover,
-	.blog-tag:focus-visible {
-		background: color-mix(in srgb, var(--color-foreground) 8%, transparent);
-		border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-		box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 20%, transparent);
+	.blog-tag::before {
+		content: '';
+		position: absolute;
+		inset: -6px;
+		background: radial-gradient(
+			ellipse 100% 60% at 50% 50%,
+			color-mix(in srgb, var(--color-accent) 10%, transparent),
+			transparent 70%
+		);
+		opacity: 0;
+		transition: opacity 300ms ease;
+		pointer-events: none;
+		filter: blur(6px);
+		z-index: -1;
+	}
+
+	/* Only apply hover effects on devices that support hover */
+	@media (hover: hover) {
+		.blog-tag:hover,
+		.blog-tag:focus-visible {
+			color: var(--color-accent);
+		}
+
+		.blog-tag:hover::before,
+		.blog-tag:focus-visible::before {
+			opacity: 0.5;
+		}
 	}
 
 	.blog-tag.active {
-		background: color-mix(in srgb, var(--color-accent) 15%, transparent);
 		color: var(--color-accent);
-		border-color: var(--color-accent);
-		box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 30%, transparent);
+		font-weight: 600;
+	}
+
+	.blog-tag.active::before {
+		opacity: 1;
 	}
 
 	.tag-count {
@@ -602,12 +647,14 @@ const monthNames = [
 		z-index: -1;
 	}
 
-	.year-button:hover {
-		color: var(--color-accent);
-	}
+	@media (hover: hover) {
+		.year-button:hover {
+			color: var(--color-accent);
+		}
 
-	.year-button:hover::before {
-		opacity: 0.6;
+		.year-button:hover::before {
+			opacity: 0.6;
+		}
 	}
 
 	.year-indicator {
@@ -679,16 +726,19 @@ const monthNames = [
 		z-index: -1;
 	}
 
-	.month-button:hover {
-		color: var(--color-accent);
-	}
+	@media (hover: hover) {
+		.month-button:hover {
+			color: var(--color-accent);
+		}
 
-	.month-button:hover::before {
-		opacity: 0.5;
+		.month-button:hover::before {
+			opacity: 0.5;
+		}
 	}
 
 	.month-button.active {
 		color: var(--color-accent);
+		font-weight: 600;
 	}
 
 	.month-button.active::before {
@@ -725,6 +775,8 @@ const monthNames = [
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		min-width: 1.75rem;
+		min-height: 1.75rem;
 	}
 
 	.clear-filter-btn:hover {
@@ -750,6 +802,10 @@ const monthNames = [
 	const url = new URL(window.location.href);
 	const initialTags = url.searchParams.get('tags')?.split(',').filter((tag) => tag.length > 0) || [];
 	const selectedTags = new Set(initialTags);
+
+	// Tag filter elements
+	const clearTagsDesktop = document.getElementById('clear-tags-filter-desktop');
+	const clearTagsMobile = document.getElementById('clear-tags-filter-mobile');
 
 	// Date filter state
 	const initialYear = url.searchParams.get('year');
@@ -799,6 +855,28 @@ const monthNames = [
 			closeMobileFilter();
 		}
 	});
+
+	function updateTagClearButtonVisibility() {
+		const hasTagFilter = selectedTags.size > 0;
+		if (clearTagsDesktop) {
+			clearTagsDesktop.style.visibility = hasTagFilter ? 'visible' : 'hidden';
+			clearTagsDesktop.style.opacity = hasTagFilter ? '1' : '0';
+			clearTagsDesktop.style.pointerEvents = hasTagFilter ? 'auto' : 'none';
+		}
+		if (clearTagsMobile) {
+			clearTagsMobile.style.visibility = hasTagFilter ? 'visible' : 'hidden';
+			clearTagsMobile.style.opacity = hasTagFilter ? '1' : '0';
+			clearTagsMobile.style.pointerEvents = hasTagFilter ? 'auto' : 'none';
+		}
+	}
+
+	function clearTagFilter() {
+		selectedTags.clear();
+		tags.forEach((tag) => tag.classList.remove('active'));
+		updatePostsVisibility();
+		updateURL();
+		updateTagClearButtonVisibility();
+	}
 
 	// Close on escape key
 	document.addEventListener('keydown', (e) => {
@@ -901,8 +979,13 @@ const monthNames = [
 
 			updatePostsVisibility();
 			updateURL();
+			updateTagClearButtonVisibility();
 		});
 	});
+
+	// Clear tag filter buttons
+	clearTagsDesktop?.addEventListener('click', clearTagFilter);
+	clearTagsMobile?.addEventListener('click', clearTagFilter);
 
 	// Clear date filter buttons
 	const clearDateDesktop = document.getElementById('clear-date-filter-desktop');
@@ -911,10 +994,14 @@ const monthNames = [
 	function updateClearButtonVisibility() {
 		const isDateFilterActive = selectedYear !== null;
 		if (clearDateDesktop) {
-			clearDateDesktop.style.display = isDateFilterActive ? 'flex' : 'none';
+			clearDateDesktop.style.visibility = isDateFilterActive ? 'visible' : 'hidden';
+			clearDateDesktop.style.opacity = isDateFilterActive ? '1' : '0';
+			clearDateDesktop.style.pointerEvents = isDateFilterActive ? 'auto' : 'none';
 		}
 		if (clearDateMobile) {
-			clearDateMobile.style.display = isDateFilterActive ? 'flex' : 'none';
+			clearDateMobile.style.visibility = isDateFilterActive ? 'visible' : 'hidden';
+			clearDateMobile.style.opacity = isDateFilterActive ? '1' : '0';
+			clearDateMobile.style.pointerEvents = isDateFilterActive ? 'auto' : 'none';
 		}
 	}
 
@@ -1029,6 +1116,7 @@ const monthNames = [
 	});
 
 	// Initialize
+	updateTagClearButtonVisibility();
 	updateClearButtonVisibility();
 	updateYearButtonStates();
 	updatePostsVisibility();

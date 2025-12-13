@@ -4,7 +4,6 @@ description: nova在其影评《小评 すずめの戸締まり（铃芽之旅�
 pubDate: 2023-05-24
 tags:
 - 御宅訪問
-- 随笔
 authors:
 - nova
 ---
