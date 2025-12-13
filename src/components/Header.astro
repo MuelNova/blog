@@ -133,39 +133,33 @@ const items = [
 		border-bottom: none;
 	}
 
-	/* Ensure theme selector shows in mobile menu */
-	.theme-selector-li {
-		display: block;
-		width: 100%;
-	}
-
+	/* Component li items */
+	.theme-selector-li,
 	.language-switcher-li {
-		display: block;
-		width: 100%;
-	}
-
-	/* Make theme selector full width in mobile menu */
-	.theme-selector-li :global(theme-selector) {
-		display: block;
-		width: 100%;
-	}
-
-	.language-switcher-li :global(.language-switcher) {
 		display: flex;
-		width: 100%;
+		align-items: center;
 	}
 
-	.theme-selector-li :global(button[data-open-modal]) {
-		display: flex;
-		width: 100%;
-		justify-content: flex-start;
-		padding: 0.25rem 0.5rem;
-		font-size: 1.125rem;
-	}
+	/* Mobile menu: full width */
+	@media (max-width: 639px) {
+		.theme-selector-li,
+		.language-switcher-li {
+			width: 100%;
+		}
 
-	.theme-selector-li :global(.nav-label-mobile) {
-		display: inline;
-		margin-left: 0.5rem;
+		/* Full width buttons in mobile menu */
+		.theme-selector-li :global(#theme-selector-btn),
+		.language-switcher-li :global(#lang-switcher-btn) {
+			width: 100%;
+			justify-content: flex-start;
+			padding: 0.375rem 0.5rem;
+		}
+
+		/* Show labels in mobile menu */
+		.theme-selector-li :global(.nav-label-mobile),
+		.language-switcher-li :global(.nav-label-mobile) {
+			display: inline;
+		}
 	}
 
 	[data-open='true'] .nav-list {
@@ -193,24 +187,21 @@ const items = [
 			border-bottom: none;
 		}
 
-		.theme-selector-li {
-			width: auto;
-		}
-
+		.theme-selector-li,
 		.language-switcher-li {
 			width: auto;
 		}
 
-		.theme-selector-li :global(theme-selector) {
-			display: inline-block;
+		.theme-selector-li :global(.theme-selector-wrapper),
+		.language-switcher-li :global(.lang-switcher-wrapper) {
+			display: inline-flex;
 			width: auto;
 		}
 
-		.language-switcher-li :global(.language-switcher) {
-			width: auto;
-		}
-
-		.theme-selector-li :global(button[data-open-modal]) {
+		/* Reset button styles for desktop */
+		.theme-selector-li :global(.nav-trigger),
+		.theme-selector-li :global(#theme-selector-btn),
+		.language-switcher-li :global(#lang-switcher-btn) {
 			display: inline-flex;
 			width: auto;
 			justify-content: center;
@@ -218,7 +209,9 @@ const items = [
 			font-size: 1rem;
 		}
 
-		.theme-selector-li :global(.nav-label-mobile) {
+		/* Hide text labels on desktop - show only icons */
+		.theme-selector-li :global(.nav-label-mobile),
+		.language-switcher-li :global(.nav-label-mobile) {
 			display: none;
 		}
 	}
