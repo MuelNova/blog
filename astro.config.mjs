@@ -16,6 +16,15 @@ import icon from 'astro-icon';
 import remarkDirective from 'remark-directive';
 import { remarkAdmonitions } from './src/plugins/remark-admonitions.ts';
 
+const languageAliases = {
+  'assembly': 'asm',
+  'Assembly': 'asm',
+  'ASSEMBLY': 'asm',
+  'C': 'c',
+  'ld': 'text',
+  'gdbscript': 'bash',
+};
+
 // https://astro.build/config
 export default defineConfig({
   output: 'static',
@@ -30,7 +39,11 @@ export default defineConfig({
   markdown: {
     remarkPlugins: [remarkDirective, remarkAdmonitions],
   },
-  integrations: [expressiveCode(), mdx({
+  integrations: [expressiveCode({
+    shiki: {
+      langAlias: languageAliases,
+    },
+  }), mdx({
     remarkPlugins: [remarkDirective, remarkAdmonitions],
   }), sitemap(), react(), icon()],
   adapter: cloudflare({
