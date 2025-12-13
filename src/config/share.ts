@@ -19,4 +19,9 @@ export const SHARE_CONFIG = {
 	
 	/** 截图固定宽度（像素）- 确保移动端和桌面端一致 */
 	screenshotWidth: 800,
+
+	allowedDomains: [
+		'nova.gal',
+		'localhost',
+	],
 } as const;

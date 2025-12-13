@@ -335,6 +335,74 @@ import { Icon } from 'astro-icon/components';
 
 	let currentDataUrl = '';
 
+	const placeholderCache = new Map<string, string>();
+	const PLACEHOLDER_TEXT = 'Image Placeholder (CORS)';
+
+	function isAllowedImageSource(src: string) {
+		if (!src) return true;
+		if (
+			src.startsWith(window.location.origin) ||
+			src.startsWith('/') ||
+			src.startsWith('data:') ||
+			src.startsWith('blob:')
+		) {
+			return true;
+		}
+
+		return SHARE_CONFIG.allowedDomains.some(domain => src.includes(domain));
+	}
+
+	function createPlaceholderDataUrl(width = 120, height = 80) {
+		const styles = getComputedStyle(document.documentElement);
+		const bgColor = styles.getPropertyValue('--color-background').trim() || 'rgba(0,0,0,0.7)';
+		const accentColor = styles.getPropertyValue('--color-accent').trim() || '#7a7a7a';
+		const textColor = styles.getPropertyValue('--color-foreground').trim() || '#d6d6d6';
+
+		const canvas = document.createElement('canvas');
+		canvas.width = Math.max(width, 60);
+		canvas.height = Math.max(height, 60);
+
+		const ctx = canvas.getContext('2d');
+		if (!ctx) return '';
+
+		ctx.fillStyle = bgColor || 'rgba(0, 0, 0, 0.6)';
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.strokeStyle = accentColor;
+		ctx.strokeRect(1, 1, canvas.width - 2, canvas.height - 2);
+		ctx.fillStyle = textColor;
+		ctx.font = '600 30px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		ctx.fillText(PLACEHOLDER_TEXT, canvas.width / 2, canvas.height / 2);
+
+		return canvas.toDataURL('image/png');
+	}
+
+	function getPlaceholderFor(img: HTMLImageElement) {
+		const width = img.naturalWidth || img.width || img.clientWidth || 120;
+		const height = img.naturalHeight || img.height || img.clientHeight || 80;
+		const key = `${width}x${height}`;
+
+		if (!placeholderCache.has(key)) {
+			placeholderCache.set(key, createPlaceholderDataUrl(width, height));
+		}
+
+		return placeholderCache.get(key) || '';
+	}
+
+	function replaceCrossOriginImages(root: HTMLElement) {
+		const imgs = root.querySelectorAll('img');
+		imgs.forEach(img => {
+			if (isAllowedImageSource(img.src)) return;
+
+			const placeholder = getPlaceholderFor(img);
+			img.dataset.placeholder = 'true';
+			img.dataset.originalSrc = img.src;
+			img.src = placeholder;
+			img.alt = img.alt ? `${img.alt} (placeholder)` : 'Image placeholder';
+		});
+	}
+
 	// Open share modal
 	function openShare() {
 		shareOverlay?.classList.remove('pointer-events-none');
@@ -546,6 +614,8 @@ import { Icon } from 'astro-icon/components';
 				
 				wrapper.appendChild(watermark);
 			}
+
+			replaceCrossOriginImages(wrapper);
 			
 			document.body.appendChild(wrapper);
 
@@ -577,6 +647,13 @@ import { Icon } from 'astro-icon/components';
 				pixelRatio: 2, // Higher quality
 				backgroundColor: bgColor,
 				cacheBust: true,
+				// Skip cross-origin images that don't support CORS to avoid errors
+				filter: (node) => {
+					if (node.tagName !== 'IMG') return true;
+					const img = node as HTMLImageElement;
+					if (img.dataset.placeholder === 'true') return true;
+					return isAllowedImageSource(img.src);
+				},
 			});
 
 			// Remove wrapper
@@ -592,6 +669,13 @@ import { Icon } from 'astro-icon/components';
 
 		} catch (error) {
 			console.error('Screenshot generation failed:', error);
+			
+			// Remove wrapper if it exists (fix: wrapper not removed on error)
+			const existingWrapper = document.body.querySelector('div[style*="position: absolute"][style*="z-index: -1"]');
+			if (existingWrapper) {
+				document.body.removeChild(existingWrapper);
+			}
+			
 			if (statusDiv) statusDiv.textContent = 'Generation failed. Please try again.';
 			shareActionsDiv?.classList.remove('hidden');
 			setTimeout(() => {
