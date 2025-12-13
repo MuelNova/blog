@@ -6,7 +6,6 @@ description: 博主 nova 厌倦了每次通过 SSH 手动执行 `git pull && npm
 pubDate: 2023-05-11
 tags:
 - cheatsheet
-- 小技巧
 authors:
 - nova
 ---

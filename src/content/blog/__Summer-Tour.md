@@ -5,7 +5,6 @@ description: 在今年 4 月份时，恰巧了解到了 NUS 的 Summer WorkShop 
 pubDate: 2023-07-20
 tags:
 - 御宅訪問
-- 随笔
 authors:
 - nova
 ---

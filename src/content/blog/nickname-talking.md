@@ -4,7 +4,6 @@ description: nova 在这篇随笔中分享了他关于昵称“Nova Noir”的�
 pubDate: 2023-05-13
 tags:
 - 御宅訪問
-- 随笔
 authors:
 - nova
 ---

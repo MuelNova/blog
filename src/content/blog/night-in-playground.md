@@ -4,7 +4,6 @@ description: 博客作者nova写了一篇随笔，记录了他在北方某大学
 pubDate: 2022-11-16
 tags:
 - 御宅訪問
-- 随笔
 authors:
 - nova
 ---
