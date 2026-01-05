@@ -410,17 +410,114 @@ const t = useTranslations(lang);
 		return placeholderCache.get(key) || '';
 	}
 
-	function replaceCrossOriginImages(root: HTMLElement) {
+	function applyPlaceholderToImage(img: HTMLImageElement, originalSrc?: string) {
+		const placeholder = getPlaceholderFor(img);
+		if (originalSrc) {
+			img.dataset.originalSrc = originalSrc;
+		} else if (!img.dataset.originalSrc) {
+			img.dataset.originalSrc = img.src;
+		}
+		img.dataset.placeholder = 'true';
+		img.src = placeholder;
+		img.alt = img.alt ? `${img.alt} (${PLACEHOLDER_ALT})` : PLACEHOLDER_ALT;
+	}
+
+	function buildCandidateImageUrls(src: string) {
+		if (!src) return [];
+		let absoluteUrl = src;
+		try {
+			absoluteUrl = new URL(src, window.location.href).href;
+		} catch (error) {
+			console.warn('Failed to resolve image URL for sharing:', src, error);
+		}
+		const proxies = (SHARE_CONFIG.imageProxyPrefixes || []).map(prefix => `${prefix}${encodeURIComponent(absoluteUrl)}`);
+		return [absoluteUrl, ...proxies];
+	}
+
+	function blobToDataUrl(blob: Blob) {
+		return new Promise<string>((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				if (typeof reader.result === 'string') {
+					resolve(reader.result);
+				} else {
+					reject(new Error('Failed to convert blob to data URL'));
+				}
+			};
+			reader.onerror = () => reject(new Error('Base64 conversion failed'));
+			reader.readAsDataURL(blob);
+		});
+	}
+
+	async function fetchImageBlobWithTimeout(url: string) {
+		const controller = new AbortController();
+		const timeoutMs = SHARE_CONFIG.imageFetchTimeoutMs ?? 8000;
+		const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+		try {
+			const response = await fetch(url, {
+				mode: 'cors',
+				credentials: 'omit',
+				cache: 'no-store',
+				signal: controller.signal,
+			});
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}`);
+			}
+			return await response.blob();
+		} finally {
+			window.clearTimeout(timeoutId);
+		}
+	}
+
+	async function inlineRemoteImage(src: string) {
+		const candidates = buildCandidateImageUrls(src);
+		for (const candidate of candidates) {
+			try {
+				const blob = await fetchImageBlobWithTimeout(candidate);
+				if (SHARE_CONFIG.maxImageBytes && blob.size > SHARE_CONFIG.maxImageBytes) {
+					throw new Error(`Image is larger than allowed (${blob.size} bytes)`);
+				}
+				return await blobToDataUrl(blob);
+			} catch (error) {
+				console.warn('Failed to inline remote image for sharing:', candidate, error);
+			}
+		}
+		return '';
+	}
+
+	async function replaceCrossOriginImages(root: HTMLElement) {
 		const imgs = root.querySelectorAll('img');
-		imgs.forEach(img => {
+		const tasks = Array.from(imgs).map(async img => {
 			if (isAllowedImageSource(img.src)) return;
 
-			const placeholder = getPlaceholderFor(img);
-			img.dataset.placeholder = 'true';
-			img.dataset.originalSrc = img.src;
-			img.src = placeholder;
-			img.alt = img.alt ? `${img.alt} (${PLACEHOLDER_ALT})` : PLACEHOLDER_ALT;
+			const originalSrc = img.dataset.originalSrc || img.currentSrc || img.getAttribute('data-src') || img.src;
+			if (!originalSrc) {
+				applyPlaceholderToImage(img);
+				return;
+			}
+
+			if (!SHARE_CONFIG.inlineExternalImages) {
+				applyPlaceholderToImage(img, originalSrc);
+				return;
+			}
+
+			try {
+				const dataUrl = await inlineRemoteImage(originalSrc);
+				if (dataUrl) {
+					img.src = dataUrl;
+					img.removeAttribute('srcset');
+					img.dataset.placeholder = 'false';
+					img.decoding = 'sync';
+					return;
+				}
+			} catch (error) {
+				console.warn('Base64 conversion failed, falling back to placeholder:', error);
+			}
+
+			applyPlaceholderToImage(img, originalSrc);
 		});
+
+		await Promise.all(tasks);
 	}
 
 	// Open share modal
@@ -635,7 +732,7 @@ const t = useTranslations(lang);
 				wrapper.appendChild(watermark);
 			}
 
-			replaceCrossOriginImages(wrapper);
+			await replaceCrossOriginImages(wrapper);
 			
 			document.body.appendChild(wrapper);
 

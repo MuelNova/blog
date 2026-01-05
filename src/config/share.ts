@@ -20,6 +20,21 @@ export const SHARE_CONFIG = {
 	/** 截图固定宽度（像素）- 确保移动端和桌面端一致 */
 	screenshotWidth: 800,
 
+	/** 是否尝试将跨域图片转为 Base64 内联 */
+	inlineExternalImages: true,
+
+	/**
+	 * 图片代理前缀（可列出多个，会依次尝试）。
+	 * 例如 https://images.weserv.nl/?url=
+	 */
+	imageProxyPrefixes: ['https://images.weserv.nl/?url='],
+
+	/** 单个远程图片的获取超时时间（毫秒） */
+	imageFetchTimeoutMs: 8000,
+
+	/** 允许内联的远程图片的最大体积（字节） */
+	maxImageBytes: 0,
+
 	allowedDomains: [
 		'nova.gal',
 		'localhost',
