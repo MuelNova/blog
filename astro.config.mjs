@@ -28,7 +28,7 @@ const languageAliases = {
 // https://astro.build/config
 export default defineConfig({
   output: 'static',
-  site: 'https://astro.nova.gal',
+  site: 'https://nova.gal',
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'zh'],
