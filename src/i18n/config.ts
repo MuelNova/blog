@@ -71,6 +71,11 @@ export function formatDate(date: Date, lang: SupportedLang) {
 
 export type Lang = SupportedLang;
 
+
+// NOTE(theme-loader coupling): ThemeLoader uses locale codes to detect localized home routes
+// (e.g. '/', '/zh', '/zh/index.html') during early theme bootstrap.
+// If i18n routing strategy changes (locale prefixes, homepage patterns, or default-locale behavior),
+// update `src/components/ThemeLoader.astro` homepage detection logic accordingly.
 export function resolveLang(pathname: string): Lang {
   try {
     const locale = getLocaleByPath(pathname);

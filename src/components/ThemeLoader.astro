@@ -9,12 +9,23 @@
 
 import { ALL_THEME_IDS, DARK_THEME_IDS, LIGHT_THEME_IDS } from '../config/theme-client-data';
 import { DEFAULT_THEME_ID, THEME_STORAGE_KEY } from '../config/theme-runtime';
+import { languages } from '../i18n/locales';
+
+const localeCodes = Object.keys(languages);
 ---
 
-<script is:inline define:vars={{ allThemeIds: ALL_THEME_IDS, darkThemeIds: DARK_THEME_IDS, lightThemeIds: LIGHT_THEME_IDS, defaultThemeId: DEFAULT_THEME_ID, themeStorageKey: THEME_STORAGE_KEY }}>
+<script is:inline define:vars={{ allThemeIds: ALL_THEME_IDS, darkThemeIds: DARK_THEME_IDS, lightThemeIds: LIGHT_THEME_IDS, defaultThemeId: DEFAULT_THEME_ID, themeStorageKey: THEME_STORAGE_KEY, localeCodes }}>
 	(() => {
 		try {
-			const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+			const normalizePathname = (pathname) => {
+				const withoutIndex = pathname.replace(/\/index\.html$/, '/');
+				const withoutTrailingSlash = withoutIndex.replace(/\/+$/, '');
+				return withoutTrailingSlash || '/';
+			};
+
+			const currentPath = normalizePathname(window.location.pathname);
+			const homePaths = new Set(['/', ...localeCodes.map((locale) => `/${locale}`)]);
+			const isHomePage = homePaths.has(currentPath);
 			const isLocked = localStorage.getItem('theme-locked') === 'true';
 			const themePreference = localStorage.getItem('theme-preference') || 'dark';
 			const storedTheme = localStorage.getItem(themeStorageKey);
@@ -36,12 +47,10 @@ import { DEFAULT_THEME_ID, THEME_STORAGE_KEY } from '../config/theme-runtime';
 
 <script>
 	import { DEFAULT_THEME_ID, THEME_STORAGE_KEY } from '../config/theme-runtime';
-	import { ALL_THEME_IDS, DARK_THEME_IDS, LIGHT_THEME_IDS } from '../config/theme-client-data';
+	import { ALL_THEME_IDS } from '../config/theme-client-data';
 	import {
 		configureThemeBus,
 		getCurrentTheme,
-		getThemePreference,
-		isThemeLocked,
 		isValidThemeId,
 		setCurrentTheme,
 	} from '../lib/theme-bus';
@@ -52,20 +61,7 @@ import { DEFAULT_THEME_ID, THEME_STORAGE_KEY } from '../config/theme-runtime';
 			validThemeIds: ALL_THEME_IDS,
 		});
 
-		// Check if theme is locked
-		const isLocked = isThemeLocked();
-		const themePreference = getThemePreference('dark'); // 'dark' or 'light'
-		const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
-
 		let themeToApply = getCurrentTheme();
-
-		// Fallback randomization path (should rarely run because inline script already applies this rule)
-		if (isHomePage && !isLocked && !themeToApply) {
-			const preferredPool = themePreference === 'light' ? LIGHT_THEME_IDS : DARK_THEME_IDS;
-			const themePool = preferredPool.length > 0 ? preferredPool : ALL_THEME_IDS;
-			const randomIndex = Math.floor(Math.random() * themePool.length);
-			themeToApply = themePool[randomIndex];
-		}
 
 		// Apply theme if exists
 		setCurrentTheme(themeToApply, {
