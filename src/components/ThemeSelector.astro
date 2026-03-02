@@ -309,17 +309,28 @@ const t = useTranslations(lang);
 	}
 </style>
 
-<script is:inline>
+<script>
+	import {
+		getCurrentTheme,
+		getThemePreference,
+		isIntroEnabled,
+		isThemeLocked,
+		setCurrentTheme,
+		setIntroEnabled,
+		setThemeLocked,
+		setThemePreference,
+	} from '../lib/theme-bus';
+
 	(function() {
-		const openBtn = document.getElementById('theme-selector-btn');
-		const closeBtn = document.querySelector('[data-close-modal]');
-		const dialog = document.querySelector('[data-theme-dialog]');
-		const tabButtons = document.querySelectorAll('[data-tab]');
-		const themeOptions = document.querySelectorAll('.theme-option');
-		const lockToggle = document.querySelector('[data-theme-lock-toggle]');
-		const lockButton = document.querySelector('[data-lock-button]');
-		const introToggle = document.querySelector('[data-intro-toggle]');
-		const introButton = document.querySelector('[data-intro-button]');
+		const openBtn = document.getElementById('theme-selector-btn') as HTMLButtonElement | null;
+		const closeBtn = document.querySelector('[data-close-modal]') as HTMLElement | null;
+		const dialog = document.querySelector('[data-theme-dialog]') as HTMLDialogElement | null;
+		const tabButtons = document.querySelectorAll<HTMLElement>('[data-tab]');
+		const themeOptions = document.querySelectorAll<HTMLElement>('.theme-option');
+		const lockToggle = document.querySelector('[data-theme-lock-toggle]') as HTMLInputElement | null;
+		const lockButton = document.querySelector('[data-lock-button]') as HTMLButtonElement | null;
+		const introToggle = document.querySelector('[data-intro-toggle]') as HTMLInputElement | null;
+		const introButton = document.querySelector('[data-intro-button]') as HTMLButtonElement | null;
 
 		function openModal() {
 			highlightCurrentTheme();
@@ -332,36 +343,38 @@ const t = useTranslations(lang);
 			document.body.classList.remove('overflow-hidden');
 		}
 
-		function switchTab(tabType) {
+		function switchTab(tabType: string) {
 			tabButtons.forEach((tab) => {
 				tab.dataset.active = tab.dataset.tab === tabType ? 'true' : '';
 			});
-			localStorage.setItem('theme-preference', tabType);
+			setThemePreference(tabType as 'all' | 'dark' | 'light');
 			themeOptions.forEach((option) => {
 				const optionType = option.dataset.themeType;
 				option.classList.toggle('hidden', tabType !== 'all' && optionType !== tabType);
 			});
 		}
 
-		function selectTheme(themeId) {
-			document.documentElement.setAttribute('data-theme', themeId);
-			localStorage.setItem('theme', themeId);
+		function selectTheme(themeId: string) {
+			setCurrentTheme(themeId, {
+				persist: true,
+				source: 'theme-selector',
+			});
 			const themeOption = Array.from(themeOptions).find((opt) => opt.dataset.themeId === themeId);
 			if (themeOption?.dataset.themeType) {
-				localStorage.setItem('theme-preference', themeOption.dataset.themeType);
+				setThemePreference(themeOption.dataset.themeType as 'all' | 'dark' | 'light');
 			}
 			closeModal();
 			highlightCurrentTheme();
 		}
 
 		function highlightCurrentTheme() {
-			const currentTheme = document.documentElement.getAttribute('data-theme') || 'andromeeda';
+			const currentTheme = getCurrentTheme();
 			themeOptions.forEach((option) => {
 				option.classList.toggle('current-theme', option.dataset.themeId === currentTheme);
 			});
 		}
 
-		function updateLockUI(isLocked) {
+		function updateLockUI(isLocked: boolean) {
 			const indicator = document.querySelector('.lock-indicator');
 			const openIcons = document.querySelectorAll('.lock-icon-open');
 			const closedIcons = document.querySelectorAll('.lock-icon-closed');
@@ -377,7 +390,7 @@ const t = useTranslations(lang);
 			lockButton?.classList.toggle('text-primary', isLocked);
 		}
 
-		function updateIntroUI(isEnabled) {
+		function updateIntroUI(isEnabled: boolean) {
 			const indicator = document.querySelector('.intro-indicator');
 			const onIcons = document.querySelectorAll('.intro-icon-on');
 			const offIcons = document.querySelectorAll('.intro-icon-off');
@@ -412,28 +425,32 @@ const t = useTranslations(lang);
 			});
 		});
 
-		lockToggle?.addEventListener('change', (e) => {
-			const isLocked = e.target.checked;
-			localStorage.setItem('theme-locked', String(isLocked));
+		lockToggle?.addEventListener('change', (e: Event) => {
+			const target = e.target as HTMLInputElement | null;
+			if (!target) return;
+			const isLocked = target.checked;
+			setThemeLocked(isLocked);
 			updateLockUI(isLocked);
 		});
 
 		lockButton?.addEventListener('click', () => {
-			const isLocked = localStorage.getItem('theme-locked') !== 'true';
-			localStorage.setItem('theme-locked', String(isLocked));
+			const isLocked = !isThemeLocked();
+			setThemeLocked(isLocked);
 			if (lockToggle) lockToggle.checked = isLocked;
 			updateLockUI(isLocked);
 		});
 
-		introToggle?.addEventListener('change', (e) => {
-			const isEnabled = e.target.checked;
-			localStorage.setItem('intro-enabled', String(isEnabled));
+		introToggle?.addEventListener('change', (e: Event) => {
+			const target = e.target as HTMLInputElement | null;
+			if (!target) return;
+			const isEnabled = target.checked;
+			setIntroEnabled(isEnabled);
 			updateIntroUI(isEnabled);
 		});
 
 		introButton?.addEventListener('click', () => {
-			const isEnabled = localStorage.getItem('intro-enabled') === 'false';
-			localStorage.setItem('intro-enabled', String(isEnabled));
+			const isEnabled = !isIntroEnabled();
+			setIntroEnabled(isEnabled);
 			if (introToggle) introToggle.checked = isEnabled;
 			updateIntroUI(isEnabled);
 		});
@@ -447,9 +464,9 @@ const t = useTranslations(lang);
 		});
 
 		// Initialize
-		const savedTab = localStorage.getItem('theme-preference') || 'all';
-		const isLocked = localStorage.getItem('theme-locked') === 'true';
-		const introEnabled = localStorage.getItem('intro-enabled') !== 'false';
+		const savedTab = getThemePreference('all');
+		const isLocked = isThemeLocked();
+		const introEnabled = isIntroEnabled();
 		
 		if (lockToggle) lockToggle.checked = isLocked;
 		if (introToggle) introToggle.checked = introEnabled;

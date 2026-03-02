@@ -25,6 +25,8 @@ const { repo, repoId, category, categoryId, reactionsEnabled, inputPosition, lan
 </div>
 
 <script>
+	import { getCurrentTheme, onThemeChange } from '../lib/theme-bus';
+
 	function loadGiscus() {
 		const giscusDiv = document.querySelector('.giscus-container');
 		if (!giscusDiv) {
@@ -42,23 +44,7 @@ const { repo, repoId, category, categoryId, reactionsEnabled, inputPosition, lan
 		const lang = giscusDiv.getAttribute('data-lang')!;
 		const loadingAttr = giscusDiv.getAttribute('data-loading')!;
 
-		console.log('Loading Giscus with config:', {
-			origin,
-			repo,
-			repoId,
-			category,
-			categoryId,
-			reactionsEnabled,
-			inputPosition,
-			lang,
-			loadingAttr
-		});
-		
-
-		// Get current theme from localStorage or DOM attribute, default to 'spectre'
-		const currentTheme = localStorage.getItem('theme') || 
-		                     document.documentElement.getAttribute('data-theme') || 
-		                     'spectre';
+		const currentTheme = getCurrentTheme();
 		const themeUrl = `${origin}/giscus/${currentTheme}.css`;
 		
 		const script = document.createElement('script');
@@ -82,16 +68,13 @@ const { repo, repoId, category, categoryId, reactionsEnabled, inputPosition, lan
 	}
 
 	async function updateGiscusTheme(themeId: string) {
-		console.log('Updating Giscus theme to:', themeId);
-		
 		let giscusFrame: HTMLIFrameElement | null = null;
 		
 		// Try to find the Giscus iframe (retry up to 3 times)
 		for (let i = 0; i < 3; i++) {
 			giscusFrame = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
 			if (giscusFrame) break;
-			
-			console.log('Giscus iframe not found, retrying...');
+
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 		}
 
@@ -112,35 +95,12 @@ const { repo, repoId, category, categoryId, reactionsEnabled, inputPosition, lan
 		);
 	}
 
-	function listenForThemeChange() {
-		// Listen for theme changes from localStorage
-		window.addEventListener('storage', async (e) => {
-			if (e.key === 'theme' && e.newValue) {
-				await updateGiscusTheme(e.newValue);
-			}
-		});
-
-		// Also watch for data-theme attribute changes on documentElement
-		const observer = new MutationObserver((mutations) => {
-			mutations.forEach(async (mutation) => {
-				if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-					const newTheme = document.documentElement.getAttribute('data-theme');
-					if (newTheme) {
-						await updateGiscusTheme(newTheme);
-					}
-				}
-			});
-		});
-
-		observer.observe(document.documentElement, {
-			attributes: true,
-			attributeFilter: ['data-theme'],
-		});
-	}
 
 	// Initialize Giscus
 	loadGiscus();
-	listenForThemeChange();
+	onThemeChange(async (detail) => {
+		await updateGiscusTheme(detail.themeId);
+	});
 </script>
 
 <style>

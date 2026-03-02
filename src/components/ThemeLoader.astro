@@ -6,39 +6,56 @@
  * Supports random theme on homepage visit and theme locking.
  * Respects user's dark/light theme preference.
  */
-import { getDarkThemes, getLightThemes } from '../config/themes';
-
-const darkThemes = await getDarkThemes();
-const lightThemes = await getLightThemes();
-const darkThemeIds = darkThemes.map(t => t.id);
-const lightThemeIds = lightThemes.map(t => t.id);
 ---
 
-<script is:inline>
+<script>
+	import { DEFAULT_THEME_ID, THEME_STORAGE_KEY } from '../config/theme-runtime';
+	import { ALL_THEME_IDS, DARK_THEME_IDS, LIGHT_THEME_IDS } from '../config/theme-client-data';
+	import {
+		configureThemeBus,
+		getStoredTheme,
+		getThemePreference,
+		isThemeLocked,
+		isValidThemeId,
+		setCurrentTheme,
+	} from '../lib/theme-bus';
+
 	(function loadTheme() {
-		const darkThemeIds = JSON.parse('{JSON.stringify(darkThemeIds)}');
-		const lightThemeIds = JSON.parse('{JSON.stringify(lightThemeIds)}');
+		configureThemeBus({
+			defaultThemeId: DEFAULT_THEME_ID,
+			validThemeIds: ALL_THEME_IDS,
+		});
 
 		// Check if theme is locked
-		const isLocked = localStorage.getItem('theme-locked') === 'true';
-		const storedTheme = localStorage.getItem('theme');
-		const themePreference = localStorage.getItem('theme-preference') || 'dark'; // 'dark' or 'light'
+		const isLocked = isThemeLocked();
+		const storedTheme = getStoredTheme();
+		const themePreference = getThemePreference('dark'); // 'dark' or 'light'
 		const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
 
-		let themeToApply = storedTheme || 'spectre';
+		let themeToApply = storedTheme || DEFAULT_THEME_ID;
 
-		// If on homepage and theme is not locked, pick a random theme based on preference
+		// If on homepage and theme is not locked, pick a random theme based on user preference
 		if (isHomePage && !isLocked) {
-			const themePool = themePreference === 'light' ? lightThemeIds : darkThemeIds;
+			const preferredPool = themePreference === 'light' ? LIGHT_THEME_IDS : DARK_THEME_IDS;
+			const themePool = preferredPool.length > 0 ? preferredPool : ALL_THEME_IDS;
 			const randomIndex = Math.floor(Math.random() * themePool.length);
 			themeToApply = themePool[randomIndex];
-			// Save the randomly selected theme
-			localStorage.setItem('theme', themeToApply);
 		}
 
 		// Apply theme if exists
-		if (themeToApply) {
-			document.documentElement.setAttribute('data-theme', themeToApply);
-		}
+		setCurrentTheme(themeToApply, {
+			persist: true,
+			source: 'theme-loader-init',
+		});
+
+		// Cross-tab theme synchronization
+		window.addEventListener('storage', (event: StorageEvent) => {
+			if (event.key !== THEME_STORAGE_KEY || !isValidThemeId(event.newValue)) return;
+
+			setCurrentTheme(event.newValue, {
+				persist: false,
+				source: 'storage-sync',
+			});
+		});
 	})();
 </script>

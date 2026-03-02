@@ -5,6 +5,8 @@
  * to avoid runtime Shiki loading issues on some adapters.
  */
 
+import { DARK_THEME_ID_SET, DARK_THEME_IDS, LIGHT_THEME_ID_SET, LIGHT_THEME_IDS } from './theme-client-data';
+
 export interface ThemeColors {
 	background: string;
 	foreground: string;
@@ -120,7 +122,7 @@ export async function getTheme(id: string): Promise<Theme> {
  */
 export async function getDefaultTheme(): Promise<Theme> {
 	const themes = await getThemes();
-	return themes[0]; // Spectre
+	return themes[0];
 }
 
 /**
@@ -144,16 +146,14 @@ export async function getRandomThemeId(): Promise<string> {
  * Get dark theme IDs
  */
 export async function getDarkThemeIds(): Promise<string[]> {
-	const themes = await getDarkThemes();
-	return themes.map(t => t.id);
+	return [...DARK_THEME_IDS];
 }
 
 /**
  * Get light theme IDs
  */
 export async function getLightThemeIds(): Promise<string[]> {
-	const themes = await getLightThemes();
-	return themes.map(t => t.id);
+	return [...LIGHT_THEME_IDS];
 }
 
 /**
@@ -161,7 +161,7 @@ export async function getLightThemeIds(): Promise<string[]> {
  */
 export async function getDarkThemes(): Promise<Theme[]> {
 	const themes = await getThemes();
-	return themes.filter((theme) => theme.tone === 'dark' || theme.id === 'spectre');
+	return themes.filter((theme) => DARK_THEME_ID_SET.has(theme.id));
 }
 
 /**
@@ -169,5 +169,5 @@ export async function getDarkThemes(): Promise<Theme[]> {
  */
 export async function getLightThemes(): Promise<Theme[]> {
 	const themes = await getThemes();
-	return themes.filter((theme) => theme.tone === 'light');
+	return themes.filter((theme) => LIGHT_THEME_ID_SET.has(theme.id));
 }
