@@ -198,6 +198,97 @@ const t = useTranslations(lang);
 		background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
 	}
 
+	.theme-option {
+		position: relative;
+		isolation: isolate;
+		overflow: hidden;
+	}
+
+	.theme-option::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -130%;
+		width: 55%;
+		height: 100%;
+		border-radius: inherit;
+		background: linear-gradient(
+			100deg,
+			transparent 0%,
+			color-mix(in srgb, var(--color-primary) 28%, transparent) 45%,
+			transparent 100%
+		);
+		opacity: 0;
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	.theme-option::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		box-shadow:
+			inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 35%, transparent),
+			inset 0 0 22px color-mix(in srgb, var(--color-primary) 24%, transparent),
+			0 0 12px color-mix(in srgb, var(--color-primary) 18%, transparent);
+		opacity: 0;
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	.theme-option > * {
+		position: relative;
+		z-index: 1;
+	}
+
+	.theme-option.preview-theme {
+		border-color: var(--color-primary);
+		background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
+	}
+
+	.theme-option.preview-theme::before {
+		opacity: 1;
+		animation: preview-sheen 1.35s ease-in-out infinite;
+	}
+
+	.theme-option.preview-theme::after {
+		opacity: 1;
+		animation: preview-glow 1.2s ease-in-out infinite;
+	}
+
+	@keyframes preview-sheen {
+		0% {
+			transform: translateX(0);
+			opacity: 0;
+		}
+		20% {
+			opacity: 0.65;
+		}
+		70% {
+			opacity: 0.35;
+		}
+		100% {
+			transform: translateX(420%);
+			opacity: 0;
+		}
+	}
+
+	@keyframes preview-glow {
+		from {
+			box-shadow:
+				inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 26%, transparent),
+				inset 0 0 16px color-mix(in srgb, var(--color-primary) 18%, transparent),
+				0 0 8px color-mix(in srgb, var(--color-primary) 12%, transparent);
+		}
+		to {
+			box-shadow:
+				inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 42%, transparent),
+				inset 0 0 24px color-mix(in srgb, var(--color-primary) 30%, transparent),
+				0 0 14px color-mix(in srgb, var(--color-primary) 22%, transparent);
+		}
+	}
+
 	dialog::backdrop {
 		animation: fade-in 150ms ease-out;
 	}
@@ -332,26 +423,24 @@ const t = useTranslations(lang);
 		const introToggle = document.querySelector('[data-intro-toggle]') as HTMLInputElement | null;
 		const introButton = document.querySelector('[data-intro-button]') as HTMLButtonElement | null;
 		let previewThemeId: string | null = null;
-		let themeBeforePreview: string | null = null;
+
+		function updatePreviewVisual() {
+			themeOptions.forEach((option) => {
+				option.classList.toggle('preview-theme', !!previewThemeId && option.dataset.themeId === previewThemeId);
+			});
+		}
 
 		function openModal() {
-			themeBeforePreview = getCurrentTheme();
 			previewThemeId = null;
+			updatePreviewVisual();
 			highlightCurrentTheme();
 			dialog?.showModal();
 			document.body.classList.add('overflow-hidden');
 		}
 
 		function closeModal() {
-			if (previewThemeId && themeBeforePreview && previewThemeId !== themeBeforePreview) {
-				setCurrentTheme(themeBeforePreview, {
-					persist: false,
-					source: 'theme-selector-preview-cancel',
-				});
-			}
-
 			previewThemeId = null;
-			themeBeforePreview = null;
+			updatePreviewVisual();
 			dialog?.close();
 			document.body.classList.remove('overflow-hidden');
 		}
@@ -368,26 +457,22 @@ const t = useTranslations(lang);
 		}
 
 		function selectTheme(themeId: string) {
-			if (previewThemeId !== themeId) {
-				setCurrentTheme(themeId, {
-					persist: false,
-					source: 'theme-selector-preview',
-				});
-				previewThemeId = themeId;
-				return;
-			}
-
 			setCurrentTheme(themeId, {
 				persist: true,
 				source: 'theme-selector',
 			});
-			previewThemeId = null;
-			themeBeforePreview = null;
 			const themeOption = Array.from(themeOptions).find((opt) => opt.dataset.themeId === themeId);
 			if (themeOption?.dataset.themeType) {
 				setThemePreference(themeOption.dataset.themeType as 'all' | 'dark' | 'light');
 			}
-			closeModal();
+
+			if (previewThemeId === themeId) {
+				closeModal();
+				return;
+			}
+
+			previewThemeId = themeId;
+			updatePreviewVisual();
 			highlightCurrentTheme();
 		}
 
