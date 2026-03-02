@@ -6,14 +6,40 @@
  * Supports random theme on homepage visit and theme locking.
  * Respects user's dark/light theme preference.
  */
+
+import { ALL_THEME_IDS, DARK_THEME_IDS, LIGHT_THEME_IDS } from '../config/theme-client-data';
+import { DEFAULT_THEME_ID, THEME_STORAGE_KEY } from '../config/theme-runtime';
 ---
+
+<script is:inline define:vars={{ allThemeIds: ALL_THEME_IDS, darkThemeIds: DARK_THEME_IDS, lightThemeIds: LIGHT_THEME_IDS, defaultThemeId: DEFAULT_THEME_ID, themeStorageKey: THEME_STORAGE_KEY }}>
+	(() => {
+		try {
+			const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+			const isLocked = localStorage.getItem('theme-locked') === 'true';
+			const themePreference = localStorage.getItem('theme-preference') || 'dark';
+			const storedTheme = localStorage.getItem(themeStorageKey);
+			let resolvedTheme = storedTheme && allThemeIds.includes(storedTheme) ? storedTheme : defaultThemeId;
+
+			if (isHomePage && !isLocked) {
+				const preferredPool = themePreference === 'light' ? lightThemeIds : darkThemeIds;
+				const themePool = preferredPool.length > 0 ? preferredPool : allThemeIds;
+				const randomIndex = Math.floor(Math.random() * themePool.length);
+				resolvedTheme = themePool[randomIndex];
+			}
+
+			document.documentElement.setAttribute('data-theme', resolvedTheme);
+		} catch {
+			document.documentElement.setAttribute('data-theme', defaultThemeId);
+		}
+	})();
+</script>
 
 <script>
 	import { DEFAULT_THEME_ID, THEME_STORAGE_KEY } from '../config/theme-runtime';
 	import { ALL_THEME_IDS, DARK_THEME_IDS, LIGHT_THEME_IDS } from '../config/theme-client-data';
 	import {
 		configureThemeBus,
-		getStoredTheme,
+		getCurrentTheme,
 		getThemePreference,
 		isThemeLocked,
 		isValidThemeId,
@@ -28,14 +54,13 @@
 
 		// Check if theme is locked
 		const isLocked = isThemeLocked();
-		const storedTheme = getStoredTheme();
 		const themePreference = getThemePreference('dark'); // 'dark' or 'light'
 		const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index.html';
 
-		let themeToApply = storedTheme || DEFAULT_THEME_ID;
+		let themeToApply = getCurrentTheme();
 
-		// If on homepage and theme is not locked, pick a random theme based on user preference
-		if (isHomePage && !isLocked) {
+		// Fallback randomization path (should rarely run because inline script already applies this rule)
+		if (isHomePage && !isLocked && !themeToApply) {
 			const preferredPool = themePreference === 'light' ? LIGHT_THEME_IDS : DARK_THEME_IDS;
 			const themePool = preferredPool.length > 0 ? preferredPool : ALL_THEME_IDS;
 			const randomIndex = Math.floor(Math.random() * themePool.length);
