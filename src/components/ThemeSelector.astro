@@ -331,14 +331,27 @@ const t = useTranslations(lang);
 		const lockButton = document.querySelector('[data-lock-button]') as HTMLButtonElement | null;
 		const introToggle = document.querySelector('[data-intro-toggle]') as HTMLInputElement | null;
 		const introButton = document.querySelector('[data-intro-button]') as HTMLButtonElement | null;
+		let previewThemeId: string | null = null;
+		let themeBeforePreview: string | null = null;
 
 		function openModal() {
+			themeBeforePreview = getCurrentTheme();
+			previewThemeId = null;
 			highlightCurrentTheme();
 			dialog?.showModal();
 			document.body.classList.add('overflow-hidden');
 		}
 
 		function closeModal() {
+			if (previewThemeId && themeBeforePreview && previewThemeId !== themeBeforePreview) {
+				setCurrentTheme(themeBeforePreview, {
+					persist: false,
+					source: 'theme-selector-preview-cancel',
+				});
+			}
+
+			previewThemeId = null;
+			themeBeforePreview = null;
 			dialog?.close();
 			document.body.classList.remove('overflow-hidden');
 		}
@@ -355,10 +368,21 @@ const t = useTranslations(lang);
 		}
 
 		function selectTheme(themeId: string) {
+			if (previewThemeId !== themeId) {
+				setCurrentTheme(themeId, {
+					persist: false,
+					source: 'theme-selector-preview',
+				});
+				previewThemeId = themeId;
+				return;
+			}
+
 			setCurrentTheme(themeId, {
 				persist: true,
 				source: 'theme-selector',
 			});
+			previewThemeId = null;
+			themeBeforePreview = null;
 			const themeOption = Array.from(themeOptions).find((opt) => opt.dataset.themeId === themeId);
 			if (themeOption?.dataset.themeType) {
 				setThemePreference(themeOption.dataset.themeType as 'all' | 'dark' | 'light');
