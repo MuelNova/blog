@@ -3,6 +3,7 @@ title: "[NDSS'26] DirtyFree: Simplified Data-Oriented Programming in the Linux K
 pubDate: 2026-03-12
 description: "DirtyFree 提出了一种新的 Data-Oriented Programming 攻击手段，仅用 partial-overwrite 原语即可实现权限提升，并可绕过 SLAB_VIRTUAL 缓解措施。"
 authors: [nova]
+lang: zh
 ---
 
 > https://www.ndss-symposium.org/ndss-paper/dirtyfree-simplified-data-oriented-programming-in-the-linux-kernel/
