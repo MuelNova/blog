@@ -52,7 +52,8 @@ function getBaseNameFromFilePath(filePath: string): string {
   // my-post.md → my-post
   return fileName
     .replace(/\.([a-z]{2})\.(md|mdx)$/, '') // 移除 .xx.md(x)
-    .replace(/\.(md|mdx)$/, '');             // 移除 .md(x)
+    .replace(/\.(md|mdx)$/, '')             // 移除 .md(x)
+    .replace(/[\[\]]/g, '');                 // 移除方括号（URL 不安全字符）
 }
 
 /**
