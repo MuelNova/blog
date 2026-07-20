@@ -21,10 +21,12 @@
 ---
 
 <div id="opening-animation" class="fixed inset-0 z-[9999] overflow-hidden select-none" aria-hidden="true">
+	<!-- 遮罩渐变与 Hero #hero-bg 可见段逐点对齐：hero-bg 是 inset-[-12%] 的 1.24 倍高盒子，
+	     其 0%/55%/100% 停靠点映射到视口即 -12%/56.2%/112%，揭开瞬间边缘零色差 -->
 	<div
 		id="opening-mask"
 		class="absolute inset-0 flex items-center justify-center"
-		style="background: linear-gradient(180deg, var(--color-background) 0%, var(--color-surface) 100%);"
+		style="background: linear-gradient(180deg, var(--color-background) -12%, var(--color-surface) 56.2%, var(--color-background) 112%);"
 	>
 		<!-- 贴纸 1 · 软糖方块（data-key 对应 hero 装饰的 data-decor） -->
 		<svg data-key="candy" viewBox="0 0 64 64" class="intro-sticker absolute left-[18%] top-[26%] h-16 w-16 md:left-[26%] md:top-[30%] md:h-24 md:w-24">
@@ -32,13 +34,16 @@
 			<circle cx="26" cy="31" r="3" fill="var(--color-foreground)" />
 			<circle cx="40" cy="31" r="3" fill="var(--color-foreground)" />
 			<path d="M28 39 Q33 43.5 38 39" stroke="var(--color-foreground)" stroke-width="2" fill="none" stroke-linecap="round" />
+			<circle cx="19" cy="37" r="2.4" fill="var(--color-primary)" opacity="0.7" />
+			<circle cx="45" cy="37" r="2.4" fill="var(--color-primary)" opacity="0.7" />
 		</svg>
 		<!-- 贴纸 2 · 甜甜圈 -->
 		<svg data-key="donut" viewBox="0 0 64 64" class="intro-sticker absolute right-[16%] top-[30%] h-14 w-14 md:right-[24%] md:top-[36%] md:h-20 md:w-20">
 			<circle cx="32" cy="32" r="22" fill="var(--color-primary-light)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
-			<circle cx="32" cy="32" r="9" fill="var(--color-surface)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
+			<circle cx="32" cy="32" r="9" fill="var(--color-background)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
 			<circle cx="24" cy="22" r="2" fill="var(--color-accent)" />
 			<circle cx="42" cy="26" r="2" fill="var(--color-accent-2)" />
+			<circle cx="30" cy="44" r="2" fill="var(--color-accent)" />
 		</svg>
 		<!-- 贴纸 3 · 小花 -->
 		<svg data-key="flower" viewBox="0 0 64 64" class="intro-sticker absolute bottom-[24%] left-[30%] h-12 w-12 md:bottom-[28%] md:left-[40%] md:h-16 md:w-16">
@@ -183,10 +188,12 @@
 		}));
 
 		// 首页 hero 装饰位（与 src/components/hero/Hero.astro 的 #hero-decor 同款图形）：
-		// 按装饰的 left/right/top/bottom 百分比 + 装饰尺寸一半换算视口中心坐标。
-		// 尺寸与 hero 装饰的 h-/w- class 对齐（mobile / md 两档）。
+		// 优先直接测量 hero 装饰 span 的实际布局位置——此时装饰 span 尚无 transform
+		// （鼠标视差未动/为 0），内部 svg 的 scale 不影响 span 自身盒模型，
+		// 百分比定位 / 100svh 高度 / 断点尺寸全部以真实渲染为准，消灭硬算偏差；
+		// 测量失败（元素缺失或 display:none，如移动端 flower 装饰 hidden）回退到硬算表。
 		const isMd = vw >= 768;
-		const LAND_TARGETS = [
+		const FALLBACK_TARGETS = [
 			{
 				key: 'candy', // left-[7%] top-[20%]，h-14 w-14 md:h-20 md:w-20
 				size: isMd ? 80 : 56,
@@ -206,6 +213,13 @@
 				cy: vh * (1 - 0.22) - (isMd ? 64 : 48) / 2,
 			},
 		];
+		const LAND_TARGETS = FALLBACK_TARGETS.map((fb) => {
+			const el = document.querySelector<HTMLElement>(`[data-decor="${fb.key}"]`);
+			if (!el) return fb;
+			const r = el.getBoundingClientRect();
+			if (r.width < 1 || r.height < 1) return fb; // display:none（如移动端 flower）
+			return { key: fb.key, size: r.width, cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+		});
 		// 每张贴纸的飞行计划：起点（屏幕中心，即第二幕吸入的终点）→ 上抛弧顶 → 落位点
 		const flights = stickers.map((_, i) => {
 			const start = { x: toCenter[i].x, y: toCenter[i].y };
@@ -284,7 +298,7 @@
 			// 边缘波动：振幅 ±3% 半径呼吸 + 相位缓慢旋转
 			const amp = 0.09 * (1 + 0.33 * Math.sin(progress * Math.PI * 4));
 			const phase = progress * 1.2;
-			const N = 180;
+			const N = 140; // 采样点 180→140：每帧少 22% 的字符串拼接，肉眼对均匀花瓣边无感
 			const pts = [];
 			for (let i = 0; i <= N; i++) {
 				const th = (i / N) * Math.PI * 2;
@@ -306,6 +320,23 @@
 				revealed = true;
 				reveal();
 			}
+		};
+
+		// onUpdate 节流：setFlowerMask 每次调用都重建整张 data-uri，
+		// 35% 之后与 hero 入场 / Lenis / 粒子 canvas 同帧竞争容易掉帧。
+		// 均匀扩大的 mask 对刷新率不敏感 → 写入节流到 ~30fps（时间戳判定），
+		// 揭开 35% 的事件检测留在 setFlowerMask 外、保持全帧率，不拖慢 hero 衔接。
+		let lastMaskWrite = -1;
+		const MASK_MIN_INTERVAL = 1000 / 30;
+		const setFlowerMaskThrottled = () => {
+			if (!revealed && maskState.pct >= 77) {
+				revealed = true;
+				reveal();
+			}
+			const now = performance.now();
+			if (lastMaskWrite >= 0 && now - lastMaskWrite < MASK_MIN_INTERVAL) return;
+			lastMaskWrite = now;
+			setFlowerMask();
 		};
 
 		// ---- 第四幕 · Canvas 粒子爆发 ----
@@ -563,13 +594,22 @@
 			.add(setFlowerMask, `act4+=${BEAT * 0.5}`)
 			.to(
 				maskState,
-				{ pct: 220, duration: BEAT * 5, ease: 'power2.inOut', onUpdate: setFlowerMask },
+				{
+					pct: 220,
+					duration: BEAT * 5,
+					ease: 'power2.inOut',
+					onUpdate: setFlowerMaskThrottled,
+					onComplete: () => {
+						// 末帧强制写一次（节流可能跳过最后一帧），随后直接移除容器：
+						// mask 已全揭开，再留 opacity 淡出尾巴等于在首页上盖一层半透明渐变（重影/发灰）
+						setFlowerMask();
+						if (container.isConnected) container.remove();
+					},
+				},
 				`act4+=${BEAT * 0.5}`
 			)
 			// 品牌字 / 手写句多停留半拍：贴纸起飞时同步淡出，完成视觉接力
-			.to([brand, tagline], { opacity: 0, duration: BEAT, ease: 'power1.out' }, `act4+=${BEAT}`)
-			// 开场层交叉淡出后移除，杜绝硬切
-			.to(container, { opacity: 0, duration: 0.35, ease: 'power1.out' }, `act4+=${BEAT * 5.5}`);
+			.to([brand, tagline], { opacity: 0, duration: BEAT, ease: 'power1.out' }, `act4+=${BEAT}`);
 
 		// 贴纸沿弧线飞向首页 hero 装饰位落位（每张贴纸独立 tween 以便各自派发落位事件；
 		// stagger 用 delay 表达，position 保持 BEAT 网格）
@@ -583,7 +623,7 @@
 						{
 							x: f.mid.x,
 							y: f.mid.y,
-							rotation: '+=90',
+							rotation: '+=180',
 							scale: (1 + f.scaleTo) / 2,
 							duration: BEAT * 1.5,
 							ease: 'power2.out',
@@ -591,7 +631,7 @@
 						{
 							x: f.end.x,
 							y: f.end.y,
-							rotation: '+=90',
+							rotation: '+=180', // 全程 360°：落位朝向与 hero 装饰（0°）一致
 							scale: f.scaleTo,
 							duration: BEAT * 1.5,
 							ease: 'power2.in',
@@ -599,9 +639,10 @@
 					],
 					delay: i * 0.08,
 					onComplete: () => {
-						// 落位：通知 hero 对应装饰弹出接班，自己 0.15s 内淡出完成无缝交接
+						// 落位：同帧通知 hero 装饰以最终形态接班，自己 0.2s 淡出——
+						// 与 hero 装饰的 0.2s 沉降淡入交叠，视觉上贴纸"变成"了首页装饰
 						window.dispatchEvent(new CustomEvent('intro:sticker-land', { detail: { key } }));
-						gsap.to(s, { opacity: 0, duration: 0.15, ease: 'power1.out' });
+						gsap.to(s, { opacity: 0, duration: 0.2, ease: 'power1.out' });
 					},
 				},
 				`act4+=${BEAT}`
