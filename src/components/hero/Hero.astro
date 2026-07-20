@@ -164,8 +164,22 @@ const chars = Array.from(brand);
 			transformOrigin: '50% 50%',
 		});
 
-		// 开场贴纸落位接班：对应 key 到达时弹出（与开场贴纸淡出交叠，无缝交接）
+		// 开场贴纸落位接班（两条路径，popped 防重入）：
+		// ① landDecor——intro:sticker-land 同帧触发：装饰以最终形态出现
+		//    （opacity 0→1 + 极轻 scale 1.04→1 沉降 0.2s 模拟落地缓冲，无 back.out 重弹），
+		//    与开场贴纸同帧开始的 0.2s 淡出交叠，视觉上飞来的贴纸"变成"了首页装饰；
+		// ② popDecor——兜底（事件丢失/开场被跳过）：维持原 back.out 节奏弹出。
 		const popped = new Set<string>();
+		const landDecor = (key: string) => {
+			const el = keyedSvgs[key];
+			if (!el || popped.has(key)) return;
+			popped.add(key);
+			gsap.fromTo(
+				el,
+				{ opacity: 0, scale: 1.04 },
+				{ opacity: 1, scale: 1, duration: 0.2, ease: 'power1.out', overwrite: 'auto' }
+			);
+		};
 		const popDecor = (key: string) => {
 			const el = keyedSvgs[key];
 			if (!el || popped.has(key)) return;
@@ -174,7 +188,7 @@ const chars = Array.from(brand);
 		};
 		window.addEventListener('intro:sticker-land', (e) => {
 			const key = (e as CustomEvent).detail?.key;
-			if (typeof key === 'string') popDecor(key);
+			if (typeof key === 'string') landDecor(key);
 		});
 
 		// 入场编排：主体弹入 → 标题逐字符 stagger → 副标/贴纸 → 粒子延迟 0.5s 淡入
