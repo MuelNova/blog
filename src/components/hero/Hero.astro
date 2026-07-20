@@ -1,0 +1,219 @@
+---
+/**
+ * Hero — 首屏五层结构
+ * L1 奶油渐变背景（CSS 变量，随主题）
+ * L2/L3 远近软糖粒子（CandyParticles React 岛屿，Canvas 2D）
+ * L4 SVG 软糖装饰（data-speed 鼠标视差）
+ * L5 主体：巨型标题 + 中文副标 + Caveat 手写贴纸
+ *
+ * 入场编排与 OpeningAnimation 通过 `intro:revealed` 事件 / body.animation-triggered 衔接。
+ * 滚动：GSAP ScrollTrigger scrub 三层差速视差（粒子 -14 / 文案 -30 / 背景 +6）。
+ */
+import CandyParticles from './CandyParticles';
+import { useTranslations } from '../../i18n/config';
+import type { Lang } from '../../i18n/config';
+
+interface Props {
+	lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const brand = "Muir's Cream";
+const chars = Array.from(brand);
+---
+
+<section id="hero" class="relative flex h-[100svh] w-full items-center justify-center overflow-hidden">
+	<!-- L1 背景：奶油渐变（随主题） -->
+	<div
+		id="hero-bg"
+		aria-hidden="true"
+		class="pointer-events-none absolute inset-[-12%]"
+		style="background: linear-gradient(180deg, var(--color-background) 0%, var(--color-surface) 55%, var(--color-background) 100%);"
+	></div>
+
+	<!-- L2/L3 粒子层 -->
+	<div id="hero-particles" class="absolute inset-0">
+		<CandyParticles client:load />
+	</div>
+
+	<!-- L4 装饰层：SVG 软糖块（鼠标视差 data-speed） -->
+	<div id="hero-decor" aria-hidden="true" class="pointer-events-none absolute inset-0">
+		<!-- 软糖方块 · 粉 -->
+		<span data-speed="0.5" class="absolute left-[7%] top-[20%] will-change-transform">
+			<svg viewBox="0 0 64 64" class="h-14 w-14 md:h-20 md:w-20">
+				<rect x="6" y="10" width="52" height="44" rx="16" fill="var(--color-accent)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
+				<circle cx="26" cy="31" r="3" fill="var(--color-foreground)" />
+				<circle cx="40" cy="31" r="3" fill="var(--color-foreground)" />
+				<path d="M28 39 Q33 43.5 38 39" stroke="var(--color-foreground)" stroke-width="2" fill="none" stroke-linecap="round" />
+				<circle cx="19" cy="37" r="2.4" fill="var(--color-primary)" opacity="0.7" />
+				<circle cx="45" cy="37" r="2.4" fill="var(--color-primary)" opacity="0.7" />
+			</svg>
+		</span>
+		<!-- 甜甜圈 · 蜜桃 -->
+		<span data-speed="-0.7" class="absolute right-[9%] top-[24%] will-change-transform">
+			<svg viewBox="0 0 64 64" class="h-12 w-12 md:h-16 md:w-16">
+				<circle cx="32" cy="32" r="22" fill="var(--color-primary-light)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
+				<circle cx="32" cy="32" r="9" fill="var(--color-background)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
+				<circle cx="24" cy="22" r="2" fill="var(--color-accent)" />
+				<circle cx="42" cy="26" r="2" fill="var(--color-accent-2)" />
+				<circle cx="30" cy="44" r="2" fill="var(--color-accent)" />
+			</svg>
+		</span>
+		<!-- 小花 · 雾蓝 -->
+		<span data-speed="0.95" class="absolute bottom-[22%] left-[13%] hidden will-change-transform md:block">
+			<svg viewBox="0 0 64 64" class="h-12 w-12 md:h-16 md:w-16">
+				<g fill="var(--color-accent-2)" stroke="var(--color-foreground)" stroke-opacity="0.2" stroke-width="2">
+					<ellipse cx="32" cy="16" rx="8" ry="11" />
+					<ellipse cx="32" cy="48" rx="8" ry="11" />
+					<ellipse cx="16" cy="32" rx="11" ry="8" />
+					<ellipse cx="48" cy="32" rx="11" ry="8" />
+				</g>
+				<circle cx="32" cy="32" r="7" fill="var(--color-primary-lightest)" stroke="var(--color-foreground)" stroke-opacity="0.2" stroke-width="2" />
+			</svg>
+		</span>
+		<!-- 包装糖 · 奶油 -->
+		<span data-speed="-0.4" class="absolute bottom-[26%] right-[14%] hidden will-change-transform md:block">
+			<svg viewBox="0 0 80 48" class="h-10 w-16 md:h-12 md:w-20">
+				<path d="M14 24 L26 14 L26 34 Z" fill="var(--color-accent)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" stroke-linejoin="round" />
+				<path d="M66 24 L54 14 L54 34 Z" fill="var(--color-accent)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" stroke-linejoin="round" />
+				<rect x="24" y="10" width="32" height="28" rx="12" fill="var(--color-primary-lightest)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
+				<circle cx="35" cy="23" r="2.2" fill="var(--color-foreground)" />
+				<circle cx="45" cy="23" r="2.2" fill="var(--color-foreground)" />
+				<path d="M36.5 29 Q40 32 43.5 29" stroke="var(--color-foreground)" stroke-width="2" fill="none" stroke-linecap="round" />
+			</svg>
+		</span>
+		<!-- 小圆糖 · 点缀 -->
+		<span data-speed="0.3" class="absolute right-[26%] top-[14%] hidden will-change-transform lg:block">
+			<svg viewBox="0 0 32 32" class="h-7 w-7">
+				<circle cx="16" cy="16" r="12" fill="var(--color-accent-2)" stroke="var(--color-foreground)" stroke-opacity="0.2" stroke-width="2" />
+				<circle cx="12" cy="12" r="3" fill="var(--color-background)" opacity="0.8" />
+			</svg>
+		</span>
+	</div>
+
+	<!-- L5 主体 -->
+	<div id="hero-main" class="relative z-10 flex flex-col items-center px-6 text-center">
+		<div class="relative">
+			<h1
+				id="hero-title"
+				aria-label={brand}
+				class="font-display text-[clamp(3rem,12vw,9rem)] font-extrabold leading-[1.05] tracking-[-0.02em] text-foreground"
+			>
+				{chars.map((c) => (
+					<span aria-hidden="true" class="hero-char inline-block will-change-transform">
+						{c === ' ' ? '\u00A0' : c}
+					</span>
+				))}
+			</h1>
+			<span
+				class="hero-sticker font-hand absolute -right-2 -top-7 rotate-[-8deg] rounded-pill border-2 border-border bg-surface px-4 py-1 text-[clamp(1.1rem,2.4vw,1.6rem)] text-primary md:-right-28 md:-top-4"
+			>
+				{t('hero.sticker')}
+			</span>
+		</div>
+		<p class="hero-sub font-display mt-3 text-[clamp(1.15rem,3vw,1.8rem)] text-foreground-secondary md:mt-5">
+			{t('hero.subtitle')}
+		</p>
+	</div>
+</section>
+
+<!-- 呼吸空档 -->
+<div class="h-[20vh]" aria-hidden="true"></div>
+
+<script>
+	import gsap from 'gsap';
+	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+	gsap.registerPlugin(ScrollTrigger);
+
+	const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	const coarse =
+		window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768;
+
+	const hero = document.getElementById('hero');
+	const main = document.getElementById('hero-main');
+	const particlesLayer = document.getElementById('hero-particles');
+	const decorLayer = document.getElementById('hero-decor');
+
+	if (hero && main && particlesLayer && decorLayer && !reduceMotion) {
+		const chars = main.querySelectorAll('.hero-char');
+		const sub = main.querySelector('.hero-sub');
+		const sticker = main.querySelector('.hero-sticker');
+
+		// 初始状态（JS 不可用时保持可见）
+		gsap.set(main, { scale: 0.8, y: 40, opacity: 0 });
+		gsap.set(chars, { y: '0.55em', opacity: 0, rotate: 5 });
+		gsap.set([sub, sticker], { opacity: 0, y: 14 });
+		gsap.set([particlesLayer, decorLayer], { opacity: 0 });
+
+		// 入场编排：主体弹入 → 标题逐字符 stagger → 副标/贴纸 → 粒子延迟 0.5s 淡入
+		const tl = gsap.timeline({ paused: true });
+		tl.to(main, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' })
+			.to(
+				chars,
+				{ y: 0, opacity: 1, rotate: 0, duration: 0.6, ease: 'back.out(1.9)', stagger: 0.08 },
+				'-=0.3'
+			)
+			.to(sub, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.35')
+			.to(
+				sticker,
+				{ opacity: 1, y: 0, duration: 0.5, ease: 'back.out(2.2)' },
+				'-=0.3'
+			)
+			.to([particlesLayer, decorLayer], { opacity: 1, duration: 1.1, ease: 'power1.out' }, 0.5);
+
+		// 与开场动画衔接：intro 播放中则等 intro:revealed，否则立即播
+		const play = () => tl.play(0);
+		if (
+			document.body.classList.contains('is-animating') &&
+			!document.body.classList.contains('animation-triggered')
+		) {
+			window.addEventListener('intro:revealed', play, { once: true });
+			// 兜底：事件丢失时 4.5s 后自动播
+			window.setTimeout(() => {
+				if (!tl.isActive() && tl.progress() === 0) play();
+			}, 4500);
+		} else {
+			play();
+		}
+
+		// 滚动三层差速视差（scrub）：粒子 -14 / 文案 -30 / 背景 +6
+		const stBase: ScrollTrigger.Vars = {
+			trigger: hero,
+			start: 'top top',
+			end: 'bottom top',
+			scrub: true,
+		};
+		gsap.to(particlesLayer, { yPercent: -14, ease: 'none', scrollTrigger: stBase });
+		gsap.to(main, { yPercent: -30, ease: 'none', scrollTrigger: { ...stBase } });
+		gsap.to('#hero-bg', { yPercent: 6, ease: 'none', scrollTrigger: { ...stBase } });
+		gsap.to(decorLayer, { yPercent: -20, ease: 'none', scrollTrigger: { ...stBase } });
+
+		// L4 鼠标视差：data-speed 差速 translate3d，lerp 平滑（±10~40px 量级）
+		if (!coarse) {
+			const items = decorLayer.querySelectorAll<HTMLElement>('[data-speed]');
+			let tx = 0;
+			let ty = 0;
+			let cx = 0;
+			let cy = 0;
+			window.addEventListener(
+				'mousemove',
+				(e) => {
+					tx = e.clientX / window.innerWidth - 0.5;
+					ty = e.clientY / window.innerHeight - 0.5;
+				},
+				{ passive: true }
+			);
+			gsap.ticker.add(() => {
+				cx += (tx - cx) * 0.06;
+				cy += (ty - cy) * 0.06;
+				items.forEach((el) => {
+					const s = parseFloat(el.dataset.speed || '0');
+					el.style.transform = `translate3d(${(cx * s * 44).toFixed(2)}px, ${(cy * s * 44).toFixed(2)}px, 0)`;
+				});
+			});
+		}
+	}
+</script>

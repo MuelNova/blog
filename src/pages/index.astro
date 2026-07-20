@@ -4,6 +4,7 @@ import ProfileCard from '../components/ProfileCard.astro';
 import SocialsCard from '../components/SocialsCard.astro';
 import AboutCard from '../components/AboutCard.astro';
 import LatestPosts from '../components/LatestPosts.astro';
+import Hero from '../components/hero/Hero.astro';
 import { SITE_DESCRIPTION, SITE_TITLE, USER_NAME } from '../consts';
 import { SOCIAL_LINKS, getQuickInfo } from '../config/profile';
 import OpeningAnimation from '../components/OpeningAnimation.astro';
@@ -23,35 +24,40 @@ const t = useTranslations(lang);
 	title={SITE_TITLE} 
 	description={SITE_DESCRIPTION}
 	lang={lang}
-	class="w-full max-w-[1280px] mx-auto flex flex-col gap-8 py-8"
+	class="w-full flex flex-col"
 >
 	<OpeningAnimation slot="overlay" />
 	
-	<!-- Two Column Grid Layout -->
-	<div class="grid grid-cols-1 lg:grid-cols-[2fr_5fr] gap-8">
-		<!-- Left Column -->
-		<div class="flex flex-col gap-8 landing-section delay-100">
-			<ProfileCard name={USER_NAME} info={getQuickInfo(lang)} />
-			<SocialsCard socials={SOCIAL_LINKS} lang={lang} />
-		</div>
+	<!-- 首屏 Hero（五层结构） -->
+	<Hero lang={lang} />
 
-		<!-- Right Column -->
-		<div class="flex flex-col gap-8">
-			<!-- About Section with accent header -->
-			<div class="landing-section delay-200">
-				<AboutCard lang={lang}>
-					<p>{t('home.intro')}</p>
-				</AboutCard>
+	<div class="w-full max-w-[1280px] mx-auto flex flex-col gap-8 py-8">
+		<!-- Two Column Grid Layout -->
+		<div class="grid grid-cols-1 lg:grid-cols-[2fr_5fr] gap-8">
+			<!-- Left Column -->
+			<div class="flex flex-col gap-8 landing-section delay-100">
+				<ProfileCard name={USER_NAME} info={getQuickInfo(lang)} />
+				<SocialsCard socials={SOCIAL_LINKS} lang={lang} />
 			</div>
-			<!-- Divider -->
-			<div class="flex items-center gap-4 my-2 landing-section delay-300">
-				<hr class="flex-1 bg-accent h-0.5 border-none" />
-				<span class="text-accent/70 text-sm font-semibold">{t('home.latestPosts')}</span>
-				<hr class="flex-1 bg-accent h-0.5 border-none" />
-			</div>
-			
-			<div class="landing-section delay-400">
-				<LatestPosts posts={posts} lang={lang} />
+
+			<!-- Right Column -->
+			<div class="flex flex-col gap-8">
+				<!-- About Section with accent header -->
+				<div class="landing-section delay-200">
+					<AboutCard lang={lang}>
+						<p>{t('home.intro')}</p>
+					</AboutCard>
+				</div>
+				<!-- Divider -->
+				<div class="flex items-center gap-4 my-2 landing-section delay-300">
+					<hr class="flex-1 bg-accent h-0.5 border-none" />
+					<span class="text-accent/70 text-sm font-semibold">{t('home.latestPosts')}</span>
+					<hr class="flex-1 bg-accent h-0.5 border-none" />
+				</div>
+				
+				<div class="landing-section delay-400">
+					<LatestPosts posts={posts} lang={lang} />
+				</div>
 			</div>
 		</div>
 	</div>
