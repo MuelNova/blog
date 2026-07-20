@@ -1,12 +1,11 @@
 ---
 /**
  * LatestPosts Component
- * Displays latest blog posts
+ * Displays latest blog posts — rounded rows with circle-bloom hover
  */
 
 import FormattedDate from './FormattedDate.astro';
 import type { CollectionEntry } from 'astro:content';
-import { stripMarkdown } from '../utils/markdown';
 import { getRelativeLocaleUrl } from '../i18n/config';
 import { getPostBaseId } from '../i18n/i18n';
 
@@ -18,34 +17,111 @@ interface Props {
 const { posts, lang } = Astro.props;
 ---
 
-<div class="flex flex-col gap-3 post-list">
+<div class="flex flex-col gap-2 post-list">
 		{posts.map((post) => (
-			<a 
+			<a
 				href={lang ? getRelativeLocaleUrl(lang, `/blog/${getPostBaseId(post)}/`) : `/blog/${getPostBaseId(post)}/`}
-				class="flex flex-col gap-2 p-3 border border-accent/40 text-white transition-all duration-150 hover:bg-primary/12.5 hover:border-primary focus-visible:outline-none focus-visible:bg-primary/12.5 focus-visible:border-primary"
+				class="latest-post-row"
 			>
-				<div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
-					<h3 class="text-sm font-semibold text-foreground m-0">{post.data.title}</h3>
-					<time class="text-xs text-foreground/70 shrink-0">
-						<FormattedDate date={post.data.pubDate} lang={lang} />
-					</time>
-				</div>
-				{post.data.description && (
-					<p class="text-xs text-foreground/70 m-0 leading-relaxed">
-						{stripMarkdown(post.data.description)}
-					</p>
-				)}
+				<span class="bloom" aria-hidden="true"></span>
+				<h3 class="post-title">{post.data.title}</h3>
+				<time class="post-date font-mono">
+					<FormattedDate date={post.data.pubDate} lang={lang} />
+				</time>
 			</a>
 		))}
 </div>
 
 <style>
-	/* Scoped style to prevent underline on post links */
-	.post-list a {
+	.latest-post-row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 0.625rem 0.875rem;
+		border: 2px solid var(--color-border);
+		border-radius: 1rem;
+		background: var(--color-surface);
 		text-decoration: none;
+		position: relative;
+		overflow: hidden;
+		transition: border-color 200ms ease;
 	}
-	
-	.post-list a:hover {
-		text-decoration: none;
+
+	@media (hover: hover) {
+		.latest-post-row:hover,
+		.latest-post-row:focus-visible {
+			border-color: var(--color-accent-2);
+		}
+	}
+
+	/* Circle bloom — grows from the pointer position */
+	.bloom {
+		position: absolute;
+		left: var(--bloom-x, 50%);
+		top: var(--bloom-y, 50%);
+		width: 2rem;
+		height: 2rem;
+		border-radius: 9999px;
+		background: color-mix(in srgb, var(--color-accent-2) 38%, transparent);
+		transform: translate(-50%, -50%) scale(0);
+		transition: transform 550ms var(--ease-out);
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	@media (hover: hover) {
+		.latest-post-row:hover .bloom,
+		.latest-post-row:focus-visible .bloom {
+			transform: translate(-50%, -50%) scale(25);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.bloom {
+			transition: none;
+		}
+	}
+
+	.post-title {
+		position: relative;
+		z-index: 1;
+		flex: 1;
+		min-width: 0;
+		margin: 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-foreground);
+		line-height: 1.5;
+		transition: transform 300ms var(--ease-out);
+	}
+
+	@media (hover: hover) {
+		.latest-post-row:hover .post-title,
+		.latest-post-row:focus-visible .post-title {
+			transform: translateX(0.25rem);
+		}
+	}
+
+	.post-date {
+		position: relative;
+		z-index: 1;
+		flex-shrink: 0;
+		font-size: 0.6875rem;
+		color: var(--color-foreground-secondary);
+		letter-spacing: 0.02em;
 	}
 </style>
+
+<script>
+	// Circle bloom: track the pointer so the circle grows from the hover point
+	document.querySelectorAll<HTMLAnchorElement>('.latest-post-row').forEach((row) => {
+		const setBloomOrigin = (e: MouseEvent) => {
+			const rect = row.getBoundingClientRect();
+			row.style.setProperty('--bloom-x', `${e.clientX - rect.left}px`);
+			row.style.setProperty('--bloom-y', `${e.clientY - rect.top}px`);
+		};
+		row.addEventListener('mouseenter', setBloomOrigin);
+		row.addEventListener('mouseleave', setBloomOrigin);
+	});
+</script>

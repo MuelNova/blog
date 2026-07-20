@@ -9,97 +9,83 @@ const { link, linkText, description, icon } = Astro.props;
 const fallbackIcon = '/favicon.png';
 ---
 
-<a 
+<a
 	href={link}
 	class="link-card"
 	target="_blank"
 	rel="noopener noreferrer"
 >
-	<div class="link-icon">
-		<img 
-			src={icon || fallbackIcon} 
+	<span class="link-icon">
+		<img
+			src={icon || fallbackIcon}
 			alt={linkText}
 			loading="lazy"
 			onerror={`this.onerror=null; this.src='${fallbackIcon}'`}
 		/>
-	</div>
-	<div class="link-content">
-		<h3 class="link-title">{linkText}</h3>
-		<p class="link-description">{description}</p>
-	</div>
+	</span>
+	<span class="link-content">
+		<span class="link-title">{linkText}</span>
+		<span class="link-description">{description}</span>
+	</span>
 </a>
 
 <style>
+	/* Horizontal capsule card — sticker style, lavender hover */
 	.link-card {
+		/* lavender = pink accent × misty blue accent-2 */
+		--link-lavender: color-mix(in srgb, var(--color-accent) 50%, var(--color-accent-2) 50%);
 		display: flex;
-		gap: 0.75rem;
-		padding: 0.875rem;
-		border: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
+		align-items: center;
+		gap: 1rem;
+		padding: 0.75rem 1.25rem 0.75rem 0.75rem;
+		border: 2px solid var(--color-border);
+		border-radius: 100px;
+		background: var(--color-surface);
 		text-decoration: none;
-		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-		position: relative;
-		overflow: hidden;
+		transition: border-color 200ms ease, transform 400ms var(--ease-pop), background-color 200ms ease;
 	}
 
-	.link-card::before {
-		content: '';
-		position: absolute;
-		inset: -20px;
-		background: radial-gradient(
-			ellipse 80% 50% at 50% 50%,
-			color-mix(in srgb, var(--color-primary) 15%, transparent),
-			transparent 70%
-		);
-		opacity: 0;
-		transition: opacity 400ms ease;
-		pointer-events: none;
-		filter: blur(20px);
+	@media (hover: hover) {
+		.link-card:hover,
+		.link-card:focus-visible {
+			border-color: var(--link-lavender);
+			background: color-mix(in srgb, var(--link-lavender) 12%, var(--color-surface));
+			transform: rotate(1.5deg) scale(1.02);
+		}
 	}
 
-	.link-card:hover,
-	.link-card:focus-visible {
-		background-color: color-mix(in srgb, var(--color-primary) 3%, transparent);
-		border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
-		box-shadow: 
-			0 0 40px color-mix(in srgb, var(--color-primary) 12%, transparent),
-			inset 0 0 20px color-mix(in srgb, var(--color-primary) 5%, transparent);
-	}
+	@media (prefers-reduced-motion: reduce) {
+		.link-card {
+			transition: border-color 200ms ease, background-color 200ms ease;
+		}
 
-	.link-card:hover::before,
-	.link-card:focus-visible::before {
-		opacity: 1;
+		.link-card:hover,
+		.link-card:focus-visible {
+			transform: none;
+		}
 	}
 
 	.link-icon {
 		flex-shrink: 0;
-		width: 48px;
-		height: 48px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid color-mix(in srgb, var(--color-foreground) 8%, transparent);
-		border-radius: 4px;
+		width: 3rem;
+		height: 3rem;
+		border: 2px solid var(--color-border);
+		border-radius: 9999px;
 		overflow: hidden;
-		background: color-mix(in srgb, var(--color-foreground) 2%, transparent);
-		transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+		background: var(--color-background);
+		transition: border-color 200ms ease;
 	}
 
 	.link-card:hover .link-icon,
 	.link-card:focus-visible .link-icon {
-		border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
-		box-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 15%, transparent);
+		border-color: var(--link-lavender);
 	}
 
 	.link-icon img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.link-card:hover .link-icon img,
-	.link-card:focus-visible .link-icon img {
-		transform: scale(1.1);
+		display: block;
 	}
 
 	.link-content {
@@ -107,53 +93,28 @@ const fallbackIcon = '/favicon.png';
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.125rem;
 	}
 
 	.link-title {
-		margin: 0;
-		font-size: 1rem;
+		font-size: 0.9375rem;
 		font-weight: 600;
 		color: var(--color-foreground);
-		transition: color 200ms ease;
 		line-height: 1.4;
+		transition: color 200ms ease;
 	}
 
 	.link-card:hover .link-title,
 	.link-card:focus-visible .link-title {
-		color: var(--color-primary-light);
+		color: color-mix(in srgb, var(--color-accent) 55%, var(--color-foreground));
 	}
 
 	.link-description {
-		margin: 0;
 		font-size: 0.8125rem;
-		line-height: 1.6;
-		color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
-		transition: color 200ms ease;
-	}
-
-	.link-card:hover .link-description,
-	.link-card:focus-visible .link-description {
-		color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
-	}
-
-	@media (min-width: 640px) {
-		.link-card {
-			gap: 1rem;
-			padding: 1rem;
-		}
-
-		.link-icon {
-			width: 64px;
-			height: 64px;
-		}
-
-		.link-title {
-			font-size: 1.125rem;
-		}
-
-		.link-description {
-			font-size: 0.875rem;
-		}
+		line-height: 1.5;
+		color: var(--color-foreground-secondary);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 </style>
