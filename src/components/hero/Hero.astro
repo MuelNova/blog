@@ -154,14 +154,27 @@ const chars = Array.from(brand);
 			.filter((el): el is SVGElement => el !== null);
 
 		// 初始状态（JS 不可用时保持可见）
-		gsap.set(main, { scale: 0.8, y: 40, opacity: 0 });
-		gsap.set(chars, { y: '0.55em', opacity: 0, rotate: 5 });
 		gsap.set([sub, sticker], { opacity: 0, y: 14 });
 		gsap.set(particlesLayer, { opacity: 0 });
 		gsap.set([...Object.values(keyedSvgs).filter((el): el is SVGElement => el !== null), ...plainSvgs], {
 			opacity: 0,
 			scale: 0.6,
 			transformOrigin: '50% 50%',
+		});
+		// 「首页是被炸出来的」：测量每个字符的最终位置，把它挪到屏幕中心（爆炸点），
+		// 入场时从中心向外飞散归位——与开场盒爆同一帧启动，开场和首页是同一爆炸的里外两面
+		const scx = window.innerWidth / 2;
+		const scy = window.innerHeight / 2;
+		const charArr = Array.from(chars) as HTMLElement[];
+		charArr.forEach((ch) => {
+			const r = ch.getBoundingClientRect();
+			gsap.set(ch, {
+				x: scx - (r.left + r.width / 2),
+				y: scy - (r.top + r.height / 2),
+				scale: 0.2,
+				opacity: 0,
+				rotation: () => gsap.utils.random(-50, 50),
+			});
 		});
 
 		// 开场贴纸落位接班（两条路径，popped 防重入）：
@@ -191,23 +204,23 @@ const chars = Array.from(brand);
 			if (typeof key === 'string') landDecor(key);
 		});
 
-		// 入场编排：主体弹入 → 标题逐字符 stagger → 副标/贴纸 → 粒子延迟 0.5s 淡入
+		// 入场编排：标题字符从爆炸中心向外飞散归位 → 副标/贴纸 → 粒子淡入
 		const tl = gsap.timeline({ paused: true });
-		tl.to(main, { scale: 1, y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' })
-			.to(
-				chars,
-				{ y: 0, opacity: 1, rotate: 0, duration: 0.6, ease: 'back.out(1.9)', stagger: 0.08 },
-				'-=0.3'
-			)
-			.to(sub, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.35')
-			.to(
-				sticker,
-				{ opacity: 1, y: 0, duration: 0.5, ease: 'back.out(2.2)' },
-				'-=0.3'
-			)
-			.to(particlesLayer, { opacity: 1, duration: 1.1, ease: 'power1.out' }, 0.5)
-			// 无 key 的两个装饰维持原节奏淡入
-			.to(plainSvgs, { opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.8)', stagger: 0.12 }, 0.5);
+		tl.to(charArr, {
+			x: 0,
+			y: 0,
+			scale: 1,
+			opacity: 1,
+			rotation: 0,
+			duration: 0.85,
+			ease: 'back.out(1.4)',
+			stagger: { each: 0.035, from: 'center' },
+		})
+			.to(particlesLayer, { opacity: 1, duration: 1.1, ease: 'power1.out' }, 0.4)
+			// 无 key 的两个装饰维持原节奏弹出
+			.to(plainSvgs, { opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.8)', stagger: 0.12 }, 0.5)
+			.to(sub, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 0.6)
+			.to(sticker, { opacity: 1, y: 0, duration: 0.5, ease: 'back.out(2.2)' }, 0.7);
 
 		// 与开场动画衔接：intro 播放中则等 intro:revealed，否则立即播
 		const play = () => {
