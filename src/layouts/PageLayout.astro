@@ -36,5 +36,24 @@ const lang = langProp ?? resolveLang(Astro.url.pathname) ?? defaultLang;
 			<slot />
 		</main>
 		{showFooter && <Footer lang={lang} />}
+		<script>
+			// Lenis 全站平滑滚动（通用逻辑，reduced-motion 时不启用）
+			// gsap.ticker 驱动 lenis.raf，lagSmoothing(0) 避免与 GSAP 时间轴冲突
+			import Lenis from 'lenis';
+			import gsap from 'gsap';
+			import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+			gsap.registerPlugin(ScrollTrigger);
+
+			const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			if (!reduceMotion) {
+				const lenis = new Lenis({ lerp: 0.1 });
+				lenis.on('scroll', ScrollTrigger.update);
+				gsap.ticker.add((time) => {
+					lenis.raf(time * 1000);
+				});
+				gsap.ticker.lagSmoothing(0);
+			}
+		</script>
 	</body>
 </html>

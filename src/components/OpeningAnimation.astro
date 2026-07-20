@@ -1,621 +1,196 @@
 ---
+/**
+ * OpeningAnimation — 贴纸晕开版开场动画
+ *
+ * 圆形 SVG mask 从屏幕中心 0 扩展到 200% 揭开页面，期间 3 个小贴纸弹跳入场。
+ *
+ * 保留契约（下游依赖，勿改）：
+ * - localStorage('intro-enabled') 开关（theme-bus 的 isIntroEnabled）
+ * - sessionStorage('intro-shown') 只播一次
+ * - 播完（及跳过路径）给 body 加 `animation-triggered` class 触发 .landing-section 阶梯入场
+ * - 同时派发 window 事件 `intro:revealed`（Hero 入场编排监听）
+ * - prefers-reduced-motion：直接跳过
+ */
 ---
-<div id="opening-animation" class="fixed inset-0 z-[9999] pointer-events-auto overflow-hidden select-none" aria-hidden="true">
-    <!-- Background Layers -->
-    <div id="opening-bg-layer" class="absolute inset-0 bg-background z-10"></div>
-    
-    <!-- The Cut Layers (Initially hidden, revealed during cut) -->
-    <div id="cut-top" class="absolute inset-0 bg-background z-20 flex items-center justify-center overflow-hidden">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--color-primary)_0%,transparent_100%)] opacity-5"></div>
-        <!-- Parallax Grid Top -->
-        <div class="parallax-grid absolute inset-[-20%] w-[140%] h-[140%] opacity-10" style="background-image: radial-gradient(var(--color-primary) 1px, transparent 1px); background-size: 30px 30px;"></div>
-    </div>
-    <div id="cut-bottom" class="absolute inset-0 bg-background z-20 flex items-center justify-center overflow-hidden">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--color-primary)_0%,transparent_100%)] opacity-5"></div>
-        <!-- Parallax Grid Bottom -->
-        <div class="parallax-grid absolute inset-[-20%] w-[140%] h-[140%] opacity-10" style="background-image: radial-gradient(var(--color-primary) 1px, transparent 1px); background-size: 30px 30px;"></div>
-    </div>
 
-    <!-- Debris Container -->
-    <svg id="debris-container" class="absolute inset-0 z-45 pointer-events-none overflow-visible" style="opacity: 0;"></svg>
+<div id="opening-animation" class="fixed inset-0 z-[9999] overflow-hidden select-none" aria-hidden="true">
+	<div
+		id="opening-mask"
+		class="absolute inset-0 flex items-center justify-center"
+		style="background: linear-gradient(180deg, var(--color-background) 0%, var(--color-surface) 100%);"
+	>
+		<!-- 贴纸 1 · 软糖方块 -->
+		<svg viewBox="0 0 64 64" class="intro-sticker absolute left-[18%] top-[26%] h-16 w-16 md:left-[26%] md:top-[30%] md:h-24 md:w-24">
+			<rect x="6" y="10" width="52" height="44" rx="16" fill="var(--color-accent)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
+			<circle cx="26" cy="31" r="3" fill="var(--color-foreground)" />
+			<circle cx="40" cy="31" r="3" fill="var(--color-foreground)" />
+			<path d="M28 39 Q33 43.5 38 39" stroke="var(--color-foreground)" stroke-width="2" fill="none" stroke-linecap="round" />
+		</svg>
+		<!-- 贴纸 2 · 甜甜圈 -->
+		<svg viewBox="0 0 64 64" class="intro-sticker absolute right-[16%] top-[30%] h-14 w-14 md:right-[24%] md:top-[36%] md:h-20 md:w-20">
+			<circle cx="32" cy="32" r="22" fill="var(--color-primary-light)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
+			<circle cx="32" cy="32" r="9" fill="var(--color-surface)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
+			<circle cx="24" cy="22" r="2" fill="var(--color-accent)" />
+			<circle cx="42" cy="26" r="2" fill="var(--color-accent-2)" />
+		</svg>
+		<!-- 贴纸 3 · 小花 -->
+		<svg viewBox="0 0 64 64" class="intro-sticker absolute bottom-[24%] left-[30%] h-12 w-12 md:bottom-[28%] md:left-[40%] md:h-16 md:w-16">
+			<g fill="var(--color-accent-2)" stroke="var(--color-foreground)" stroke-opacity="0.2" stroke-width="2">
+				<ellipse cx="32" cy="16" rx="8" ry="11" />
+				<ellipse cx="32" cy="48" rx="8" ry="11" />
+				<ellipse cx="16" cy="32" rx="11" ry="8" />
+				<ellipse cx="48" cy="32" rx="11" ry="8" />
+			</g>
+			<circle cx="32" cy="32" r="7" fill="var(--color-primary-lightest)" stroke="var(--color-foreground)" stroke-opacity="0.2" stroke-width="2" />
+		</svg>
 
-    <!-- Content Container (Centered) -->
-    <div id="intro-content" class="absolute inset-0 z-30 flex flex-col items-center justify-center">
-        <div class="relative overflow-hidden p-4">
-            <h1 id="logo-text" class="text-6xl md:text-9xl lg:text-10xl font-black tracking-tighter text-foreground opacity-0 scale-110 blur-lg transition-all duration-1000" data-value="NOVA">
-                NOVA
-            </h1>
-            <!-- Scanline -->
-            <div id="scan-line" class="absolute top-0 left-0 w-full h-[2px] bg-primary opacity-0"></div>
-        </div>
-        <div class="mt-4 overflow-hidden">
-             <span id="sub-text" class="font-mono text-xs md:text-sm lg:text-base text-primary tracking-[1em] uppercase opacity-0 translate-y-4 transition-all duration-700 delay-300 block">
-                System Breach
-            </span>
-        </div>
-    </div>
-
-    <!-- The Slash Line -->
-    <div id="slash-line" class="absolute top-1/2 left-1/2 w-[200vw] h-[2px] bg-white shadow-[0_0_30px_var(--color-primary)] opacity-0 z-40 pointer-events-none"></div>
-    
-    <!-- Character Placeholder (Uncomment and add image URL to enable) -->
-    <!-- 
-    <div id="character-flash" class="absolute inset-0 z-35 flex items-center justify-center opacity-0 pointer-events-none mix-blend-overlay">
-        <img src="/your-samurai-girl.png" alt="Character" class="h-[80vh] object-contain filter drop-shadow-[0_0_20px_var(--color-primary)]" />
-    </div>
-    -->
-
-    <!-- Flash Effect -->
-    <div id="flash-overlay" class="absolute inset-0 bg-white z-50 opacity-0 pointer-events-none"></div>
+		<!-- 小字 wordmark -->
+		<div class="intro-brand font-display text-[clamp(1.4rem,4vw,2.4rem)] font-extrabold tracking-[-0.02em] text-foreground-secondary">
+			Muir's Cream
+		</div>
+	</div>
 </div>
 
 <script is:inline>
-    // Immediate check to prevent content flash
-    try {
-        const introEnabled = localStorage.getItem('intro-enabled') !== 'false';
-        const hasShown = sessionStorage.getItem('intro-shown');
-        
-        if (introEnabled && !hasShown) {
-            // First visit AND enabled: Full animation
-            document.body.classList.add('is-animating');
-        } else {
-            // Disabled OR already shown: Skip cut, but prepare for landIn
-            // Hide container immediately
-            const container = document.getElementById('opening-animation');
-            if (container) container.style.display = 'none';
-            
-            // Trigger landIn animation immediately
-            document.body.classList.add('animation-triggered');
-        }
-    } catch (e) {}
+	// 早期检查，避免内容闪烁（inline：模块脚本之前执行，直接读 localStorage）
+	try {
+		const introEnabled = localStorage.getItem('intro-enabled') !== 'false';
+		const hasShown = sessionStorage.getItem('intro-shown');
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+		if (introEnabled && !hasShown && !reduceMotion) {
+			// 首次访问且启用：完整动画
+			document.body.classList.add('is-animating');
+		} else {
+			// 关闭 / 已播过 / reduced-motion：立即跳过，直接触发 landIn
+			const container = document.getElementById('opening-animation');
+			if (container) container.style.display = 'none';
+			document.body.classList.add('animation-triggered');
+		}
+	} catch (e) {}
 </script>
 
 <script>
-    const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&";
+	import gsap from 'gsap';
+	import { isIntroEnabled } from '../lib/theme-bus';
 
-    function startAnimation() {
-        const container = document.getElementById('opening-animation');
-        
-        const introEnabled = localStorage.getItem('intro-enabled') !== 'false';
-        const hasShown = sessionStorage.getItem('intro-shown');
+	function startAnimation() {
+		const container = document.getElementById('opening-animation');
+		const mask = document.getElementById('opening-mask');
 
-        // Check if we should skip
-        if (!introEnabled || hasShown) {
-            if (container) container.remove();
-            document.body.classList.remove('is-animating');
-            document.body.classList.add('animation-triggered');
-            return;
-        }
-        
-        // Mark as shown for next time
-        sessionStorage.setItem('intro-shown', 'true');
-        
-        // Ensure body has the class (in case inline script failed)
-        document.body.classList.add('is-animating');
+		const hasShown = sessionStorage.getItem('intro-shown') === 'true';
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        const cutTop = document.getElementById('cut-top');
-        const cutBottom = document.getElementById('cut-bottom');
-        const slashLine = document.getElementById('slash-line');
-        const flash = document.getElementById('flash-overlay');
-        const content = document.getElementById('intro-content');
-        const logoText = document.getElementById('logo-text');
-        const subText = document.getElementById('sub-text');
-        const scanLine = document.getElementById('scan-line');
-        const character = document.getElementById('character-flash');
-        const debrisContainer = document.getElementById('debris-container');
-        const parallaxGrids = document.querySelectorAll('.parallax-grid');
-        const bgLayer = document.getElementById('opening-bg-layer');
+		// 跳过路径：inline 脚本已处理 class，这里只清理 DOM
+		if (!isIntroEnabled() || hasShown || reduceMotion) {
+			if (container) container.remove();
+			document.body.classList.remove('is-animating');
+			document.body.classList.add('animation-triggered');
+			return;
+		}
+		if (!container || !mask) return;
 
-        if (!container || !cutTop || !cutBottom || !slashLine || !flash || !content || !logoText) return;
+		// 标记已播（每次会话一次）
+		try {
+			sessionStorage.setItem('intro-shown', 'true');
+		} catch (e) {}
+		document.body.classList.add('is-animating');
 
-        // 1. Setup initial state (Randomized)
-        // Random angle between -35 and 35 degrees
-        const angle = (Math.random() * 70) - 35; 
-        // Random center offset (+/- 10%)
-        const cx = 50 + (Math.random() - 0.5) * 20;
-        const cy = 50 + (Math.random() - 0.5) * 20;
+		const stickers = mask.querySelectorAll('.intro-sticker');
+		const brand = mask.querySelector('.intro-brand');
 
-        const rad = angle * (Math.PI / 180);
-        const tan = Math.tan(rad);
-        
-        // Calculate y-intercepts at x=0 and x=100 based on line equation: y - cy = tan(x - cx)
-        // y = tan(x - cx) + cy
-        // Note: cx, cy are percentages.
-        const y0 = tan * (0 - cx) + cy;
-        const y100 = tan * (100 - cx) + cy;
-        
-        const p0 = `${y0}%`;
-        const p100 = `${y100}%`;
+		const reveal = () => {
+			document.body.classList.add('animation-triggered');
+			window.dispatchEvent(new Event('intro:revealed'));
+		};
 
-        cutTop.style.clipPath = `polygon(0% 0%, 100% 0%, 100% ${p100}, 0% ${p0})`;
-        cutBottom.style.clipPath = `polygon(0% ${p0}, 100% ${p100}, 100% 100%, 0% 100%)`;
-        
-        // Position slash line at the random center
-        slashLine.style.left = `${cx}%`;
-        slashLine.style.top = `${cy}%`;
-        slashLine.style.transform = `translate(-50%, -50%) rotate(${angle}deg) scaleX(0)`;
+		gsap.set(stickers, { scale: 0, rotate: -14, opacity: 0 });
+		gsap.set(brand, { opacity: 0, y: 12 });
 
-        // Helper: Hacker Decode Effect
-        const runDecodeEffect = (element: HTMLElement, finalText: string, duration: number) => {
-            let iterations = 0;
-            const totalIterations = finalText.length;
-            const intervalTime = 50;
-            const increment = totalIterations / (duration / intervalTime);
+		const tl = gsap.timeline({
+			onComplete: () => {
+				document.body.classList.remove('is-animating');
+				container.remove();
+			},
+		});
 
-            const interval = setInterval(() => {
-                // Text Scramble
-                element.innerText = finalText
-                    .split("")
-                    .map((_, index) => {
-                        if (index < iterations) {
-                            return finalText[index];
-                        }
-                        return LETTERS[Math.floor(Math.random() * LETTERS.length)];
-                    })
-                    .join("");
-                
-                // Position Jitter (Nervousness)
-                const jitterX = (Math.random() - 0.5) * 4;
-                const jitterY = (Math.random() - 0.5) * 4;
-                element.style.transform = `translate(${jitterX}px, ${jitterY}px) scale(1)`;
+		tl
+			// 贴纸弹跳入场
+			.to(stickers, {
+				scale: 1,
+				rotate: 0,
+				opacity: 1,
+				duration: 0.55,
+				ease: 'back.out(2.4)',
+				stagger: 0.13,
+			})
+			.to(brand, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '-=0.25')
+			// 稍作停留，开始晕开
+			.add(() => {
+				mask.classList.add('is-revealing');
+			}, '+=0.35')
+			// 圆形 mask 从中心 0 → 200% 揭开
+			.to(mask, { '--reveal': '200%', duration: 1.6, ease: 'power2.inOut' }, '<')
+			// mask 揭开初期：内容 0.3s 淡入 + 触发 landIn / hero 编排
+			.add(reveal, '<+0.15');
+	}
 
-                if (iterations >= totalIterations) { 
-                    clearInterval(interval);
-                    element.innerText = finalText; // Ensure final state is clean
-                    element.style.transform = 'translate(0, 0) scale(1)'; // Reset position
-                }
-                iterations += increment; 
-            }, intervalTime);
-        };
-
-        // Helper: Generate Text Shatter Debris
-        const generateTextDebris = () => {
-            if (!debrisContainer || !logoText) return;
-            const rect = logoText.getBoundingClientRect();
-            const textCenterX = rect.left + rect.width / 2;
-            const textCenterY = rect.top + rect.height / 2;
-            
-            // Use DocumentFragment for better performance
-            // But since we are working with SVG string, we can just build a string and append it once.
-            // However, reading innerHTML forces layout.
-            // Let's just append new particles to the existing SVG content string if possible, 
-            // OR better: create elements using createElementNS.
-            
-            const numParticles = 80; // Lots of small shards
-            let newParticlesHTML = '';
-            
-            for (let i = 0; i < numParticles; i++) {
-                // Random position within text box
-                const x = rect.left + Math.random() * rect.width;
-                const y = rect.top + Math.random() * rect.height;
-                
-                // Velocity: Explode outwards from text center
-                const dx = x - textCenterX;
-                const dy = y - textCenterY;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                const dirX = dist > 0 ? dx/dist : (Math.random()-0.5);
-                const dirY = dist > 0 ? dy/dist : (Math.random()-0.5);
-                
-                // Add some randomness to direction
-                const spread = 0.5;
-                const finalDirX = dirX + (Math.random() - 0.5) * spread;
-                const finalDirY = dirY + (Math.random() - 0.5) * spread;
-
-                const speed = 10 + Math.random() * 30; // Fast explosion
-                const vx = finalDirX * speed;
-                const vy = finalDirY * speed;
-                
-                // Rotation
-                const rotSpeed = (Math.random() - 0.5) * 100;
-                
-                // Shape: Small rectangles or shards
-                const w = 2 + Math.random() * 8;
-                const h = 2 + Math.random() * 8;
-                
-                newParticlesHTML += `
-                    <g transform="translate(${x}, ${y})" class="debris-particle text-shard" data-vx="${vx}" data-vy="${vy}" data-r="${rotSpeed}">
-                        <rect width="${w}" height="${h}" fill="var(--theme-text, white)" opacity="1" />
-                    </g>
-                `;
-            }
-            // Append efficiently
-            debrisContainer.insertAdjacentHTML('beforeend', newParticlesHTML);
-        };
-
-        // Generate SVG Debris (Optimized for explosion)
-        const generateDebris = () => {
-            if (!debrisContainer) return;
-            const numParticles = 50; // More particles
-            const centerX = window.innerWidth * (cx / 100); // Use random center
-            const centerY = window.innerHeight * (cy / 100); // Use random center
-            
-            let svgContent = '';
-            for (let i = 0; i < numParticles; i++) {
-                // Position along the cut line
-                const t = (Math.random() - 0.5) * 1.5; 
-                const x = centerX + t * window.innerWidth;
-                const y = centerY + t * window.innerWidth * tan;
-                
-                // Determine which side of the cut (Top or Bottom)
-                // We want particles to fly OUTWARD from the cut
-                const isTop = Math.random() > 0.5;
-                
-                // Velocity Calculation
-                // Base direction is perpendicular to the cut line
-                // Cut angle is `angle`. Perpendiculars are `angle - 90` (Up/Left) and `angle + 90` (Down/Right)
-                const baseDir = isTop ? (angle - 90) : (angle + 90);
-                // Add some spread (+/- 30 degrees)
-                const spread = (Math.random() - 0.5) * 60;
-                const moveAngle = (baseDir + spread) * (Math.PI / 180);
-                
-                // Explosion speed (High initial velocity)
-                const speed = 15 + Math.random() * 25; 
-                const vx = Math.cos(moveAngle) * speed;
-                const vy = Math.sin(moveAngle) * speed;
-                
-                // Random Gravity (Unstable Physics)
-                // Some particles have normal gravity, some zero, some negative (anti-gravity)
-                const gravityType = Math.random();
-                let gravity = 500;
-                if (gravityType > 0.8) gravity = -200; // Anti-gravity
-                else if (gravityType > 0.6) gravity = 0; // Zero-G
-                
-                const rotSpeed = (Math.random() - 0.5) * 60;
-
-                // Shape Mutation: Triangle, Rect, or Line
-                const shapeType = Math.random();
-                let shapeElement = '';
-                
-                if (shapeType > 0.6) {
-                    // Triangle (Standard Shard)
-                    const size = 2 + Math.random() * 10;
-                    const points = [];
-                    const sides = 3;
-                    const rotationOffset = Math.random() * Math.PI * 2;
-                    for (let j = 0; j < sides; j++) {
-                        const pAngle = (j / sides) * Math.PI * 2 + rotationOffset;
-                        const r = size * (0.5 + Math.random() * 0.5);
-                        const px = Math.cos(pAngle) * r;
-                        const py = Math.sin(pAngle) * r;
-                        points.push(`${px},${py}`);
-                    }
-                    shapeElement = `<polygon points="${points.join(' ')}" fill="var(--color-primary)" opacity="${0.6 + Math.random() * 0.4}" />`;
-                } else if (shapeType > 0.3) {
-                    // Rectangle (Data Block)
-                    const w = 4 + Math.random() * 10;
-                    const h = 4 + Math.random() * 10;
-                    shapeElement = `<rect x="${-w/2}" y="${-h/2}" width="${w}" height="${h}" fill="var(--color-primary)" opacity="${0.6 + Math.random() * 0.4}" />`;
-                } else {
-                    // Line (Glitch Line)
-                    const len = 10 + Math.random() * 40;
-                    const thickness = 1 + Math.random() * 2;
-                    shapeElement = `<rect x="${-len/2}" y="${-thickness/2}" width="${len}" height="${thickness}" fill="var(--color-primary)" opacity="${0.8 + Math.random() * 0.2}" />`;
-                }
-
-                svgContent += `
-                    <g transform="translate(${x}, ${y})" class="debris-particle" data-vx="${vx}" data-vy="${vy}" data-r="${rotSpeed}" data-g="${gravity}">
-                        ${shapeElement}
-                    </g>
-                `;
-            }
-            debrisContainer.innerHTML = svgContent;
-        };
-        generateDebris();
-
-        // 2. Animation Sequence
-        const timeline = [
-            // Step 1: Logo Reveal (Cinematic Decode)
-            () => {
-                // Reset styles
-                logoText.style.opacity = '1';
-                logoText.style.transform = 'scale(1)';
-                logoText.style.filter = 'blur(0px)';
-                
-                // Start decode - Slower, more deliberate (2000ms)
-                runDecodeEffect(logoText, logoText.dataset.value || "NOVA", 1500);
-
-                // Subtext reveal with RANDOM MESSAGE
-                if(subText) {
-                    const messages = [
-                        "SYSTEM BREACH",
-                        "REALITY COMPROMISED",
-                        "SIGNAL UNSTABLE",
-                        "MEMORY LEAK",
-                        "VOID DETECTED",
-                        "ENTROPY RISING",
-                        "CONNECTION LOST",
-                        "FATAL ERROR"
-                    ];
-                    subText.innerText = messages[Math.floor(Math.random() * messages.length)];
-                    subText.classList.remove('opacity-0', 'translate-y-4');
-                }
-
-                // Scanline pass
-                if(scanLine) {
-                    scanLine.style.transition = 'top 1500ms ease-in-out, opacity 0.5s';
-                    scanLine.style.opacity = '0.5';
-                    scanLine.style.top = '100%';
-                }
-
-                return new Promise(r => setTimeout(r, 1700));
-            },
-            // Step 2: Prepare Slash (With Tectonic Jitter)
-            () => {
-                if (character) {
-                    character.style.transition = 'opacity 0.05s';
-                    character.style.opacity = '1';
-                }
-                
-                // Random Slash Color from Theme
-                const slashColors = [
-                    'var(--theme-primary)', 
-                    'var(--theme-primary-light)', 
-                    'var(--theme-primary-lightest)',
-                    '#ffffff' // Keep white as an option
-                ];
-                const randomColor = slashColors[Math.floor(Math.random() * slashColors.length)];
-                
-                slashLine.style.backgroundColor = randomColor;
-                slashLine.style.boxShadow = `0 0 30px ${randomColor}`;
-
-                slashLine.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.1s';
-                slashLine.style.opacity = '1';
-                slashLine.style.transform = `translate(-50%, -50%) rotate(${angle}deg) scaleX(1)`;
-
-                // Randomize wait time for tension (200ms - 600ms)
-                const waitTime = 200 + Math.random() * 400;
-
-                // Ensure no transition smoothing interferes with jitter
-                cutTop.style.transition = 'none';
-                cutBottom.style.transition = 'none';
-
-                // Tectonic Jitter: Shake the screen halves slightly while waiting
-                const startTime = Date.now();
-                const jitterInterval = setInterval(() => {
-                    const elapsed = Date.now() - startTime;
-                    if (elapsed >= waitTime) {
-                        clearInterval(jitterInterval);
-                        return;
-                    }
-                    
-                    // Jitter intensity increases significantly over time
-                    // Start at 2px, ramp up to 8px
-                    const progress = elapsed / waitTime;
-                    const intensity = 2 + progress * 6; 
-                    
-                    const jx = (Math.random() - 0.5) * intensity;
-                    const jy = (Math.random() - 0.5) * intensity;
-                    
-                    // Add slight rotation jitter for more chaos (max 0.5 deg)
-                    const jr = (Math.random() - 0.5) * 0.5 * progress;
-
-                    cutTop.style.transform = `translate(${jx}px, ${jy}px) rotate(${jr}deg)`;
-                    cutBottom.style.transform = `translate(${-jx}px, ${-jy}px) rotate(${-jr}deg)`;
-
-                    // Visual Corruption: RGB Split (Chromatic Aberration)
-                    if (Math.random() > 0.6) {
-                        const rX = (Math.random() - 0.5) * 10 * progress;
-                        const bX = (Math.random() - 0.5) * 10 * progress;
-                        const filter = `drop-shadow(${rX}px 0 rgba(255,0,0,0.5)) drop-shadow(${bX}px 0 rgba(0,255,255,0.5))`;
-                        cutTop.style.filter = filter;
-                        cutBottom.style.filter = filter;
-                    } else {
-                        cutTop.style.filter = 'none';
-                        cutBottom.style.filter = 'none';
-                    }
-                }, 16); // ~60fps
-
-                return new Promise(r => setTimeout(r, waitTime));
-            },
-            // Step 3: The Flash & Cut & Explosion
-            () => {
-                // Hide the static background layer immediately so we can see through the cut
-                if (bgLayer) bgLayer.style.display = 'none';
-
-                // Trigger Landing Animation with delay to match the cut opening
-                // Wait for the cut to open enough so we can see the entry animation
-                setTimeout(() => {
-                    document.body.classList.add('animation-triggered');
-                }, 300);
-
-                // Visual Corruption: Invert Flash
-                // 30% chance to invert colors instead of white flash
-                const isInvert = Math.random() > 0.7;
-                
-                flash.style.transition = 'opacity 0.05s ease-out';
-                flash.style.opacity = '0.9';
-                flash.style.backgroundColor = '#ffffff'; 
-                
-                if (isInvert) {
-                    flash.style.mixBlendMode = 'difference';
-                } else {
-                    flash.style.mixBlendMode = 'normal';
-                }
-
-                // Hide content immediately
-                content.style.opacity = '0';
-                if (character) character.style.opacity = '0';
-
-                // SHATTER TEXT: Generate particles and hide text
-                generateTextDebris();
-                logoText.style.opacity = '0'; // Hide original text
-                if (subText) subText.style.opacity = '0';
-
-                // Shake effect
-                document.body.style.transform = `translate(${Math.random()*6-3}px, ${Math.random()*6-3}px)`;
-                
-                setTimeout(() => {
-                    flash.style.transition = 'opacity 0.4s ease-out';
-                    flash.style.opacity = '0';
-                    document.body.style.transform = 'none';
-                    // Reset filters
-                    cutTop.style.filter = 'none';
-                    cutBottom.style.filter = 'none';
-                }, 50);
-
-                // Split movement (More aggressive)
-                // Calculate distance to clear the screen based on angle
-                // We want to move enough so that the cut opens completely.
-                const slideDist = Math.max(window.innerWidth, window.innerHeight); 
-                const slideRad = (angle - 90) * (Math.PI / 180); 
-                const dx = Math.cos(slideRad) * slideDist;
-                const dy = Math.sin(slideRad) * slideDist;
-
-                // Time Dilation (Variable Speed)
-                const timeType = Math.random();
-                let duration = '2.5s';
-                let easing = 'cubic-bezier(0.23, 1, 0.32, 1)'; // Standard Heavy (60%)
-
-                if (timeType > 0.8) {
-                    // Blitz (Fast) - 20%
-                    duration = '0.6s';
-                    easing = 'cubic-bezier(0.16, 1, 0.3, 1)';
-                } else if (timeType > 0.6) {
-                    // Suspense (Slow start, fast finish) - 20%
-                    duration = '3.5s';
-                    easing = 'cubic-bezier(0.85, 0, 0.15, 1)'; 
-                }
-                
-                cutTop.style.transition = `transform ${duration} ${easing}`;
-                cutBottom.style.transition = `transform ${duration} ${easing}`;
-                
-                cutTop.style.transform = `translate(${dx}px, ${dy}px)`;
-                cutBottom.style.transform = `translate(${-dx}px, ${-dy}px)`;
-
-                // Enhanced Parallax
-                // Move grids significantly in opposite direction to create depth
-                parallaxGrids.forEach((grid, i) => {
-                    const isTop = i === 0; 
-                    // Parallax factor: 0.4 (Background moves 40% of foreground distance in opposite direction)
-                    const pdx = isTop ? -dx * 0.4 : dx * 0.4;
-                    const pdy = isTop ? -dy * 0.4 : dy * 0.4;
-                    
-                    (grid as HTMLElement).style.transition = `transform ${duration} ${easing}`;
-                    (grid as HTMLElement).style.transform = `translate(${pdx}px, ${pdy}px) scale(1.1)`; // Slight scale up
-                });
-
-                // Animate Debris (Explosion Physics)
-                if (debrisContainer) {
-                    debrisContainer.style.opacity = '1';
-                    const particles = debrisContainer.querySelectorAll('.debris-particle');
-                    particles.forEach(p => {
-                        const vx = parseFloat(p.getAttribute('data-vx') || '0');
-                        const vy = parseFloat(p.getAttribute('data-vy') || '0');
-                        const r = parseFloat(p.getAttribute('data-r') || '0');
-                        
-                        let startTime: number;
-                        const animateParticle = (time: number) => {
-                            if (!startTime) startTime = time;
-                            const elapsed = (time - startTime) / 1000; // seconds
-                            
-                            if (elapsed > 1.5) return; 
-
-                            // Physics: x = vt, y = vt + 0.5gt^2
-                            // Reduced gravity for "space" feel
-                            // Use per-particle gravity if available, else default
-                            const gAttr = p.getAttribute('data-g');
-                            const gravity = gAttr ? parseFloat(gAttr) : 500; 
-                            
-                            const cx = vx * elapsed * 60;
-                            const cy = vy * elapsed * 60 + (0.5 * gravity * elapsed * elapsed); 
-                            const rot = r * elapsed * 60;
-
-                            const originalTransform = p.getAttribute('transform')?.split(')')[0] + ')';
-                            p.setAttribute('transform', `${originalTransform} translate(${cx}, ${cy}) rotate(${rot})`);
-                            
-                            // Fade out particles near end
-                            if (elapsed > 0.5) {
-                                (p.children[0] as HTMLElement).style.opacity = Math.max(0, 1 - (elapsed - 0.5)).toString();
-                            }
-
-                            requestAnimationFrame(animateParticle);
-                        };
-                        requestAnimationFrame(animateParticle);
-                    });
-                }
-
-                // Fade out slash line
-                slashLine.style.transition = 'opacity 0.1s';
-                slashLine.style.opacity = '0';
-
-                // Wait for the cut animation (1.5s) and landing animation to complete
-                return new Promise(r => setTimeout(r, 1800));
-            },
-            // Step 4: Cleanup
-            () => {
-                // We don't fade out the container anymore, we let the pieces fly out
-                // Just remove pointer events and wait a bit before removing DOM
-                container.style.pointerEvents = 'none';
-                return new Promise(r => setTimeout(r, 200));
-            }
-        ];
-
-        // Execute timeline
-        (async () => {
-            // Note: 'is-animating' class is added by inline script above
-            
-            // Force logo visible immediately for debugging/safety
-            if (logoText) {
-                logoText.style.opacity = '1';
-            }
-
-            for (const step of timeline) {
-                await step();
-            }
-            
-            // Cleanup
-            document.body.classList.remove('is-animating');
-            // Keep animation-triggered so content stays visible
-            // document.body.classList.remove('animation-triggered'); 
-            container.remove();
-        })();
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', startAnimation);
-    } else {
-        startAnimation();
-    }
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', startAnimation);
+	} else {
+		startAnimation();
+	}
 </script>
 
 <style>
-    /* Removed old glitch styles */
+	#opening-mask {
+		--reveal: 0%;
+	}
+	/* 中心透明洞随 --reveal 扩大，形成晕开揭开效果 */
+	#opening-mask.is-revealing {
+		-webkit-mask-image: radial-gradient(
+			circle var(--reveal) at 50% 50%,
+			transparent 98%,
+			#000 100%
+		);
+		mask-image: radial-gradient(circle var(--reveal) at 50% 50%, transparent 98%, #000 100%);
+	}
 </style>
 
 <style is:global>
-    /* Global Landing Animation Styles */
-    /* Force initial hidden state when animation is active BUT not yet triggered */
-    body.is-animating:not(.animation-triggered) .landing-section {
-        opacity: 0 !important;
-        transform: scale(0.9) translateY(50px);
-        filter: blur(10px);
-        pointer-events: none;
-        will-change: transform, opacity, filter;
-    }
+	/* Global Landing Animation Styles */
+	/* Force initial hidden state when animation is active BUT not yet triggered */
+	body.is-animating:not(.animation-triggered) .landing-section {
+		opacity: 0 !important;
+		transform: scale(0.9) translateY(50px);
+		filter: blur(10px);
+		pointer-events: none;
+		will-change: transform, opacity, filter;
+	}
 
-    /* Trigger animation */
-    body.animation-triggered .landing-section {
-        animation: landIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-        pointer-events: auto;
-    }
+	/* Trigger animation */
+	body.animation-triggered .landing-section {
+		animation: landIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+		pointer-events: auto;
+	}
 
-    body.animation-triggered .landing-section.delay-0 { animation-delay: 0ms; }
-    body.animation-triggered .landing-section.delay-100 { animation-delay: 100ms; }
-    body.animation-triggered .landing-section.delay-200 { animation-delay: 200ms; }
-    body.animation-triggered .landing-section.delay-300 { animation-delay: 300ms; }
-    body.animation-triggered .landing-section.delay-400 { animation-delay: 400ms; }
-    body.animation-triggered .landing-section.delay-500 { animation-delay: 500ms; }
+	body.animation-triggered .landing-section.delay-0 { animation-delay: 0ms; }
+	body.animation-triggered .landing-section.delay-100 { animation-delay: 100ms; }
+	body.animation-triggered .landing-section.delay-200 { animation-delay: 200ms; }
+	body.animation-triggered .landing-section.delay-300 { animation-delay: 300ms; }
+	body.animation-triggered .landing-section.delay-400 { animation-delay: 400ms; }
+	body.animation-triggered .landing-section.delay-500 { animation-delay: 500ms; }
 
-    @keyframes landIn {
-        0% {
-            opacity: 0;
-            transform: scale(0.9) translateY(50px);
-            filter: blur(10px);
-        }
-        100% {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-            filter: blur(0);
-        }
-    }
+	@keyframes landIn {
+		0% {
+			opacity: 0;
+			transform: scale(0.9) translateY(50px);
+			filter: blur(10px);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1) translateY(0);
+			filter: blur(0);
+		}
+	}
 </style>
