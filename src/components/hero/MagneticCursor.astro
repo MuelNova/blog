@@ -33,6 +33,13 @@
 		will-change: transform;
 	}
 
+	/* 开场动画播放期间（body 还没有 animation-triggered）完全隐藏，
+	   避免小圆点飘在开场遮罩（z-9999）之上 */
+	body:not(.animation-triggered) .cursor-dot,
+	body:not(.animation-triggered) .cursor-ring {
+		display: none !important;
+	}
+
 	.cursor-dot.is-live,
 	.cursor-ring.is-live {
 		display: block;

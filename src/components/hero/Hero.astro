@@ -40,8 +40,8 @@ const chars = Array.from(brand);
 
 	<!-- L4 装饰层：SVG 软糖块（鼠标视差 data-speed） -->
 	<div id="hero-decor" aria-hidden="true" class="pointer-events-none absolute inset-0">
-		<!-- 软糖方块 · 粉 -->
-		<span data-speed="0.5" class="absolute left-[7%] top-[20%] will-change-transform">
+		<!-- 软糖方块 · 粉（与开场贴纸同款，data-decor 用于开场交接） -->
+		<span data-decor="candy" data-speed="0.5" class="absolute left-[7%] top-[20%] will-change-transform">
 			<svg viewBox="0 0 64 64" class="h-14 w-14 md:h-20 md:w-20">
 				<rect x="6" y="10" width="52" height="44" rx="16" fill="var(--color-accent)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
 				<circle cx="26" cy="31" r="3" fill="var(--color-foreground)" />
@@ -51,8 +51,8 @@ const chars = Array.from(brand);
 				<circle cx="45" cy="37" r="2.4" fill="var(--color-primary)" opacity="0.7" />
 			</svg>
 		</span>
-		<!-- 甜甜圈 · 蜜桃 -->
-		<span data-speed="-0.7" class="absolute right-[9%] top-[24%] will-change-transform">
+		<!-- 甜甜圈 · 蜜桃（与开场贴纸同款） -->
+		<span data-decor="donut" data-speed="-0.7" class="absolute right-[9%] top-[24%] will-change-transform">
 			<svg viewBox="0 0 64 64" class="h-12 w-12 md:h-16 md:w-16">
 				<circle cx="32" cy="32" r="22" fill="var(--color-primary-light)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
 				<circle cx="32" cy="32" r="9" fill="var(--color-background)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" />
@@ -61,8 +61,8 @@ const chars = Array.from(brand);
 				<circle cx="30" cy="44" r="2" fill="var(--color-accent)" />
 			</svg>
 		</span>
-		<!-- 小花 · 雾蓝 -->
-		<span data-speed="0.95" class="absolute bottom-[22%] left-[13%] hidden will-change-transform md:block">
+		<!-- 小花 · 雾蓝（与开场贴纸同款） -->
+		<span data-decor="flower" data-speed="0.95" class="absolute bottom-[22%] left-[13%] hidden will-change-transform md:block">
 			<svg viewBox="0 0 64 64" class="h-12 w-12 md:h-16 md:w-16">
 				<g fill="var(--color-accent-2)" stroke="var(--color-foreground)" stroke-opacity="0.2" stroke-width="2">
 					<ellipse cx="32" cy="16" rx="8" ry="11" />
@@ -74,7 +74,7 @@ const chars = Array.from(brand);
 			</svg>
 		</span>
 		<!-- 包装糖 · 奶油 -->
-		<span data-speed="-0.4" class="absolute bottom-[26%] right-[14%] hidden will-change-transform md:block">
+		<span data-decor="wrap" data-speed="-0.4" class="absolute bottom-[26%] right-[14%] hidden will-change-transform md:block">
 			<svg viewBox="0 0 80 48" class="h-10 w-16 md:h-12 md:w-20">
 				<path d="M14 24 L26 14 L26 34 Z" fill="var(--color-accent)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" stroke-linejoin="round" />
 				<path d="M66 24 L54 14 L54 34 Z" fill="var(--color-accent)" stroke="var(--color-foreground)" stroke-opacity="0.22" stroke-width="2" stroke-linejoin="round" />
@@ -85,7 +85,7 @@ const chars = Array.from(brand);
 			</svg>
 		</span>
 		<!-- 小圆糖 · 点缀 -->
-		<span data-speed="0.3" class="absolute right-[26%] top-[14%] hidden will-change-transform lg:block">
+		<span data-decor="dot" data-speed="0.3" class="absolute right-[26%] top-[14%] hidden will-change-transform lg:block">
 			<svg viewBox="0 0 32 32" class="h-7 w-7">
 				<circle cx="16" cy="16" r="12" fill="var(--color-accent-2)" stroke="var(--color-foreground)" stroke-opacity="0.2" stroke-width="2" />
 				<circle cx="12" cy="12" r="3" fill="var(--color-background)" opacity="0.8" />
@@ -142,11 +142,40 @@ const chars = Array.from(brand);
 		const sub = main.querySelector('.hero-sub');
 		const sticker = main.querySelector('.hero-sticker');
 
+		// 装饰层 5 个装饰：candy/donut/flower 与开场贴纸同款（等开场飞入交接），
+		// wrap/dot 无对应贴纸（维持原节奏淡入）。
+		// 注意：弹出动画作用在内部 svg 上——外层 span 的 transform 归鼠标视差管，互不打架。
+		const keyedSvgs: Record<string, SVGElement | null> = {};
+		for (const key of ['candy', 'donut', 'flower']) {
+			keyedSvgs[key] = decorLayer.querySelector(`[data-decor="${key}"] svg`);
+		}
+		const plainSvgs = ['wrap', 'dot']
+			.map((key) => decorLayer.querySelector(`[data-decor="${key}"] svg`))
+			.filter((el): el is SVGElement => el !== null);
+
 		// 初始状态（JS 不可用时保持可见）
 		gsap.set(main, { scale: 0.8, y: 40, opacity: 0 });
 		gsap.set(chars, { y: '0.55em', opacity: 0, rotate: 5 });
 		gsap.set([sub, sticker], { opacity: 0, y: 14 });
-		gsap.set([particlesLayer, decorLayer], { opacity: 0 });
+		gsap.set(particlesLayer, { opacity: 0 });
+		gsap.set([...Object.values(keyedSvgs).filter((el): el is SVGElement => el !== null), ...plainSvgs], {
+			opacity: 0,
+			scale: 0.6,
+			transformOrigin: '50% 50%',
+		});
+
+		// 开场贴纸落位接班：对应 key 到达时弹出（与开场贴纸淡出交叠，无缝交接）
+		const popped = new Set<string>();
+		const popDecor = (key: string) => {
+			const el = keyedSvgs[key];
+			if (!el || popped.has(key)) return;
+			popped.add(key);
+			gsap.to(el, { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(2)' });
+		};
+		window.addEventListener('intro:sticker-land', (e) => {
+			const key = (e as CustomEvent).detail?.key;
+			if (typeof key === 'string') popDecor(key);
+		});
 
 		// 入场编排：主体弹入 → 标题逐字符 stagger → 副标/贴纸 → 粒子延迟 0.5s 淡入
 		const tl = gsap.timeline({ paused: true });
@@ -162,10 +191,19 @@ const chars = Array.from(brand);
 				{ opacity: 1, y: 0, duration: 0.5, ease: 'back.out(2.2)' },
 				'-=0.3'
 			)
-			.to([particlesLayer, decorLayer], { opacity: 1, duration: 1.1, ease: 'power1.out' }, 0.5);
+			.to(particlesLayer, { opacity: 1, duration: 1.1, ease: 'power1.out' }, 0.5)
+			// 无 key 的两个装饰维持原节奏淡入
+			.to(plainSvgs, { opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.8)', stagger: 0.12 }, 0.5);
 
 		// 与开场动画衔接：intro 播放中则等 intro:revealed，否则立即播
-		const play = () => tl.play(0);
+		const play = () => {
+			tl.play(0);
+			// 兜底：开场被跳过（或落位事件丢失）时没有任何 intro:sticker-land，
+			// hero 入场 1.5s 后把没弹出的装饰全部正常弹出，不能缺席
+			window.setTimeout(() => {
+				for (const key of Object.keys(keyedSvgs)) popDecor(key);
+			}, 1500);
+		};
 		if (
 			document.body.classList.contains('is-animating') &&
 			!document.body.classList.contains('animation-triggered')
