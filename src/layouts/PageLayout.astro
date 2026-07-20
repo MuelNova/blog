@@ -9,6 +9,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Background from '../components/Background.astro';
+import MarqueeDivider from '../components/MarqueeDivider.astro';
 import { defaultLang, resolveLang } from '../i18n/config';
 
 interface Props {
@@ -16,10 +17,12 @@ interface Props {
 	description: string;
 	class?: string;
 	showFooter?: boolean;
+	/** 页脚上方跑马灯分隔带，默认开启；首页自挂两条时关闭 */
+	showMarquee?: boolean;
 	lang?: string;
 }
 
-const { title, description, class: className, showFooter = false, lang: langProp } = Astro.props;
+const { title, description, class: className, showFooter = false, showMarquee = true, lang: langProp } = Astro.props;
 const lang = langProp ?? resolveLang(Astro.url.pathname) ?? defaultLang;
 ---
 
@@ -35,6 +38,7 @@ const lang = langProp ?? resolveLang(Astro.url.pathname) ?? defaultLang;
 		<main class={className}>
 			<slot />
 		</main>
+		{showMarquee && <MarqueeDivider />}
 		{showFooter && <Footer lang={lang} />}
 		<script>
 			// Lenis 全站平滑滚动（通用逻辑，reduced-motion 时不启用）
@@ -53,6 +57,8 @@ const lang = langProp ?? resolveLang(Astro.url.pathname) ?? defaultLang;
 					lenis.raf(time * 1000);
 				});
 				gsap.ticker.lagSmoothing(0);
+				// 暴露给 MarqueeDivider 等彩蛋读取滚动速度
+				(window as unknown as { __lenis?: Lenis }).__lenis = lenis;
 			}
 		</script>
 	</body>

@@ -1,0 +1,192 @@
+---
+/**
+ * MagneticCursor — 首页限定磁性自定义光标（叠加层，不隐藏系统光标）
+ *
+ * 门控：pointer:fine 且非 reduced-motion 才激活；移动端/减少动态时完全不挂载行为。
+ * 形态：主色软糖球（12px，lerp 0.15）+ 描边拖尾环（32px，lerp 0.10）。
+ * 悬停 a / button / [data-cursor] 时球吸附放大至 48px 半透明并显示标签：
+ * data-cursor 属性覆盖文案（READ / VISIT …），默认 "GO"。
+ * 颜色全部走 CSS 变量，主题切换自动跟随。
+ */
+---
+
+<div class="cursor-dot" aria-hidden="true">
+	<span class="cursor-dot-inner">
+		<span class="cursor-label"></span>
+	</span>
+</div>
+<div class="cursor-ring" aria-hidden="true">
+	<span class="cursor-ring-inner"></span>
+</div>
+
+<style>
+	.cursor-dot,
+	.cursor-ring {
+		position: fixed;
+		left: 0;
+		top: 0;
+		z-index: 9999;
+		pointer-events: none;
+		display: none;
+		opacity: 0;
+		transition: opacity 300ms ease;
+		will-change: transform;
+	}
+
+	.cursor-dot.is-live,
+	.cursor-ring.is-live {
+		display: block;
+	}
+
+	.cursor-dot.is-visible,
+	.cursor-ring.is-visible {
+		opacity: 1;
+	}
+
+	.cursor-dot-inner {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 12px;
+		height: 12px;
+		margin: -6px 0 0 -6px;
+		border-radius: 9999px;
+		background: var(--color-primary);
+		border: 1.5px solid transparent;
+		transition:
+			width 220ms var(--ease-out),
+			height 220ms var(--ease-out),
+			margin 220ms var(--ease-out),
+			background-color 220ms ease,
+			border-color 220ms ease;
+	}
+
+	.cursor-dot.is-hover .cursor-dot-inner {
+		width: 48px;
+		height: 48px;
+		margin: -24px 0 0 -24px;
+		background: color-mix(in srgb, var(--color-primary) 32%, transparent);
+		border-color: color-mix(in srgb, var(--color-primary) 65%, transparent);
+	}
+
+	.cursor-label {
+		font-family: var(--font-display);
+		font-size: 10px;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		color: var(--color-foreground);
+		opacity: 0;
+		transition: opacity 160ms ease;
+		user-select: none;
+	}
+
+	.cursor-dot.is-hover .cursor-label {
+		opacity: 1;
+		transition-delay: 60ms;
+	}
+
+	.cursor-ring-inner {
+		display: block;
+		width: 32px;
+		height: 32px;
+		margin: -16px 0 0 -16px;
+		border-radius: 9999px;
+		border: 1.5px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+		transition:
+			transform 300ms var(--ease-out),
+			opacity 300ms ease,
+			border-color 220ms ease;
+	}
+
+	.cursor-ring.is-hover .cursor-ring-inner {
+		transform: scale(1.6);
+		opacity: 0.5;
+	}
+</style>
+
+<script>
+	const finePointer = window.matchMedia('(pointer: fine)');
+	const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+	if (finePointer.matches && !reduceMotion.matches) {
+		const dot = document.querySelector<HTMLElement>('.cursor-dot');
+		const ring = document.querySelector<HTMLElement>('.cursor-ring');
+		const label = document.querySelector<HTMLElement>('.cursor-label');
+
+		if (dot && ring && label) {
+			dot.classList.add('is-live');
+			ring.classList.add('is-live');
+
+			let mouseX = -100;
+			let mouseY = -100;
+			let dotX = -100;
+			let dotY = -100;
+			let ringX = -100;
+			let ringY = -100;
+			let visible = false;
+
+			window.addEventListener(
+				'pointermove',
+				(e) => {
+					mouseX = e.clientX;
+					mouseY = e.clientY;
+					if (!visible) {
+						visible = true;
+						// 首次直接落位，避免从角落飞入
+						dotX = ringX = mouseX;
+						dotY = ringY = mouseY;
+						dot.classList.add('is-visible');
+						ring.classList.add('is-visible');
+					}
+				},
+				{ passive: true }
+			);
+
+			document.documentElement.addEventListener('pointerleave', () => {
+				visible = false;
+				dot.classList.remove('is-visible');
+				ring.classList.remove('is-visible');
+			});
+
+			// 悬停检测：a / button / [data-cursor]，data-cursor 覆盖标签文案
+			const interactiveSelector = 'a, button, [data-cursor], [role="button"]';
+			let current: Element | null = null;
+
+			const applyHover = () => {
+				const on = current !== null;
+				dot.classList.toggle('is-hover', on);
+				ring.classList.toggle('is-hover', on);
+				if (on && current) {
+					label.textContent = (current as HTMLElement).dataset?.cursor || 'GO';
+				}
+			};
+
+			document.addEventListener('pointerover', (e) => {
+				const target = (e.target as Element | null)?.closest?.(interactiveSelector) ?? null;
+				if (target !== current) {
+					current = target;
+					applyHover();
+				}
+			});
+
+			document.addEventListener('pointerout', (e) => {
+				if (!current) return;
+				const related = e.relatedTarget as Element | null;
+				if (related instanceof Node && current.contains(related)) return;
+				current = related?.closest?.(interactiveSelector) ?? null;
+				applyHover();
+			});
+
+			const tick = () => {
+				dotX += (mouseX - dotX) * 0.15;
+				dotY += (mouseY - dotY) * 0.15;
+				ringX += (mouseX - ringX) * 0.1;
+				ringY += (mouseY - ringY) * 0.1;
+				dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0)`;
+				ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
+				requestAnimationFrame(tick);
+			};
+			requestAnimationFrame(tick);
+		}
+	}
+</script>

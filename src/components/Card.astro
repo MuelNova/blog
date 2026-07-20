@@ -2,6 +2,8 @@
 /**
  * Card Component
  * Sticker-style card: rounded corners, 2px warm outline, no drop shadow.
+ * Hover 彩蛋：内嵌 SVG rect 沿描边跑圈点亮（0.7s ease-out），
+ * reduced-motion 时隐藏 SVG，退化为原有 hover:border-primary 变色。
  */
 
 interface Props {
@@ -12,8 +14,46 @@ const { class: className } = Astro.props;
 ---
 
 <div class:list={[
-	'rounded-2xl border-2 border-border bg-surface p-3 md:p-6 transition-colors duration-300 hover:border-primary',
+	'card relative rounded-2xl border-2 border-border bg-surface p-3 md:p-6 transition-colors duration-300 hover:border-primary',
 	className
 ]}>
+	<svg class="card-border-run" aria-hidden="true" focusable="false">
+		<rect x="1.25" y="1.25" rx="15" pathLength="100" />
+	</svg>
 	<slot />
 </div>
+
+<style>
+	.card-border-run {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+	}
+
+	.card-border-run rect {
+		width: calc(100% - 2.5px);
+		height: calc(100% - 2.5px);
+		fill: none;
+		stroke: var(--color-primary);
+		stroke-width: 2.5px;
+		stroke-linecap: round;
+		stroke-dasharray: 100;
+		stroke-dashoffset: 100;
+	}
+
+	@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+		.card:hover .card-border-run rect,
+		.card:focus-within .card-border-run rect {
+			stroke-dashoffset: 0;
+			transition: stroke-dashoffset 700ms var(--ease-out);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.card-border-run {
+			display: none;
+		}
+	}
+</style>

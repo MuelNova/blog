@@ -243,6 +243,7 @@ const sortedDateGroups: YearData[] = Array.from(dateGroups.entries())
 				<a
 					href={getRelativeLocaleUrl(lang, `/blog/${getPostBaseId(post)}/`)}
 					class="post-row"
+					data-cursor="READ"
 					data-tags={(post.data.tags || []).join(',')}
 					data-year={post.data.pubDate.getFullYear()}
 					data-month={post.data.pubDate.getMonth() + 1}

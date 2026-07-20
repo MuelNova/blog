@@ -22,6 +22,7 @@ const { posts, lang } = Astro.props;
 			<a
 				href={lang ? getRelativeLocaleUrl(lang, `/blog/${getPostBaseId(post)}/`) : `/blog/${getPostBaseId(post)}/`}
 				class="latest-post-row"
+				data-cursor="READ"
 			>
 				<span class="bloom" aria-hidden="true"></span>
 				<h3 class="post-title">{post.data.title}</h3>

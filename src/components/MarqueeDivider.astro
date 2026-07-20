@@ -1,0 +1,164 @@
+---
+/**
+ * MarqueeDivider — 跑马灯分隔带（中英日混搭短语，无限滚动）
+ *
+ * 速度耦合：基础匀速 30px/s，叠加 Lenis 滚动速度（window.__lenis.velocity，
+ * 由 PageLayout 暴露）；无 Lenis 时退化为 scroll 事件差值估算。
+ * 向下滚动加速正转，向上滚动减速/缓慢反转。reduced-motion：静止不滚。
+ */
+
+interface Props {
+	class?: string;
+}
+
+const { class: className } = Astro.props;
+
+const phrase = [
+	{ text: "MUIR'S CREAM", hand: false },
+	{ text: '·', hand: false },
+	{ text: '奶油小站', hand: false },
+	{ text: '·', hand: false },
+	{ text: 'ブログ', hand: false },
+	{ text: '·', hand: false },
+	{ text: 'sweet day', hand: true },
+	{ text: '·', hand: false },
+];
+
+// 单 half 重复次数：保证 half 宽度 >= 超宽视口，实现无缝循环
+const repeats = 10;
+---
+
+<div class:list={['marquee-divider', className]} aria-hidden="true">
+	<div class="marquee-track">
+		{[0, 1].map(() => (
+			<div class="marquee-half">
+				{Array.from({ length: repeats }).map(() => (
+					<span class="marquee-chunk">
+						{phrase.map((word) => (
+							<span class:list={['marquee-word', { 'marquee-hand': word.hand }]}>
+								{word.text}{' '}
+							</span>
+						))}
+					</span>
+				))}
+			</div>
+		))}
+	</div>
+</div>
+
+<style>
+	.marquee-divider {
+		overflow: hidden;
+		padding: 0.625rem 0;
+		border-top: 2px solid color-mix(in srgb, var(--color-accent) 65%, transparent);
+		border-bottom: 2px solid color-mix(in srgb, var(--color-accent) 65%, transparent);
+		background: color-mix(in srgb, var(--color-accent) 16%, var(--color-background));
+		user-select: none;
+	}
+
+	.marquee-track {
+		display: flex;
+		width: max-content;
+		will-change: transform;
+	}
+
+	.marquee-half {
+		display: flex;
+		flex-shrink: 0;
+	}
+
+	.marquee-chunk {
+		display: inline-flex;
+		align-items: baseline;
+		margin-right: 3rem;
+		white-space: nowrap;
+	}
+
+	.marquee-word {
+		font-family: var(--font-display);
+		font-size: 0.9375rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
+	}
+
+	.marquee-hand {
+		font-family: var(--font-hand);
+		font-size: 1.25rem;
+		font-weight: 600;
+		text-transform: none;
+		color: color-mix(in srgb, var(--color-primary) 85%, var(--color-foreground));
+	}
+</style>
+
+<script>
+	interface LenisLike {
+		velocity: number;
+	}
+
+	const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+	if (!reduceMotion.matches) {
+		const instances = Array.from(document.querySelectorAll<HTMLElement>('.marquee-divider'))
+			.map((el) => {
+				const track = el.querySelector<HTMLElement>('.marquee-track');
+				const half = el.querySelector<HTMLElement>('.marquee-half');
+				return track && half ? { track, half, offset: 0, width: 0 } : null;
+			})
+			.filter((i): i is NonNullable<typeof i> => i !== null);
+
+		if (instances.length > 0) {
+			const measure = () => {
+				instances.forEach((i) => {
+					i.width = i.half.offsetWidth;
+				});
+			};
+			measure();
+			window.addEventListener('resize', measure, { passive: true });
+			document.fonts?.ready.then(measure).catch(() => {});
+
+			// 滚动速度：优先 Lenis 实例，退化为 scroll 差值估算
+			let fallbackVelocity = 0;
+			let lastScrollY = window.scrollY;
+			window.addEventListener(
+				'scroll',
+				() => {
+					const y = window.scrollY;
+					fallbackVelocity = fallbackVelocity * 0.7 + (y - lastScrollY) * 0.3;
+					lastScrollY = y;
+				},
+				{ passive: true }
+			);
+
+			const BASE_SPEED = 30; // px/s
+			let currentSpeed = BASE_SPEED;
+			let lastTime = performance.now();
+
+			const tick = (now: number) => {
+				const dt = Math.min((now - lastTime) / 1000, 0.05);
+				lastTime = now;
+
+				const lenis = (window as unknown as { __lenis?: LenisLike }).__lenis;
+				const velocity =
+					lenis && typeof lenis.velocity === 'number' ? lenis.velocity : fallbackVelocity;
+				fallbackVelocity *= 0.9;
+
+				// 向下滚加速正转；向上滚减速，最多缓慢反转
+				const boost = Math.max(-45, Math.min(velocity * 6, 220));
+				const target = BASE_SPEED + boost;
+				currentSpeed += (target - currentSpeed) * 0.12;
+
+				for (const instance of instances) {
+					if (instance.width <= 0) continue;
+					instance.offset =
+						((instance.offset + currentSpeed * dt) % instance.width + instance.width) %
+						instance.width;
+					instance.track.style.transform = `translate3d(${-instance.offset}px, 0, 0)`;
+				}
+				requestAnimationFrame(tick);
+			};
+			requestAnimationFrame(tick);
+		}
+	}
+</script>

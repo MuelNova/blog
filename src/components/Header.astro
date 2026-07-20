@@ -1,7 +1,6 @@
 ---
 import ThemeSelector from './ThemeSelector.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
-import { Icon } from 'astro-icon/components';
 import { SITE_TITLE } from '../consts';
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
 import { defaultLang, useTranslations, getRelativeLocaleUrl } from '../i18n/config';
@@ -15,6 +14,16 @@ const { lang = defaultLang } = Astro.props as { lang?: Lang };
 const t = useTranslations(lang);
 
 const localized = (path: string) => getRelativeLocaleUrl(lang, path);
+
+// 导航激活态：当前路径匹配（home 仅精确匹配，避免 /en 吃掉 /en/blog）
+const homeHref = localized('/');
+const normalize = (p: string) => p.replace(/\/+$/, '') || '/';
+const currentPath = normalize(Astro.url.pathname);
+const isActive = (href: string) => {
+	const target = normalize(href);
+	if (target === normalize(homeHref)) return currentPath === target;
+	return currentPath === target || currentPath.startsWith(target + '/');
+};
 
 const items = [
 	{ type: 'link', name: t('common.nav.home'), href: localized('/') },
@@ -32,7 +41,16 @@ const items = [
 	data-scroll-direction="up"
 >
 	<div class="nav-container max-w-[1280px] mx-auto px-4 py-4 flex items-center justify-between">
-		<a class="font-extrabold text-xl no-underline" href="/">{SITE_TITLE}</a>
+		<a class="logo-link font-display font-extrabold text-xl no-underline" href="/">
+			<span>{SITE_TITLE}</span>
+			<!-- 眨眼小眼睛彩蛋：4s 周期 scaleY 1→0.1→1（小动作 ease-pop） -->
+			<span class="logo-eyes" aria-hidden="true">
+				<svg viewBox="0 0 24 12" width="18" height="9" focusable="false">
+					<g class="eye"><circle cx="5" cy="6" r="2.4" fill="currentColor" /></g>
+					<g class="eye"><circle cx="19" cy="6" r="2.4" fill="currentColor" /></g>
+				</svg>
+			</span>
+		</a>
 
 		<ul
 			id="primary-nav"
@@ -42,7 +60,11 @@ const items = [
 				<>
 					{item.type === 'link' ? (
 						<li class="w-full sm:w-auto">
-							<a href={item.href} class="nav-link">
+							<a
+								href={item.href}
+								class:list={['nav-link', { active: isActive(item.href) }]}
+								aria-current={isActive(item.href) ? 'page' : undefined}
+							>
 								{item.name}
 							</a>
 						</li>
@@ -59,14 +81,16 @@ const items = [
 		</ul>
 
 		<button
-			class="mobile-menu-toggle inline-flex h-10 w-10 items-center justify-center border-2 border-[color-mix(in_srgb,var(--color-accent)_20%,transparent)] bg-[color:var(--color-background)] text-[color:var(--color-accent)] transition-colors duration-150 sm:hidden"
+			class="mobile-menu-toggle inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[color-mix(in_srgb,var(--color-accent)_20%,transparent)] bg-[color:var(--color-background)] text-[color:var(--color-accent)] transition-colors duration-150 sm:hidden"
 			data-nav-toggle
 			aria-label={t('common.mobileMenu')}
 			aria-expanded="false"
 			aria-controls="primary-nav"
 		>
-			<Icon name="ph:list-duotone" class="menu-closed w-6 h-6" />
-			<Icon name="ph:x-duotone" class="menu-open w-6 h-6 hidden" />
+			<span class="menu-lines" aria-hidden="true">
+				<span class="menu-line"></span>
+				<span class="menu-line"></span>
+			</span>
 		</button>
 	</div>
 </nav>
@@ -91,15 +115,33 @@ const items = [
 		text-decoration: none;
 	}
 
-	.header-nav li:hover > a,
-	.header-nav li:focus-within > a {
-		color: var(--color-foreground);
-		background-color: var(--color-accent)
+	/* 贴纸化导航：hover 改为粉色浅洗 pill，不再整块平铺 accent */
+	@media (hover: hover) {
+		.nav-link:hover,
+		.nav-link:focus-visible {
+			color: var(--color-foreground);
+			background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+		}
+	}
+
+	/* 激活态：底部圆点指示器 */
+	.nav-link.active::after {
+		content: '';
+		position: absolute;
+		left: 50%;
+		bottom: -3px;
+		width: 5px;
+		height: 5px;
+		border-radius: 9999px;
+		background: var(--color-primary);
+		transform: translateX(-50%);
 	}
 
 	.nav-link {
 		display: block;
+		position: relative;
 		padding: 0.25rem 0.5rem;
+		border-radius: 100px;
 		font-size: 1.125rem;
 		line-height: 1.5;
 		color: var(--color-foreground);
@@ -168,12 +210,76 @@ const items = [
 		pointer-events: auto;
 	}
 
-	[data-open='true'] .menu-closed {
-		display: none;
+	/* 汉堡两条线：hover 微张（translateY 错开），展开后交叉成 X */
+	.menu-lines {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 5px;
 	}
 
-	[data-open='true'] .menu-open {
+	.menu-line {
 		display: block;
+		width: 18px;
+		height: 2px;
+		border-radius: 9999px;
+		background: currentColor;
+		transition: transform 260ms var(--ease-pop);
+	}
+
+	@media (hover: hover) {
+		.mobile-menu-toggle:hover .menu-line:first-child {
+			transform: translateY(-2px);
+		}
+
+		.mobile-menu-toggle:hover .menu-line:last-child {
+			transform: translateY(2px);
+		}
+	}
+
+	[data-open='true'] .mobile-menu-toggle .menu-line:first-child,
+	[data-open='true'] .mobile-menu-toggle:hover .menu-line:first-child {
+		transform: translateY(3.5px) rotate(45deg);
+	}
+
+	[data-open='true'] .mobile-menu-toggle .menu-line:last-child,
+	[data-open='true'] .mobile-menu-toggle:hover .menu-line:last-child {
+		transform: translateY(-3.5px) rotate(-45deg);
+	}
+
+	/* Logo 眨眼彩蛋 */
+	.logo-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.logo-eyes {
+		display: inline-flex;
+		transform: rotate(-4deg);
+	}
+
+	.logo-eyes .eye {
+		transform-box: fill-box;
+		transform-origin: center;
+		animation: logo-blink 4s var(--ease-pop) infinite;
+	}
+
+	.logo-eyes .eye:last-child {
+		animation-delay: 40ms;
+	}
+
+	@keyframes logo-blink {
+		0%, 90%, 100% { transform: scaleY(1); }
+		93% { transform: scaleY(0.1); }
+		96% { transform: scaleY(1); }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.logo-eyes .eye {
+			animation: none;
+		}
 	}
 
 	@media (min-width: 640px) {
