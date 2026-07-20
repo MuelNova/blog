@@ -1,44 +1,29 @@
 ---
 /**
- * Theme Loader Component (MultiTerm style)
- * 
- * Loads the saved theme from localStorage before page render.
- * Supports random theme on homepage visit and theme locking.
- * Respects user's dark/light theme preference.
+ * Theme Loader Component (Muir's Cream)
+ *
+ * Applies the cream / cream-dark theme before first paint (no FOUC).
+ * - explicit choice (localStorage 'theme-preference' = light|dark) wins
+ * - otherwise follows prefers-color-scheme and live system changes
+ * - resolved theme id stays in localStorage 'theme' for theme-bus consumers
  */
 
-import { ALL_THEME_IDS, DARK_THEME_IDS, LIGHT_THEME_IDS } from '../config/theme-client-data';
 import { DEFAULT_THEME_ID, THEME_STORAGE_KEY } from '../config/theme-runtime';
-import { languages } from '../i18n/locales';
-
-const localeCodes = Object.keys(languages);
 ---
 
-<script is:inline define:vars={{ allThemeIds: ALL_THEME_IDS, darkThemeIds: DARK_THEME_IDS, lightThemeIds: LIGHT_THEME_IDS, defaultThemeId: DEFAULT_THEME_ID, themeStorageKey: THEME_STORAGE_KEY, localeCodes }}>
+<script is:inline define:vars={{ defaultThemeId: DEFAULT_THEME_ID, themeStorageKey: THEME_STORAGE_KEY }}>
 	(() => {
 		try {
-			const normalizePathname = (pathname) => {
-				const withoutIndex = pathname.replace(/\/index\.html$/, '/');
-				const withoutTrailingSlash = withoutIndex.replace(/\/+$/, '');
-				return withoutTrailingSlash || '/';
-			};
-
-			const currentPath = normalizePathname(window.location.pathname);
-			const homePaths = new Set(['/', ...localeCodes.map((locale) => `/${locale}`)]);
-			const isHomePage = homePaths.has(currentPath);
-			const isLocked = localStorage.getItem('theme-locked') === 'true';
-			const themePreference = localStorage.getItem('theme-preference') || 'dark';
-			const storedTheme = localStorage.getItem(themeStorageKey);
-			let resolvedTheme = storedTheme && allThemeIds.includes(storedTheme) ? storedTheme : defaultThemeId;
-
-			if (isHomePage && !isLocked) {
-				const preferredPool = themePreference === 'light' ? lightThemeIds : darkThemeIds;
-				const themePool = preferredPool.length > 0 ? preferredPool : allThemeIds;
-				const randomIndex = Math.floor(Math.random() * themePool.length);
-				resolvedTheme = themePool[randomIndex];
+			const preference = localStorage.getItem('theme-preference');
+			let theme;
+			if (preference === 'light') {
+				theme = 'cream';
+			} else if (preference === 'dark') {
+				theme = 'cream-dark';
+			} else {
+				theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'cream-dark' : 'cream';
 			}
-
-			document.documentElement.setAttribute('data-theme', resolvedTheme);
+			document.documentElement.setAttribute('data-theme', theme);
 		} catch {
 			document.documentElement.setAttribute('data-theme', defaultThemeId);
 		}
@@ -51,7 +36,9 @@ const localeCodes = Object.keys(languages);
 	import {
 		configureThemeBus,
 		getCurrentTheme,
+		getThemePreference,
 		isValidThemeId,
+		resolveThemeForPreference,
 		setCurrentTheme,
 	} from '../lib/theme-bus';
 
@@ -61,22 +48,41 @@ const localeCodes = Object.keys(languages);
 			validThemeIds: ALL_THEME_IDS,
 		});
 
-		let themeToApply = getCurrentTheme();
-
-		// Apply theme if exists
-		setCurrentTheme(themeToApply, {
+		// Persist the resolved theme so cross-tab sync and consumers
+		// (e.g. Giscus) keep working.
+		setCurrentTheme(getCurrentTheme(), {
 			persist: true,
 			source: 'theme-loader-init',
 		});
 
+		// Follow live system theme changes unless the user made an explicit choice.
+		const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+		systemDark.addEventListener('change', () => {
+			if (getThemePreference('system') !== 'system') return;
+
+			setCurrentTheme(resolveThemeForPreference('system'), {
+				persist: true,
+				source: 'system',
+			});
+		});
+
 		// Cross-tab theme synchronization
 		window.addEventListener('storage', (event: StorageEvent) => {
-			if (event.key !== THEME_STORAGE_KEY || !isValidThemeId(event.newValue)) return;
+			if (event.key === THEME_STORAGE_KEY && isValidThemeId(event.newValue)) {
+				setCurrentTheme(event.newValue, {
+					persist: false,
+					source: 'storage-sync',
+				});
+				return;
+			}
 
-			setCurrentTheme(event.newValue, {
-				persist: false,
-				source: 'storage-sync',
-			});
+			if (event.key === 'theme-preference') {
+				const preference = event.newValue === 'light' || event.newValue === 'dark' ? event.newValue : 'system';
+				setCurrentTheme(resolveThemeForPreference(preference), {
+					persist: false,
+					source: 'storage-sync',
+				});
+			}
 		});
 	})();
 </script>

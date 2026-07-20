@@ -1,8 +1,9 @@
 /**
- * Theme Configuration System (Using pre-generated colors + Custom Spectre)
+ * Theme Configuration System (Muir's Cream)
  *
- * Colors are pre-generated at build time via `scripts/generate-theme-colors.ts`
- * to avoid runtime Shiki loading issues on some adapters.
+ * The random Shiki theme pool was removed. Only two static cream themes
+ * remain; their colors are also inlined into the document head by
+ * `BaseHead.astro` as `:root[data-theme="..."]` CSS variable blocks.
  */
 
 import { DARK_THEME_ID_SET, DARK_THEME_IDS, LIGHT_THEME_ID_SET, LIGHT_THEME_IDS } from './theme-client-data';
@@ -30,98 +31,78 @@ export interface Theme {
 }
 
 /**
- * Custom Spectre Theme
- * The signature purple theme from Spectre
+ * Cream (light) — the signature warm cream theme, default.
  */
-const spectreTheme: Theme = {
-	id: 'spectre',
-	name: 'Spectre',
-	description: 'Purple dark theme inspired by Spectre',
-	tone: 'dark',
+const creamTheme: Theme = {
+	id: 'cream',
+	name: 'Cream',
+	description: 'Soft cream light theme',
+	tone: 'light',
 	colors: {
-		background: '#0a0a0a',
-		foreground: '#ffffff',
-		foregroundSecondary: '#c7c7c7',
-		primary: '#8c5cf5',
-		primaryLight: '#a277ff',
-		primaryLightest: '#c2a8fd',
-		primaryRgb: '140, 92, 245',
-		border: '#353535',
-		separator: '#353535',
-		accent: '#8c5cf5',
-		link: '#a277ff',
+		background: '#FFF9F5',
+		foreground: '#54453F',
+		foregroundSecondary: '#8A7A72',
+		primary: '#FFB583',
+		primaryLight: '#FFC9A3',
+		primaryLightest: '#FFE7D6',
+		primaryRgb: '255, 181, 131',
+		border: 'rgba(84, 69, 63, 0.18)',
+		separator: 'rgba(84, 69, 63, 0.12)',
+		accent: '#FFD3E0',
+		link: '#3E93A8',
 	},
 };
 
-interface GeneratedThemePayload {
-	generatedAt: string;
-	themes: Array<Omit<Theme, 'colors'> & { colors: ThemeColors }>;
-}
-
-const normalizeColors = (colors: ThemeColors): ThemeColors => {
-	const foregroundSecondary = colors.foregroundSecondary || colors.foreground;
-	const accent = colors.accent || colors.primary || colors.foreground;
-	const border = colors.border || accent;
-	const separator = colors.separator || border;
-
-	return {
-		...colors,
-		foregroundSecondary,
-		accent,
-		border,
-		separator,
-	};
-};
-
-const loadGeneratedThemes = async (): Promise<Theme[]> => {
-	const { default: data } = (await import('../generated/theme-colors.json')) as { default: GeneratedThemePayload };
-	return data.themes.map((theme) => ({
-		...theme,
-		colors: normalizeColors(theme.colors),
-	}));
-};
-
 /**
- * Cache for loaded themes
+ * Cream Dark — warm cocoa dark theme.
  */
-let themesCache: Theme[] | null = null;
+const creamDarkTheme: Theme = {
+	id: 'cream-dark',
+	name: 'Cream Dark',
+	description: 'Soft cream dark theme',
+	tone: 'dark',
+	colors: {
+		background: '#1F1A17',
+		foreground: '#F2E9E3',
+		foregroundSecondary: '#A89A90',
+		primary: '#E89A63',
+		primaryLight: '#F0B586',
+		primaryLightest: '#F7D2B3',
+		primaryRgb: '232, 154, 99',
+		border: 'rgba(242, 233, 227, 0.16)',
+		separator: 'rgba(242, 233, 227, 0.10)',
+		accent: '#E8A7BF',
+		link: '#8FC6D4',
+	},
+};
+
+const themes: Theme[] = [creamTheme, creamDarkTheme];
 
 /**
- * Load all themes (Spectre + pre-generated Shiki themes)
+ * Load all themes (cream + cream-dark)
  */
 export async function getThemes(): Promise<Theme[]> {
-	if (themesCache) {
-		return themesCache;
-	}
-
-	const shikiThemes = await loadGeneratedThemes();
-
-	// Combine Spectre theme (first) with Shiki themes
-	themesCache = [spectreTheme, ...shikiThemes];
-
-	return themesCache;
+	return themes;
 }
 
 /**
  * Get a specific theme by ID
  */
 export async function getTheme(id: string): Promise<Theme> {
-	const themes = await getThemes();
 	const theme = themes.find((t) => t.id === id);
-	
+
 	if (!theme) {
-		// Return Spectre as fallback
+		// Return cream as fallback
 		return themes[0];
 	}
-	
+
 	return theme;
 }
 
 /**
- * Get the default theme (Spectre)
+ * Get the default theme (cream)
  */
 export async function getDefaultTheme(): Promise<Theme> {
-	const themes = await getThemes();
 	return themes[0];
 }
 
@@ -129,17 +110,7 @@ export async function getDefaultTheme(): Promise<Theme> {
  * Get theme IDs for quick reference
  */
 export async function getThemeIds(): Promise<string[]> {
-	const themes = await getThemes();
 	return themes.map((t) => t.id);
-}
-
-/**
- * Get a random theme ID
- */
-export async function getRandomThemeId(): Promise<string> {
-	const themeIds = await getThemeIds();
-	const randomIndex = Math.floor(Math.random() * themeIds.length);
-	return themeIds[randomIndex];
 }
 
 /**
@@ -160,7 +131,6 @@ export async function getLightThemeIds(): Promise<string[]> {
  * Get dark themes only
  */
 export async function getDarkThemes(): Promise<Theme[]> {
-	const themes = await getThemes();
 	return themes.filter((theme) => DARK_THEME_ID_SET.has(theme.id));
 }
 
@@ -168,6 +138,5 @@ export async function getDarkThemes(): Promise<Theme[]> {
  * Get light themes only
  */
 export async function getLightThemes(): Promise<Theme[]> {
-	const themes = await getThemes();
 	return themes.filter((theme) => LIGHT_THEME_ID_SET.has(theme.id));
 }

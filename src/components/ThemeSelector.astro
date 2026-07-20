@@ -1,20 +1,15 @@
 ---
 /**
- * Theme Selector Component
- * 
- * A modal dialog that allows users to select from 60 Shiki themes.
- * Supports keyboard shortcuts (Ctrl+K / ⌘+K) and theme persistence.
+ * Theme Selector Component (Muir's Cream)
+ *
+ * A small sun/moon popover with three options:
+ * light (cream) / dark (cream-dark) / follow system.
+ * Keeps the intro-animation toggle (localStorage 'intro-enabled').
+ * Keyboard shortcut: Ctrl+K / ⌘+K.
  */
 
 import { Icon } from 'astro-icon/components';
-import { getThemes, getDarkThemes, getLightThemes } from '../config/themes';
 import { defaultLang, useTranslations } from '../i18n/config';
-
-// Load all themes at build time
-const allThemes = await getThemes();
-const darkThemes = await getDarkThemes();
-const lightThemes = await getLightThemes();
-const darkThemeIds = new Set(darkThemes.map((t) => t.id));
 
 const { lang = defaultLang } = Astro.props as { lang?: import('../i18n/config').Lang };
 const t = useTranslations(lang);
@@ -28,106 +23,24 @@ const t = useTranslations(lang);
 		aria-label={t('common.nav.theme')}
 		title="Theme (Ctrl+K)"
 	>
-		<Icon name="ph:swatches-duotone" class="w-5 h-5 nav-trigger-icon" />
+		<Icon name="ph:sun-duotone" class="w-5 h-5 nav-trigger-icon" data-theme-icon="cream" />
+		<Icon name="ph:moon-duotone" class="w-5 h-5 nav-trigger-icon hidden" data-theme-icon="cream-dark" />
 		<span class="sr-only">Theme</span>
 		<span class="nav-label-mobile">Theme</span>
 	</button>
 
-	<!-- Mobile floating trigger (for real devices where nav may be closed) -->
-	<!-- <button
-		class="mobile-theme-trigger fixed bottom-4 right-4 z-50 p-3 rounded-full shadow-lg bg-foreground text-background hover:bg-foreground/90 transition-colors duration-150 sm:hidden"
-		data-open-modal-mobile
-		aria-label="Theme"
-		title="Theme"
-	>
-		<Icon name="ph:swatches-duotone" class="w-5 h-5" />
-	</button> -->
-
 	<dialog
-		class="fixed inset-0 w-full max-w-2xl max-h-[80vh] m-auto p-0 bg-background border border-accent/40 rounded-lg shadow-2xl backdrop:backdrop-blur-sm backdrop:bg-black/50"
+		class="fixed inset-0 w-full max-w-xs max-h-[80vh] m-auto p-0 bg-surface text-foreground border-2 border-border rounded-2xl backdrop:backdrop-blur-sm backdrop:bg-black/40"
 		data-theme-dialog
 	>
-		<div class="flex flex-col h-full">
-			<div class="flex items-center justify-between p-4 border-b border-accent/40" data-theme-header>
-				<div class="flex items-center gap-3 flex-wrap header-actions">
-					<h2 class="text-lg font-semibold text-foreground flex items-center gap-2">
-						<Icon name="ph:swatches-duotone" class="w-5 h-5" />
-						<span class="header-text">{t('common.nav.theme')}</span>
-					</h2>
-					<label class="flex items-center gap-2 cursor-pointer group lock-switch">
-						<input
-							type="checkbox"
-							class="sr-only"
-							data-theme-lock-toggle
-							aria-label={t('common.theme.lock')}
-						/>
-						<div class="relative w-10 h-5 bg-foreground/20 rounded-full transition-colors duration-150">
-							<div class="lock-indicator absolute top-0.5 left-0.5 w-4 h-4 bg-foreground rounded-full transition-transform duration-150 flex items-center justify-center">
-								<Icon name="ph:lock-open-duotone" class="lock-icon-open w-3 h-3 text-background" />
-								<Icon name="ph:lock-duotone" class="lock-icon-closed w-3 h-3 text-background hidden" />
-							</div>
-						</div>
-						<span class="text-xs text-foreground/70 header-text">{t('common.theme.lock')}</span>
-					</label>
-					<label class="flex items-center gap-2 cursor-pointer group lock-switch">
-						<input
-							type="checkbox"
-							class="sr-only"
-							data-intro-toggle
-							aria-label={t('common.theme.intro')}
-						/>
-						<div class="relative w-10 h-5 bg-foreground/20 rounded-full intro-track">
-							<div class="intro-indicator absolute top-0.5 left-0.5 w-4 h-4 bg-foreground rounded-full transition-transform duration-150 flex items-center justify-center">
-								<Icon name="ph:sparkle-duotone" class="intro-icon-on w-3 h-3 text-background" />
-								<Icon name="ph:prohibit-inset-duotone" class="intro-icon-off w-3 h-3 text-background hidden" />
-							</div>
-						</div>
-						<span class="text-xs text-foreground/70 header-text">{t('common.theme.intro')}</span>
-					</label>
-					<button
-						class="w-9 h-9 flex items-center justify-center rounded-md border border-accent/40 hover:border-primary hover:text-primary transition-colors duration-150 lock-icon-compact hidden"
-						data-lock-button
-						type="button"
-						aria-label={t('common.theme.lock')}
-						aria-pressed="false"
-					>
-						<Icon name="ph:lock-open-duotone" class="lock-icon-open w-4 h-4" />
-						<Icon name="ph:lock-duotone" class="lock-icon-closed w-4 h-4 hidden" />
-					</button>
-					<button
-						class="w-9 h-9 flex items-center justify-center rounded-md border border-accent/40 hover:border-primary hover:text-primary transition-colors duration-150 intro-icon-compact hidden"
-						data-intro-button
-						type="button"
-						aria-label={t('common.theme.intro')}
-						aria-pressed="true"
-					>
-						<Icon name="ph:sparkle-duotone" class="intro-icon-on w-4 h-4" />
-						<Icon name="ph:prohibit-inset-duotone" class="intro-icon-off w-4 h-4 hidden" />
-					</button>
-				</div>
-				<div class="flex items-center gap-2 overflow-x-auto">
-					<button
-						class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-foreground/70 hover:text-foreground transition-colors duration-150"
-						data-tab="all"
-						data-active="true"
-					>
-						{t('common.theme.all')} ({allThemes.length})
-					</button>
-					<button
-						class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-foreground/70 hover:text-foreground transition-colors duration-150"
-						data-tab="dark"
-					>
-						{t('common.theme.dark')} ({darkThemes.length})
-					</button>
-					<button
-						class="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-foreground/70 hover:text-foreground transition-colors duration-150"
-						data-tab="light"
-					>
-						{t('common.theme.light')} ({lightThemes.length})
-					</button>
-				</div>
+		<div class="flex flex-col">
+			<div class="flex items-center justify-between p-4 border-b-2 border-border">
+				<h2 class="text-base font-semibold text-foreground flex items-center gap-2 m-0">
+					<Icon name="ph:palette-duotone" class="w-5 h-5 text-primary" />
+					<span>{t('common.nav.theme')}</span>
+				</h2>
 				<button
-					class="p-1 rounded-md text-foreground/70 hover:text-foreground hover:bg-foreground/10 transition-colors duration-150"
+					class="p-1 rounded-full text-foreground/70 hover:text-foreground hover:bg-foreground/10 transition-colors duration-150 cursor-pointer"
 					data-close-modal
 					aria-label="Close"
 				>
@@ -135,190 +48,80 @@ const t = useTranslations(lang);
 				</button>
 			</div>
 
-			<div class="flex-1 overflow-y-auto p-4" data-theme-scroll>
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2" data-theme-list>
-					{allThemes.map((theme) => (
-						<button
-							class="flex flex-col items-start p-3 rounded-md border border-accent/40 text-left hover:border-primary hover:bg-primary/5 transition-all duration-150 theme-option"
-							data-theme-id={theme.id}
-							data-theme-type={darkThemeIds.has(theme.id) ? 'dark' : 'light'}
-						>
-							<span class="text-sm font-medium text-foreground">{theme.name}</span>
-							<span class="text-xs text-foreground/70 mt-1">{theme.description}</span>
-							<div class="flex gap-1 mt-2">
-								<div class="w-4 h-4 rounded-sm border border-accent/40/50" style={`background-color: ${theme.colors.background}`} title="Background" />
-								<div class="w-4 h-4 rounded-sm border border-accent/40/50" style={`background-color: ${theme.colors.primary}`} title="Primary" />
-								<div class="w-4 h-4 rounded-sm border border-accent/40/50" style={`background-color: ${theme.colors.foreground}`} title="Foreground" />
-							</div>
-						</button>
-					))}
-				</div>
+			<div class="flex flex-col gap-2 p-4">
+				<button
+					class="flex items-center gap-3 p-3 rounded-xl border-2 border-border text-left hover:border-primary transition-colors duration-150 cursor-pointer theme-option"
+					data-theme-option="light"
+				>
+					<Icon name="ph:sun-duotone" class="w-5 h-5 text-primary flex-shrink-0" />
+					<span class="text-sm font-medium">{t('common.theme.light')}</span>
+					<Icon name="ph:check-circle-duotone" class="w-5 h-5 ml-auto text-primary hidden option-check" />
+				</button>
+				<button
+					class="flex items-center gap-3 p-3 rounded-xl border-2 border-border text-left hover:border-primary transition-colors duration-150 cursor-pointer theme-option"
+					data-theme-option="dark"
+				>
+					<Icon name="ph:moon-duotone" class="w-5 h-5 text-primary flex-shrink-0" />
+					<span class="text-sm font-medium">{t('common.theme.dark')}</span>
+					<Icon name="ph:check-circle-duotone" class="w-5 h-5 ml-auto text-primary hidden option-check" />
+				</button>
+				<button
+					class="flex items-center gap-3 p-3 rounded-xl border-2 border-border text-left hover:border-primary transition-colors duration-150 cursor-pointer theme-option"
+					data-theme-option="system"
+				>
+					<Icon name="ph:monitor-duotone" class="w-5 h-5 text-primary flex-shrink-0" />
+					<span class="text-sm font-medium">{t('common.theme.system')}</span>
+					<Icon name="ph:check-circle-duotone" class="w-5 h-5 ml-auto text-primary hidden option-check" />
+				</button>
+
+				<label class="flex items-center justify-between gap-3 p-3 mt-1 rounded-xl border-2 border-border cursor-pointer">
+					<span class="flex items-center gap-3">
+						<Icon name="ph:sparkle-duotone" class="w-5 h-5 text-primary flex-shrink-0" />
+						<span class="text-sm font-medium">{t('common.theme.intro')}</span>
+					</span>
+					<input
+						type="checkbox"
+						class="sr-only"
+						data-intro-toggle
+						aria-label={t('common.theme.intro')}
+					/>
+					<span class="relative w-10 h-5 bg-foreground/20 rounded-full transition-colors duration-150 intro-track flex-shrink-0">
+						<span class="intro-indicator absolute top-0.5 left-0.5 w-4 h-4 bg-surface rounded-full transition-transform duration-150"></span>
+					</span>
+				</label>
 			</div>
 		</div>
 	</dialog>
 </div>
 
 <style>
-	button[data-tab][data-active="true"] {
-		border-color: var(--color-primary);
-		color: var(--color-primary);
-	}
-
-	dialog[data-theme-dialog][open] {
-		display: grid;
-		grid-template-rows: auto 1fr;
-		height: min(80vh, 720px);
-		overflow: hidden;
-	}
-
-	dialog[data-theme-dialog] > div {
-		height: 100%;
-		min-height: 0; /* allow inner flex to shrink for scrolling */
-	}
-
-	[data-theme-header] {
-		position: sticky;
-		top: 0;
-		z-index: 1;
-		background: var(--color-background);
-	}
-
-	[data-theme-scroll] {
-		overflow-y: auto;
-		scrollbar-width: none;
-		min-height: 0; /* allow flex child to shrink and scroll */
-	}
-
-	[data-theme-scroll]::-webkit-scrollbar {
-		display: none;
-	}
-
-	.theme-option.current-theme {
-		border-color: var(--color-primary);
-		background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
-	}
-
-	.theme-option {
-		position: relative;
-		isolation: isolate;
-		overflow: hidden;
-	}
-
-	.theme-option::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: -130%;
-		width: 55%;
-		height: 100%;
-		border-radius: inherit;
-		background: linear-gradient(
-			100deg,
-			transparent 0%,
-			color-mix(in srgb, var(--color-primary) 28%, transparent) 45%,
-			transparent 100%
-		);
-		opacity: 0;
-		pointer-events: none;
-		z-index: 0;
-	}
-
-	.theme-option::after {
-		content: '';
-		position: absolute;
-		inset: 0;
-		border-radius: inherit;
-		box-shadow:
-			inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 35%, transparent),
-			inset 0 0 22px color-mix(in srgb, var(--color-primary) 24%, transparent),
-			0 0 12px color-mix(in srgb, var(--color-primary) 18%, transparent);
-		opacity: 0;
-		pointer-events: none;
-		z-index: 0;
-	}
-
-	.theme-option > * {
-		position: relative;
-		z-index: 1;
-	}
-
-	.theme-option.preview-theme {
+	.theme-option.active {
 		border-color: var(--color-primary);
 		background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
 	}
 
-	.theme-option.preview-theme::before {
-		opacity: 1;
-		animation: preview-sheen 1.35s ease-in-out infinite;
-	}
-
-	.theme-option.preview-theme::after {
-		opacity: 1;
-		animation: preview-glow 1.2s ease-in-out infinite;
-	}
-
-	@keyframes preview-sheen {
-		0% {
-			transform: translateX(0);
-			opacity: 0;
-		}
-		20% {
-			opacity: 0.65;
-		}
-		70% {
-			opacity: 0.35;
-		}
-		100% {
-			transform: translateX(420%);
-			opacity: 0;
-		}
-	}
-
-	@keyframes preview-glow {
-		from {
-			box-shadow:
-				inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 26%, transparent),
-				inset 0 0 16px color-mix(in srgb, var(--color-primary) 18%, transparent),
-				0 0 8px color-mix(in srgb, var(--color-primary) 12%, transparent);
-		}
-		to {
-			box-shadow:
-				inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 42%, transparent),
-				inset 0 0 24px color-mix(in srgb, var(--color-primary) 30%, transparent),
-				0 0 14px color-mix(in srgb, var(--color-primary) 22%, transparent);
-		}
-	}
-
 	dialog::backdrop {
-		animation: fade-in 150ms ease-out;
-	}
-
-	@keyframes fade-in {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 1;
-		}
+		animation: theme-dialog-fade 150ms ease-out;
 	}
 
 	dialog[open] {
-		animation: slide-up 150ms ease-out;
+		animation: theme-dialog-pop 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 	}
 
-	@keyframes slide-up {
+	@keyframes theme-dialog-fade {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+
+	@keyframes theme-dialog-pop {
 		from {
 			opacity: 0;
-			transform: translateY(20px);
+			transform: translateY(12px) scale(0.96);
 		}
 		to {
 			opacity: 1;
-			transform: translateY(0);
+			transform: translateY(0) scale(1);
 		}
-	}
-
-	.mobile-theme-trigger {
-		box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
 	}
 
 	/* Fix icon vertical alignment */
@@ -329,75 +132,6 @@ const t = useTranslations(lang);
 	#theme-selector-btn :global(svg) {
 		display: block;
 	}
-
-	/* Mobile-first adjustments */
-	.header-text {
-		display: none;
-	}
-
-	.lock-switch {
-		display: none;
-	}
-
-	.lock-icon-compact,
-	.intro-icon-compact {
-		display: flex;
-	}
-
-	.header-actions {
-		flex-wrap: nowrap;
-		gap: 0.5rem;
-	}
-
-	button[data-open-modal] {
-		display: none;
-	}
-
-	button[data-tab] {
-		padding: 0.35rem 0.6rem;
-		font-size: 0.8rem;
-	}
-
-	dialog[data-theme-dialog][open] {
-		min-height: 80vh;
-		height: 90vh;
-		max-height: 100vh;
-	}
-
-	@media (min-width: 640px) {
-		.header-text {
-			display: inline;
-		}
-
-		.lock-switch {
-			display: flex;
-		}
-
-		.lock-icon-compact,
-		.intro-icon-compact {
-			display: none;
-		}
-
-		.header-actions {
-			flex-wrap: wrap;
-			gap: 0.75rem;
-		}
-
-		button[data-open-modal] {
-			display: inline-flex;
-		}
-
-		button[data-tab] {
-			padding: 0.5rem 1rem;
-			font-size: 0.875rem;
-		}
-
-		dialog[data-theme-dialog][open] {
-			height: min(80vh, 720px);
-			max-height: 80vh;
-			min-height: 0;
-		}
-	}
 </style>
 
 <script>
@@ -405,114 +139,62 @@ const t = useTranslations(lang);
 		getCurrentTheme,
 		getThemePreference,
 		isIntroEnabled,
-		isThemeLocked,
+		onThemeChange,
+		resolveThemeForPreference,
 		setCurrentTheme,
 		setIntroEnabled,
-		setThemeLocked,
 		setThemePreference,
+		type ThemePreference,
 	} from '../lib/theme-bus';
 
 	(function() {
 		const openBtn = document.getElementById('theme-selector-btn') as HTMLButtonElement | null;
 		const closeBtn = document.querySelector('[data-close-modal]') as HTMLElement | null;
 		const dialog = document.querySelector('[data-theme-dialog]') as HTMLDialogElement | null;
-		const tabButtons = document.querySelectorAll<HTMLElement>('[data-tab]');
-		const themeOptions = document.querySelectorAll<HTMLElement>('.theme-option');
-		const lockToggle = document.querySelector('[data-theme-lock-toggle]') as HTMLInputElement | null;
-		const lockButton = document.querySelector('[data-lock-button]') as HTMLButtonElement | null;
+		const optionButtons = document.querySelectorAll<HTMLElement>('[data-theme-option]');
 		const introToggle = document.querySelector('[data-intro-toggle]') as HTMLInputElement | null;
-		const introButton = document.querySelector('[data-intro-button]') as HTMLButtonElement | null;
-		let previewThemeId: string | null = null;
+		const introTrack = document.querySelector('.intro-track') as HTMLElement | null;
+		const introIndicator = document.querySelector('.intro-indicator') as HTMLElement | null;
 
-		function updatePreviewVisual() {
-			themeOptions.forEach((option) => {
-				option.classList.toggle('preview-theme', !!previewThemeId && option.dataset.themeId === previewThemeId);
+		function updateTriggerIcon() {
+			const current = getCurrentTheme();
+			document.querySelectorAll<HTMLElement>('[data-theme-icon]').forEach((icon) => {
+				icon.classList.toggle('hidden', icon.dataset.themeIcon !== current);
 			});
 		}
 
-		function openModal() {
-			previewThemeId = null;
-			updatePreviewVisual();
-			highlightCurrentTheme();
-			dialog?.showModal();
-			document.body.classList.add('overflow-hidden');
-		}
-
-		function closeModal() {
-			previewThemeId = null;
-			updatePreviewVisual();
-			dialog?.close();
-			document.body.classList.remove('overflow-hidden');
-		}
-
-		function switchTab(tabType: string) {
-			tabButtons.forEach((tab) => {
-				tab.dataset.active = tab.dataset.tab === tabType ? 'true' : '';
+		function updateActiveOption() {
+			const preference = getThemePreference('system');
+			optionButtons.forEach((option) => {
+				const isActive = option.dataset.themeOption === preference;
+				option.classList.toggle('active', isActive);
+				option.querySelector('.option-check')?.classList.toggle('hidden', !isActive);
 			});
-			setThemePreference(tabType as 'all' | 'dark' | 'light');
-			themeOptions.forEach((option) => {
-				const optionType = option.dataset.themeType;
-				option.classList.toggle('hidden', tabType !== 'all' && optionType !== tabType);
-			});
-		}
-
-		function selectTheme(themeId: string) {
-			setCurrentTheme(themeId, {
-				persist: true,
-				source: 'theme-selector',
-			});
-			const themeOption = Array.from(themeOptions).find((opt) => opt.dataset.themeId === themeId);
-			if (themeOption?.dataset.themeType) {
-				setThemePreference(themeOption.dataset.themeType as 'all' | 'dark' | 'light');
-			}
-
-			if (previewThemeId === themeId) {
-				closeModal();
-				return;
-			}
-
-			previewThemeId = themeId;
-			updatePreviewVisual();
-			highlightCurrentTheme();
-		}
-
-		function highlightCurrentTheme() {
-			const currentTheme = getCurrentTheme();
-			themeOptions.forEach((option) => {
-				option.classList.toggle('current-theme', option.dataset.themeId === currentTheme);
-			});
-		}
-
-		function updateLockUI(isLocked: boolean) {
-			const indicator = document.querySelector('.lock-indicator');
-			const openIcons = document.querySelectorAll('.lock-icon-open');
-			const closedIcons = document.querySelectorAll('.lock-icon-closed');
-			
-			indicator?.classList.toggle('translate-x-5', isLocked);
-			indicator?.parentElement?.classList.toggle('bg-primary', isLocked);
-			indicator?.parentElement?.classList.toggle('bg-foreground/20', !isLocked);
-			openIcons.forEach((icon) => icon.classList.toggle('hidden', isLocked));
-			closedIcons.forEach((icon) => icon.classList.toggle('hidden', !isLocked));
-			lockToggle?.setAttribute('aria-pressed', String(isLocked));
-			lockButton?.setAttribute('aria-pressed', String(isLocked));
-			lockButton?.classList.toggle('border-primary', isLocked);
-			lockButton?.classList.toggle('text-primary', isLocked);
 		}
 
 		function updateIntroUI(isEnabled: boolean) {
-			const indicator = document.querySelector('.intro-indicator');
-			const onIcons = document.querySelectorAll('.intro-icon-on');
-			const offIcons = document.querySelectorAll('.intro-icon-off');
-			
-			indicator?.classList.toggle('translate-x-5', isEnabled);
-			indicator?.parentElement?.classList.toggle('bg-primary', isEnabled);
-			indicator?.parentElement?.classList.toggle('bg-foreground/20', !isEnabled);
-			onIcons.forEach((icon) => icon.classList.toggle('hidden', !isEnabled));
-			offIcons.forEach((icon) => icon.classList.toggle('hidden', isEnabled));
+			introIndicator?.classList.toggle('translate-x-5', isEnabled);
+			introTrack?.classList.toggle('bg-primary', isEnabled);
+			introTrack?.classList.toggle('bg-foreground/20', !isEnabled);
 			introToggle?.setAttribute('aria-pressed', String(isEnabled));
-			introButton?.setAttribute('aria-pressed', String(isEnabled));
-			introButton?.classList.toggle('border-primary', isEnabled);
-			introButton?.classList.toggle('text-primary', isEnabled);
+		}
+
+		function openModal() {
+			updateActiveOption();
+			dialog?.showModal();
+		}
+
+		function closeModal() {
+			dialog?.close();
+		}
+
+		function selectPreference(preference: ThemePreference) {
+			setThemePreference(preference);
+			setCurrentTheme(resolveThemeForPreference(preference), {
+				persist: true,
+				source: 'theme-selector',
+			});
+			updateActiveOption();
 		}
 
 		// Event listeners
@@ -522,46 +204,18 @@ const t = useTranslations(lang);
 			if (e.target === dialog) closeModal();
 		});
 
-		tabButtons.forEach((tab) => {
-			tab.addEventListener('click', () => {
-				if (tab.dataset.tab) switchTab(tab.dataset.tab);
-			});
-		});
-
-		themeOptions.forEach((option) => {
+		optionButtons.forEach((option) => {
 			option.addEventListener('click', () => {
-				if (option.dataset.themeId) selectTheme(option.dataset.themeId);
+				const preference = option.dataset.themeOption as ThemePreference | undefined;
+				if (preference) selectPreference(preference);
 			});
-		});
-
-		lockToggle?.addEventListener('change', (e: Event) => {
-			const target = e.target as HTMLInputElement | null;
-			if (!target) return;
-			const isLocked = target.checked;
-			setThemeLocked(isLocked);
-			updateLockUI(isLocked);
-		});
-
-		lockButton?.addEventListener('click', () => {
-			const isLocked = !isThemeLocked();
-			setThemeLocked(isLocked);
-			if (lockToggle) lockToggle.checked = isLocked;
-			updateLockUI(isLocked);
 		});
 
 		introToggle?.addEventListener('change', (e: Event) => {
 			const target = e.target as HTMLInputElement | null;
 			if (!target) return;
-			const isEnabled = target.checked;
-			setIntroEnabled(isEnabled);
-			updateIntroUI(isEnabled);
-		});
-
-		introButton?.addEventListener('click', () => {
-			const isEnabled = !isIntroEnabled();
-			setIntroEnabled(isEnabled);
-			if (introToggle) introToggle.checked = isEnabled;
-			updateIntroUI(isEnabled);
+			setIntroEnabled(target.checked);
+			updateIntroUI(target.checked);
 		});
 
 		// Keyboard shortcut (Ctrl+K / ⌘+K)
@@ -572,15 +226,16 @@ const t = useTranslations(lang);
 			}
 		});
 
+		// Keep the trigger icon in sync with external theme changes
+		onThemeChange(() => {
+			updateTriggerIcon();
+			updateActiveOption();
+		});
+
 		// Initialize
-		const savedTab = getThemePreference('all');
-		const isLocked = isThemeLocked();
-		const introEnabled = isIntroEnabled();
-		
-		if (lockToggle) lockToggle.checked = isLocked;
-		if (introToggle) introToggle.checked = introEnabled;
-		updateLockUI(isLocked);
-		updateIntroUI(introEnabled);
-		switchTab(savedTab);
+		if (introToggle) introToggle.checked = isIntroEnabled();
+		updateIntroUI(isIntroEnabled());
+		updateTriggerIcon();
+		updateActiveOption();
 	})();
 </script>

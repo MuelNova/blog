@@ -1,35 +1,14 @@
-import generatedThemeData from '../generated/theme-colors.json';
-import { DEFAULT_THEME_ID } from './theme-runtime';
+/**
+ * Theme client data (Muir's Cream)
+ *
+ * The random Shiki theme pool was removed. Only two cream themes remain:
+ * - `cream`      — light, default
+ * - `cream-dark` — dark
+ */
 
-type ThemeTone = 'dark' | 'light' | undefined;
+export const LIGHT_THEME_IDS = ['cream'];
+export const DARK_THEME_IDS = ['cream-dark'];
+export const ALL_THEME_IDS = ['cream', 'cream-dark'];
 
-interface GeneratedThemeMeta {
-	id: string;
-	tone?: ThemeTone;
-}
-
-interface GeneratedThemePayload {
-	themes: GeneratedThemeMeta[];
-}
-
-const generatedThemes = (generatedThemeData as GeneratedThemePayload).themes;
-
-function uniqueThemeIds(themeIds: string[]): string[] {
-	return Array.from(new Set(themeIds));
-}
-
-const generatedThemeIds = generatedThemes.map((theme) => theme.id);
-const generatedDarkThemeIds = generatedThemes
-	.filter((theme) => theme.tone !== 'light')
-	.map((theme) => theme.id);
-const generatedLightThemeIds = generatedThemes
-	.filter((theme) => theme.tone === 'light')
-	.map((theme) => theme.id);
-
-export const ALL_THEME_IDS = uniqueThemeIds([DEFAULT_THEME_ID, ...generatedThemeIds]);
-export const DARK_THEME_IDS = uniqueThemeIds([DEFAULT_THEME_ID, ...generatedDarkThemeIds]);
-export const LIGHT_THEME_IDS = uniqueThemeIds(generatedLightThemeIds);
-
-export const ALL_THEME_ID_SET = new Set(ALL_THEME_IDS);
-export const DARK_THEME_ID_SET = new Set(DARK_THEME_IDS);
 export const LIGHT_THEME_ID_SET = new Set(LIGHT_THEME_IDS);
+export const DARK_THEME_ID_SET = new Set(DARK_THEME_IDS);

@@ -1,7 +1,7 @@
 ---
 /**
  * Card Component
- * Base card component with Spectre styling
+ * Sticker-style card: rounded corners, 2px warm outline, no drop shadow.
  */
 
 interface Props {
@@ -12,7 +12,7 @@ const { class: className } = Astro.props;
 ---
 
 <div class:list={[
-	'border border-accent/40 bg-background p-3 md:p-6',
+	'rounded-2xl border-2 border-border bg-surface p-3 md:p-6 transition-colors duration-300 hover:border-primary',
 	className
 ]}>
 	<slot />

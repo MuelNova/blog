@@ -1,12 +1,11 @@
 import { DEFAULT_THEME_ID, THEME_CHANGE_EVENT, THEME_STORAGE_KEY } from '../config/theme-runtime';
 
 const THEME_PREFERENCE_KEY = 'theme-preference';
-const THEME_LOCKED_KEY = 'theme-locked';
 const INTRO_ENABLED_KEY = 'intro-enabled';
 
-const THEME_PREFERENCE_VALUES = new Set(['all', 'dark', 'light']);
+const THEME_PREFERENCE_VALUES = new Set(['light', 'dark', 'system']);
 
-export type ThemePreference = 'all' | 'dark' | 'light';
+export type ThemePreference = 'light' | 'dark' | 'system';
 
 export interface ThemeChangeDetail {
 	themeId: string;
@@ -111,7 +110,13 @@ export function onThemeChange(listener: (detail: ThemeChangeDetail) => void): ()
 	};
 }
 
-export function getThemePreference(fallback: ThemePreference = 'dark'): ThemePreference {
+/**
+ * Read the user's theme preference:
+ * - 'light'  → always cream
+ * - 'dark'   → always cream-dark
+ * - 'system' → follow prefers-color-scheme (default)
+ */
+export function getThemePreference(fallback: ThemePreference = 'system'): ThemePreference {
 	try {
 		const value = localStorage.getItem(THEME_PREFERENCE_KEY);
 		if (value && THEME_PREFERENCE_VALUES.has(value)) {
@@ -130,18 +135,18 @@ export function setThemePreference(preference: ThemePreference): void {
 	} catch {}
 }
 
-export function isThemeLocked(): boolean {
-	try {
-		return localStorage.getItem(THEME_LOCKED_KEY) === 'true';
-	} catch {
-		return false;
-	}
-}
+/**
+ * Resolve a preference to a concrete theme id.
+ */
+export function resolveThemeForPreference(preference: ThemePreference): string {
+	if (preference === 'light') return 'cream';
+	if (preference === 'dark') return 'cream-dark';
 
-export function setThemeLocked(locked: boolean): void {
 	try {
-		localStorage.setItem(THEME_LOCKED_KEY, String(locked));
-	} catch {}
+		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'cream-dark' : 'cream';
+	} catch {
+		return currentDefaultThemeId;
+	}
 }
 
 export function isIntroEnabled(): boolean {

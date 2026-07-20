@@ -1,6 +1,6 @@
-# Blog Astro (Spectre x MultiTerm)
+# Muir's Cream
 
-A custom Astro blog that blends the Spectre visual style with MultiTerm-inspired theme switching. Themes are pre-generated from Shiki to avoid runtime loading issues on Cloudflare workers.
+A cozy cream-themed Astro blog. Theming is reduced to two hand-crafted palettes — `cream` (light) and `cream-dark` — with light/dark/system switching.
 
 ## Stack
 - Astro 5 (Cloudflare adapter)
@@ -12,22 +12,18 @@ A custom Astro blog that blends the Spectre visual style with MultiTerm-inspired
 - `yarn build` — production build
 - `yarn preview` — preview the build locally
 - `yarn astro ...` — run Astro CLI commands
-- `yarn generate:themes` — pre-generate theme color JSON from Shiki (`src/generated/theme-colors.json`)
 
 ## Theme system
-- Theme definitions live in `src/config/themes.ts` and use the pre-generated `src/generated/theme-colors.json`.
-- `BaseHead.astro` injects CSS variables for every theme at build time.
-- `ThemeLoader.astro` reads `localStorage` early and applies `data-theme` to prevent FOUC; defaults to `spectre` if no stored theme.
+- Only two themes exist: `cream` (light, default) and `cream-dark`. Definitions live in `src/config/themes.ts`.
+- `BaseHead.astro` inlines the `:root[data-theme="cream"]` / `:root[data-theme="cream-dark"]` CSS variable blocks at build time.
+- `ThemeLoader.astro` reads `localStorage('theme-preference')` early and applies `data-theme` to prevent FOUC; falls back to `prefers-color-scheme` and follows live system changes unless the user picked light/dark explicitly.
 
-### Adding a new theme
-1) Edit `scripts/generate-theme-colors.ts` and append a new entry to `themeDefinitions` with `id`, `name`, `description`, `shikiTheme`, and `tone` (`dark` or `light`).
-2) Run `yarn generate:themes` to regenerate `src/generated/theme-colors.json`.
-3) Ensure the new theme appears in the UI (ThemeSelector lists all themes automatically).
+### Theme palettes
+The two palettes are hand-maintained in `src/config/themes.ts`, `src/components/BaseHead.astro`, and the `@theme` block in `src/styles/global.css` — keep all three in sync when adjusting colors.
 
 ## Performance notes
-- Latest build output: CSS bundle `dist/_astro/ec.y0rd3.css` ~18.5 kB (gz ~4.1 kB); client JS `dist/_astro/client.C3DCzcxU.js` ~195 kB (gz ~61 kB).
 - Tailwind v4 on-demand compilation removes unused utilities automatically; custom CSS is minimal.
-- Theme FOUC is mitigated by early `ThemeLoader` defaulting to `spectre` when no saved theme exists.
+- Theme FOUC is mitigated by the early inline `ThemeLoader` script.
 - For a full audit, run Lighthouse against the built site (e.g., `yarn build && npx serve dist` then Lighthouse in Chrome DevTools).
 
 ## Content & pages

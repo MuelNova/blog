@@ -20,7 +20,7 @@ const createGiscusCSS = (colors: ThemeColors) => {
 
 	return `
 /*!
- * Custom Giscus theme for MuelNova's Blog
+ * Custom Giscus theme for Muir's Cream
  * Based on current site theme colors
  */
 
@@ -48,7 +48,7 @@ main {
 	--color-btn-primary-text: ${background};
 	--color-btn-primary-bg: ${primary};
 	--color-btn-primary-border: transparent;
-	--color-btn-primary-shadow: 0 0 12px ${rgba(primary, 0.3)};
+	--color-btn-primary-shadow: 0 0 transparent;
 	--color-btn-primary-hover-bg: ${primary};
 	--color-btn-primary-selected-bg: ${primary};
 	
@@ -120,16 +120,16 @@ main {
 	order: 3;
 }
 
-/* Code blocks in comments - 直角设计，符合极简主义 */
+/* Code blocks in comments - 圆角奶油风 */
 div.gsc-comment-content div.highlight pre {
-	border-radius: 0;
-	border: 0px solid ${rgba(foreground, 0.15)};
+	border-radius: 8px;
+	border: 1px solid ${rgba(foreground, 0.15)};
 	background: ${rgba(foreground, 0.03)};
 }
 
-/* Inline code in comments - 直角设计 */
+/* Inline code in comments - 圆角奶油风 */
 div.gsc-comment-content code {
-	border-radius: 0;
+	border-radius: 6px;
 	background: ${rgba(foreground, 0.1)};
 	padding: 0.125rem 0.375rem;
 	color: ${foreground};

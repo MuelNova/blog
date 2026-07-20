@@ -1,76 +1,98 @@
 /* Import Tailwind CSS v4 */
 @import "tailwindcss";
 
+/* ===================================
+   Muir's Cream — Design Tokens
+   =================================== */
 
-/* Legacy Theme CSS Variables (for backward compatibility only) */
-:root {
-	/* Primary color - Spectre purple */
-	--theme-primary: #8c5cf5;
-	--theme-primary-rgb: 140, 92, 245;
-	--theme-primary-light: #a277ff;
-	--theme-primary-lightest: #c2a8fd;
-	
-	/* Background and foreground - Dark theme */
-	--theme-background: #0a0a0a;
-	--theme-foreground: #ffffff;
-	--theme-foreground-secondary: #c7c7c7;
-	
-	/* Borders and separators */
-	--theme-border: #353535;
-	--theme-separator: #353535;
-	
-	/* Semantic colors */
-	--theme-accent: var(--color-primary);
-	--theme-link: var(--color-primary-light);
-	
-	/* Legacy variables for compatibility */
-	--accent: var(--color-primary);
-	--accent-dark: #6b3fd4;
-}
-
-/* Tailwind v4 Theme Configuration */
+/*
+ * Cream (light) values are the defaults. The `cream-dark` overrides live in
+ * `:root[data-theme="cream-dark"]` blocks inlined by BaseHead.astro
+ * (and duplicated for `cream` for explicitness).
+ */
 @theme {
-	/* Map legacy theme colors to Tailwind utilities (for backward compatibility) */
-	--color-primary: var(--theme-primary);
-	--color-primary-light: var(--theme-primary-light);
-	--color-primary-lightest: var(--theme-primary-lightest);
-	--color-background: var(--theme-background);
-	--color-foreground: var(--theme-foreground);
-	--color-accent: var(--theme-accent);
-	--color-link: var(--theme-link);
-	
-	/* Font families - Tailwind v4 syntax */
-	--font-sans: Geist, ui-sans-serif, system-ui, sans-serif;
-	--font-mono: GeistMono, ui-monospace, 'SFMono-Regular', Monaco, 'Cascadia Code', 'Segoe UI Mono', 'Courier New', monospace;
-	
-	/* Box shadows for glow effects */
-	--shadow-glow-sm: 0 0 2px var(--color-primary);
-	--shadow-glow: 0 0 4px var(--color-primary);
-	--shadow-glow-md: 0 0 8px var(--color-primary);
-	--shadow-glow-lg: 0 0 12px var(--color-primary);
-	--shadow-glow-xl: 0 0 16px var(--color-primary);
-	
-	/* Drop shadows for text glow */
-	--drop-shadow-glow: drop-shadow(0 0 4px var(--color-primary));
-	--drop-shadow-glow-lg: drop-shadow(0 0 12px var(--color-primary));
-	
+	/* Colors — cream (light) */
+	--color-background: #FFF9F5;
+	--color-surface: #FFF1E8;
+	--color-surface-deep: #E5DCD5;
+	--color-foreground: #54453F;
+	--color-foreground-secondary: #8A7A72;
+	--color-primary: #FFB583;
+	--color-primary-light: #FFC9A3;
+	--color-primary-lightest: #FFE7D6;
+	--color-accent: #FFD3E0;
+	--color-accent-2: #BBE9F2;
+	--color-border: rgba(84, 69, 63, 0.18);
+	--color-success: #7CB362;
+	--color-warning: #E8862E;
+	--color-danger: #D96A8B;
+	--color-link: #3E93A8;
+
+	/* Font families */
+	--font-display: "Baloo 2", "ZCOOL KuaiLe", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+	--font-sans: "Noto Sans SC", -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+	--font-hand: "Caveat", cursive;
+	--font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+	/* Easing */
+	--ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+	/* Radii — sticker style */
+	--radius-card: 1.25rem;
+	--radius-pill: 100px;
+
 	/* Animations */
 	--animate-fade-in: fade-in 150ms ease-in;
 	--animate-slide-in: slide-in 150ms ease-out;
 }
 
-/* Font faces - Geist from Spectre */
+:root {
+	/* RGB triplet of the primary color, for rgba() usage (e.g. scrollbar, Background canvas) */
+	--color-primary-rgb: 255, 181, 131;
+
+	/* Easing variables (also exposed as Tailwind ease utilities via @theme) */
+	--ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===================================
+   Self-hosted fonts (font-display: swap)
+   =================================== */
+
+/* Baloo 2 — English display / headings (variable, latin subset) */
 @font-face {
-	font-family: "Geist";
-	src: url("/fonts/Geist.woff2") format("woff2");
-	font-weight: 100 900;
+	font-family: "Baloo 2";
+	src: url("/fonts/Baloo2-latin.woff2") format("woff2");
+	font-weight: 700 800;
 	font-style: normal;
 	font-display: swap;
 }
+
+/* ZCOOL KuaiLe — Chinese display / headings (subset: site vocabulary only) */
 @font-face {
-	font-family: "GeistMono";
-	src: url("/fonts/GeistMono.woff2") format("woff2");
-	font-weight: 100 900;
+	font-family: "ZCOOL KuaiLe";
+	src: url("/fonts/ZCOOLKuaiLe-subset.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+	unicode-range: U+20-7e, U+b7, U+2013-2014, U+2026, U+3001-3002, U+3008-300b, U+4e0e, U+4e16, U+4e8b, U+4e8e, U+4eab, U+505a, U+5173, U+5206, U+5230, U+535a, U+53cb, U+5728, U+5976, U+5ba2, U+5c0f, U+5f0f, U+5f52, U+5f55, U+60f3, U+6211, U+6280, U+6587, U+65b0, U+65b9, U+65f6, U+6700, U+672f, U+6765, U+6807, U+6863, U+68a6, U+6b22, U+6b63, U+6cb9, U+6d3b, U+751c, U+751f, U+754c, U+7684, U+76ee, U+7ad9, U+7ae0, U+7b14, U+7b7e, U+7cd6, U+7cfb, U+7ebf, U+8054, U+80fd, U+871c, U+8bb0, U+8f6f, U+8fce, U+94fe, U+95f4, U+968f, U+9875, U+9879, U+9996, U+ff01, U+ff08-ff09, U+ff0c, U+ff1a-ff1b, U+ff1f;
+}
+
+/* Caveat — handwritten sticker accents (variable, latin subset) */
+@font-face {
+	font-family: "Caveat";
+	src: url("/fonts/Caveat-latin.woff2") format("woff2");
+	font-weight: 500 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* JetBrains Mono — code / dates / tags (variable, latin subset) */
+@font-face {
+	font-family: "JetBrains Mono";
+	src: url("/fonts/JetBrainsMono-latin.woff2") format("woff2");
+	font-weight: 400 500;
 	font-style: normal;
 	font-display: swap;
 }
@@ -94,9 +116,11 @@ body {
 	text-align: left;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
-	line-height: 1.7;
+	line-height: 1.8;
 	font-size: 18px;
 	-webkit-font-smoothing: antialiased;
+	/* Gentle color-only transition when switching cream / cream-dark */
+	transition: background-color 600ms ease, color 600ms ease;
 }
 
 /* Blog post layout helpers */
@@ -142,7 +166,6 @@ body {
 	display: block;
 	margin: 0 auto;
 	border-radius: 12px;
-	box-shadow: var(--shadow-glow-md);
 }
 
 .blog-post-prose {
@@ -607,6 +630,8 @@ b {
 
 a {
 	@apply text-link transition-colors duration-150;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
 }
 a:hover {
 	@apply text-primary-lightest underline;
@@ -723,14 +748,14 @@ html {
 	scrollbar-color: rgba(var(--color-primary-rgb), 0.4) transparent;
 }
 
-/* Selection styling */
+/* Selection styling — soft peach wash */
 ::selection {
-	background: var(--color-primary);
+	background: color-mix(in srgb, var(--color-primary) 30%, transparent);
 	color: var(--color-foreground);
 }
 
 ::-moz-selection {
-	background: var(--color-primary);
+	background: color-mix(in srgb, var(--color-primary) 30%, transparent);
 	color: var(--color-foreground);
 }
 

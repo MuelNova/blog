@@ -6,7 +6,6 @@ import type { ImageMetadata } from 'astro';
 import FallbackImage from '../assets/blog-placeholder-1.jpg';
 import ThemeLoader from './ThemeLoader.astro';
 import { SITE_TITLE } from '../consts';
-import { getThemes } from '../config/themes';
 
 interface Props {
 	title: string;
@@ -18,33 +17,44 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 const { title, description, image = FallbackImage } = Astro.props;
 
-// Generate theme CSS at build time (MultiTerm style)
-const allThemes = await getThemes();
-
-let cssLines: string[] = [];
-const plainIntroCss = `:root[data-theme="plain-intro"] {
-	--color-background: #f5f5f1;
-	--color-foreground: #1f2933;
-	--color-primary: #1f3a5f;
-	--color-primary-light: #33527a;
-	--color-primary-lightest: #e5e9f2;
-	--color-primary-rgb: 31, 58, 95;
-	--color-accent: #94a3b8;
-	--color-link: #2563eb;
-}`;
-for (const theme of allThemes) {
-	cssLines.push(`:root[data-theme="${theme.id}"] {`);
-	cssLines.push(`  --color-background: ${theme.colors.background};`);
-	cssLines.push(`  --color-foreground: ${theme.colors.foreground};`);
-	cssLines.push(`  --color-primary: ${theme.colors.primary};`);
-	cssLines.push(`  --color-primary-light: ${theme.colors.primaryLight};`);
-	cssLines.push(`  --color-primary-lightest: ${theme.colors.primaryLightest};`);
-	cssLines.push(`  --color-primary-rgb: ${theme.colors.primaryRgb};`);
-	cssLines.push(`  --color-accent: ${theme.colors.accent};`);
-	cssLines.push(`  --color-link: ${theme.colors.link};`);
-	cssLines.push(`}`);
+// Muir's Cream themes — only cream (light, default) and cream-dark exist.
+// Keep in sync with `src/config/themes.ts` and the `@theme` block in global.css.
+const generatedCss = `:root[data-theme="cream"] {
+	--color-background: #FFF9F5;
+	--color-surface: #FFF1E8;
+	--color-surface-deep: #E5DCD5;
+	--color-foreground: #54453F;
+	--color-foreground-secondary: #8A7A72;
+	--color-primary: #FFB583;
+	--color-primary-light: #FFC9A3;
+	--color-primary-lightest: #FFE7D6;
+	--color-primary-rgb: 255, 181, 131;
+	--color-accent: #FFD3E0;
+	--color-accent-2: #BBE9F2;
+	--color-border: rgba(84, 69, 63, 0.18);
+	--color-success: #7CB362;
+	--color-warning: #E8862E;
+	--color-danger: #D96A8B;
+	--color-link: #3E93A8;
 }
-const generatedCss = [plainIntroCss, cssLines.join('\n')].join('\n');
+:root[data-theme="cream-dark"] {
+	--color-background: #1F1A17;
+	--color-surface: #2A2320;
+	--color-surface-deep: #241E1B;
+	--color-foreground: #F2E9E3;
+	--color-foreground-secondary: #A89A90;
+	--color-primary: #E89A63;
+	--color-primary-light: #F0B586;
+	--color-primary-lightest: #F7D2B3;
+	--color-primary-rgb: 232, 154, 99;
+	--color-accent: #E8A7BF;
+	--color-accent-2: #8FC6D4;
+	--color-border: rgba(242, 233, 227, 0.16);
+	--color-success: #8FC97A;
+	--color-warning: #F0A55C;
+	--color-danger: #E88BA6;
+	--color-link: #8FC6D4;
+}`;
 ---
 
 <!-- Global Metadata -->
@@ -63,8 +73,9 @@ const generatedCss = [plainIntroCss, cssLines.join('\n')].join('\n');
 <meta name="generator" content={Astro.generator} />
 
 <!-- Font preloads (match @font-face in global.css) -->
-<link rel="preload" href="/fonts/Geist.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="/fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/Baloo2-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/ZCOOLKuaiLe-subset.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/JetBrainsMono-latin.woff2" as="font" type="font/woff2" crossorigin />
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
@@ -88,7 +99,7 @@ const generatedCss = [plainIntroCss, cssLines.join('\n')].join('\n');
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image.src, Astro.url)} />
 
-<!-- Auto-generated theme CSS (MultiTerm style) -->
+<!-- Cream theme CSS variables -->
 <style is:inline set:html={generatedCss}></style>
 
 <!-- Theme Loader (must be early to prevent FOUC) -->
