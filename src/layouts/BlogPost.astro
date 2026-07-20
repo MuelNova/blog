@@ -17,11 +17,31 @@ type Props = Partial<CollectionEntry<'blog'>['data']> & {
 	headings?: any[];
 	showTitle?: boolean;
   	lang?: Lang;
+	/** Optional estimated reading time in minutes (computed by the caller). */
+	readingTimeMinutes?: number;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, headings = [], showTitle = true, lang: langProp } = Astro.props;
+const {
+	title,
+	description,
+	pubDate,
+	updatedDate,
+	heroImage,
+	headings = [],
+	showTitle = true,
+	lang: langProp,
+	tags = [],
+	readingTimeMinutes,
+} = Astro.props;
 const lang = langProp ?? resolveLang(Astro.url.pathname) ?? defaultLang;
 const t = useTranslations(lang);
+
+const readingTimeLabel =
+	typeof readingTimeMinutes === 'number' && readingTimeMinutes > 0
+		? lang === 'zh'
+			? `约 ${readingTimeMinutes} 分钟`
+			: `${readingTimeMinutes} min read`
+		: null;
 ---
 
 <html lang={lang}>
@@ -42,9 +62,12 @@ const t = useTranslations(lang);
 				<div class="prose blog-post-prose">
 					{(showTitle || pubDate || updatedDate) && (
 						<div class="title blog-post-title">
-							{(pubDate || updatedDate) && (
+							{(pubDate || updatedDate || readingTimeLabel) && (
 								<div class="date blog-post-date">
 									{pubDate && <FormattedDate date={pubDate} lang={lang} />}
+									{readingTimeLabel && (
+										<span class="blog-post-reading-time">· {readingTimeLabel}</span>
+									)}
 									{updatedDate && (
 										<div class="last-updated-on blog-post-last-updated">
 											{t('blog.lastUpdated')} <FormattedDate date={updatedDate} lang={lang} />
@@ -53,6 +76,11 @@ const t = useTranslations(lang);
 								</div>
 							)}
 							{showTitle && <h1>{title}</h1>}
+							{tags.length > 0 && (
+								<div class="blog-post-tags">
+									{tags.map((tag) => <span class="blog-post-tag">{tag}</span>)}
+								</div>
+							)}
 							{showTitle && <hr />}
 						</div>
 					)}
@@ -66,3 +94,69 @@ const t = useTranslations(lang);
 		<Footer lang={lang} />
 	</body>
 </html>
+
+<style>
+	/* Hero cover — sticker frame */
+	:global(.hero-image.blog-post-hero img) {
+		border-radius: var(--radius-card);
+		border: 2px solid var(--color-border);
+	}
+
+	/* Article title — cute display font */
+	:global(.blog-post-title h1) {
+		font-family: var(--font-display);
+		font-weight: 700;
+		line-height: 1.25;
+	}
+
+	/* Meta row — small mono type */
+	:global(.prose .blog-post-date) {
+		font-family: var(--font-mono);
+		font-size: 0.8125rem;
+		color: var(--color-foreground-secondary);
+	}
+
+	:global(.prose .blog-post-reading-time) {
+		color: var(--color-foreground-secondary);
+	}
+
+	:global(.prose .blog-post-last-updated) {
+		font-style: normal;
+		font-size: 0.75rem;
+	}
+
+	/* Tag pills */
+	.blog-post-tags {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.5rem;
+		margin-top: 0.75rem;
+	}
+
+	.blog-post-tag {
+		font-family: var(--font-mono);
+		font-size: 0.75rem;
+		padding: 0.25rem 0.875rem;
+		border-radius: var(--radius-pill);
+		border: 2px solid var(--color-border);
+		background: var(--color-surface);
+		color: var(--color-foreground-secondary);
+	}
+
+	/* Title divider — soft and short */
+	:global(.prose .blog-post-title hr) {
+		max-width: 12rem;
+		margin: 1.5rem auto 0;
+		background: color-mix(in srgb, var(--color-primary) 45%, transparent);
+	}
+
+	/* Giscus comment area — rounded sticker container */
+	:global(.giscus-container) {
+		border: 2px solid var(--color-border);
+		border-radius: var(--radius-card);
+		background: var(--color-surface);
+		padding: 1rem 1.25rem;
+		overflow: hidden;
+	}
+</style>

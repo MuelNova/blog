@@ -1,314 +1,330 @@
 /**
- * Page Background Script
- * Creates animated glowing text background effect
- * Adapted from Spectre theme for blog_astro
+ * Page Background Script — floating candy particles
+ *
+ * A single fixed canvas with 10-25 soft dots / rounded shapes that slowly
+ * float upward with a sine drift. Colors are sampled from the active theme's
+ * CSS variables (--color-primary-rgb, --color-accent, --color-accent-2) at
+ * low opacity. Re-colors on `theme:change` and `data-theme` mutations,
+ * renders one static frame under `prefers-reduced-motion`, and handles
+ * bfcache (pagehide/pageshow) plus resize.
  */
 
-interface LetterPosition {
-  x: number;
-  y: number;
-  letter: string;
+type ParticleShape = 'circle' | 'rounded-rect';
+
+interface Particle {
+	/** Base x position (center of the sine drift), in CSS px. */
+	baseX: number;
+	/** Current y position, in CSS px. */
+	y: number;
+	/** Shape size (radius for circle, half-width for rect), in CSS px. */
+	size: number;
+	shape: ParticleShape;
+	/** Upward speed, CSS px per second. */
+	speed: number;
+	/** Sine drift frequency (rad/s). */
+	freq: number;
+	/** Sine drift amplitude, CSS px. */
+	amp: number;
+	phase: number;
+	alpha: number;
+	/** Index into the current palette. */
+	colorIndex: number;
+	rotation: number;
+	rotationSpeed: number;
 }
 
-interface LetterInstance extends LetterPosition {
-  timestamp: number;
-  fadeout: number;
+interface PaletteEntry {
+	r: number;
+	g: number;
+	b: number;
 }
 
-/**
- * PageBackground class
- */
-class PageBackground {
-  private LETTER_FADE_DURATION: [number, number] = [2, 7]; // Seconds
+const DESKTOP_PARTICLES: [number, number] = [15, 25];
+const MOBILE_PARTICLES = 10;
+const MOBILE_BREAKPOINT = 640;
+const ALPHA_RANGE: [number, number] = [0.15, 0.3];
 
-  private baseCanvas: HTMLCanvasElement;
-  private overlayCanvas: HTMLCanvasElement;
-
-  private baseCtx: CanvasRenderingContext2D;
-  private overlayCtx: CanvasRenderingContext2D;
-  
-  private width: number = window.innerWidth;
-  private height: number = window.innerHeight;
-
-  private letterPositions: LetterPosition[] = [];
-  private letterInstances: LetterInstance[] = [];
-
-  private primaryRgb: string = '0, 0, 0';
-  private maxAlpha: number = 0.3;
-
-  /**
-   * Initializes the background on the page.
-   * @param baseCanvas - The base canvas element. Used for static letters.
-   * @param overlayCanvas - The overlay canvas element. Used for animated letters.
-   */
-  constructor(baseCanvas: HTMLCanvasElement, overlayCanvas: HTMLCanvasElement) {
-    // Get 2D context for both canvases
-    const baseCtx = baseCanvas.getContext('2d');
-    const overlayCtx = overlayCanvas.getContext('2d');
-
-    // If either context is null, throw an error
-    if(!baseCtx || !overlayCtx) {
-      throw new Error('Unable to get 2D context.');
-    }
-
-    this.baseCanvas = baseCanvas;
-    this.overlayCanvas = overlayCanvas;
-    this.baseCtx = baseCtx;
-    this.overlayCtx = overlayCtx;
-
-    baseCanvas.width = this.width;
-    baseCanvas.height = this.height;
-
-    overlayCanvas.width = this.width;
-    overlayCanvas.height = this.height;
-
-    // Set the primary color to the first color in the theme
-    this.updatePrimaryColor();
-
-    this.initBackground();
-  
-    requestAnimationFrame(this.redrawBackground);
-
-    // Listen for theme changes
-    this.observeThemeChanges();
-  }
-
-  /**
-   * Updates the primary color from CSS variables
-   */
-  private updatePrimaryColor = () => {
-    this.primaryRgb = window.getComputedStyle(document.documentElement)
-      .getPropertyValue('--color-primary-rgb').trim();
-  }
-
-  /**
-   * Observes theme changes and updates colors accordingly
-   */
-  private observeThemeChanges = () => {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-          this.updatePrimaryColor();
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme']
-    });
-  }
-
-  /**
-   * Sets up the background canvases. The text is decided based on the title of the page.
-   */
-  private initBackground = () => {
-    let text: string = document.title.toLowerCase().split(' | ')[0].replace(/\s/g, '_') || 'blog';
-
-    // Add additional underscore to separate words
-    if (text.includes("_")) {
-      text += "_";
-    }
-  
-    // Letters are 17px wide and 35px tall
-    const letters = Math.ceil(this.width / 17);
-    const lines = Math.ceil(this.height / 35);
-  
-    // Loop through the canvas and draw the text
-    this.baseCtx.font = '28px Geist Mono';
-    this.baseCtx.textAlign = 'start';
-    this.baseCtx.textBaseline = 'top';
-    this.baseCtx.fillStyle = 'rgba(255, 255, 255, 0.01)';
-      
-    for(let i = 0; i < lines; i++) {
-      for(let j = 0; j < letters; j++) {
-        this.baseCtx.fillText(text[j % text.length], j * 17, i * 35);
-        this.letterPositions.push({
-          x: j * 17,
-          y: i * 35,
-          letter: text[j % text.length]
-        });
-      }
-    }
-  
-    // Randomly select 75% of the letters to animate
-    const randomLetters = this.getRandomAmountFromArray<LetterPosition>(
-      this.letterPositions,
-      Number.parseInt((lines * 0.75).toFixed())
-    );
-  
-    this.overlayCtx.font = 'bold 28px Geist Mono';
-    this.overlayCtx.textAlign = 'start';
-    this.overlayCtx.textBaseline = 'top';
-    this.overlayCtx.fillStyle = `rgba(${this.primaryRgb}, 0)`;
-    this.overlayCtx.shadowBlur = 16;
-    this.overlayCtx.shadowColor = `rgba(${this.primaryRgb}, 0)`;
-
-    // Draw the letters on the overlay canvas
-    for(const letter of randomLetters) {
-      this.overlayCtx.fillText(letter.letter, letter.x, letter.y);
-  
-      // Some number between LETTER_FADE_DURATION[0] and LETTER_FADE_DURATION[1] (in seconds)
-      const animLength = this.LETTER_FADE_DURATION[0] + Math.random() * (this.LETTER_FADE_DURATION[1] - this.LETTER_FADE_DURATION[0]);
-  
-      this.letterInstances.push({
-        x: letter.x,
-        y: letter.y,
-        letter: letter.letter,
-        timestamp: Date.now(),
-        fadeout: Date.now() + animLength * 1000
-      });
-    }
-  
-    // Make the base canvas visible
-    this.baseCanvas.style.opacity = '1';
-  }
-
-  /**
-   * Simple sine easing function. Used for fading in and out letters.
-   * @param timestamp - The current timestamp.
-   * @param start - The start timestamp of a letter.
-   * @param end - The end timestamp of a letter.
-   */
-  private easeInOutSine = (timestamp: number, start: number, end: number) => {
-    const totalDuration = end - start;
-    
-    // If the current timestamp is before the start, return 0
-    if (timestamp < start) {
-      return 0;
-    }
-    
-    // If the current timestamp is after the end, return 0
-    if (timestamp > end) {
-      const elapsedAfterEnd = timestamp - end;
-      const progressAfterEnd = elapsedAfterEnd / (totalDuration / 2);
-      
-      return Math.sin(progressAfterEnd * Math.PI);
-    }
-    
-    const progress = (timestamp - start) / totalDuration;
-    
-    return Math.max(0, 0.5 - 0.5 * Math.cos(progress * Math.PI));
-  }
-
-  /**
-   * Grabs n random elements from an array.
-   * @param arr - The array to grab elements from.
-   * @param n - The number of elements to grab.
-   * @returns - An array of n elements.
-   */
-  private getRandomAmountFromArray = <T>(arr: Array<T>, n = 20): Array<T> => {
-    let len = arr.length;
-
-    // Initialize arrays beforehand
-    const result = new Array(n);
-    const taken = new Array(len);
-    
-    if(n > len) {
-      throw new Error("getRandomAmountFromArray: more elements taken than available");
-    }
-
-    while(n--) {
-      const x = Math.floor(Math.random() * len);
-      result[n] = arr[x in taken ? taken[x] : x];
-      taken[x] = --len in taken ? taken[len] : len;
-    }
-
-    return result;
-  }
-
-  /**
-   * Redraws the overlay canvas and animates the letters.
-   */
-  private redrawBackground = () => {
-    // Clear the overlay canvas
-    this.overlayCtx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
-  
-    this.overlayCtx.font = 'bold 28px Geist Mono';
-    this.overlayCtx.textAlign = 'start';
-    this.overlayCtx.textBaseline = 'top';
-    this.overlayCtx.shadowBlur = 16;
-
-    for(const letter of this.letterInstances) {
-      if (letter.fadeout > Date.now()) continue;
-
-      const rawAlpha = this.easeInOutSine(Date.now(), letter.timestamp, letter.fadeout);
-      const alpha = rawAlpha * this.maxAlpha; // Scale down the alpha to reduce intensity
-
-      if(rawAlpha <= 0 && Date.now() > letter.fadeout) {
-        this.letterInstances.splice(this.letterInstances.indexOf(letter), 1);
-        const randomLetter = this.getRandomAmountFromArray<LetterPosition>(this.letterPositions, 1);
-
-        this.letterInstances.push({
-          x: randomLetter[0].x,
-          y: randomLetter[0].y,
-          letter: randomLetter[0].letter,
-          timestamp: Date.now(),
-          fadeout: Date.now() + (this.LETTER_FADE_DURATION[0] + Math.random() * (this.LETTER_FADE_DURATION[1] - this.LETTER_FADE_DURATION[0])) * 1000
-        });
-      }
-      
-      this.overlayCtx.fillStyle = `rgba(${this.primaryRgb}, ${alpha})`;
-      this.overlayCtx.shadowColor = `rgba(${this.primaryRgb}, ${alpha})`;
-      this.overlayCtx.fillText(letter.letter, letter.x, letter.y);
-    }
-    
-    requestAnimationFrame(this.redrawBackground);
-  }
-
-  /**
-   * Resizes the background canvases.
-   */
-  public resizeBackground = () => {
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
-
-    this.baseCanvas.width = this.width;
-    this.baseCanvas.height = this.height;
-
-    this.overlayCanvas.width = this.width;
-    this.overlayCanvas.height = this.height;
-    
-    this.baseCtx.clearRect(0, 0, this.baseCanvas.width, this.baseCanvas.height);
-    this.overlayCtx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
-
-    this.letterInstances = [];
-    this.letterPositions = [];
-
-    this.initBackground();
-  }
+function randomBetween(min: number, max: number): number {
+	return min + Math.random() * (max - min);
 }
 
-/**
- * Loads the Geist Mono font. We have to do this asynchronously because the font is not preloaded.
- */
-async function loadFont() {
-  const font = new FontFace('Geist Mono', 'url(/fonts/GeistMono.woff2)');
-
-  await font.load();
-  
-  document.fonts.add(font);
+/** Parses a hex color (#rgb / #rrggbb) into an rgb triplet. */
+function parseHexColor(value: string): PaletteEntry | null {
+	const hex = value.trim().replace(/^#/, '');
+	if (hex.length === 3) {
+		const r = parseInt(hex[0] + hex[0], 16);
+		const g = parseInt(hex[1] + hex[1], 16);
+		const b = parseInt(hex[2] + hex[2], 16);
+		if ([r, g, b].some(Number.isNaN)) return null;
+		return { r, g, b };
+	}
+	if (hex.length === 6) {
+		const r = parseInt(hex.slice(0, 2), 16);
+		const g = parseInt(hex.slice(2, 4), 16);
+		const b = parseInt(hex.slice(4, 6), 16);
+		if ([r, g, b].some(Number.isNaN)) return null;
+		return { r, g, b };
+	}
+	return null;
 }
 
-/**
- * First loads the Geist Mono font, then initializes the background.
- */
-async function initializeBackground() {
-  await loadFont();
+/** Reads the particle palette from the active theme's CSS variables. */
+function readPalette(): PaletteEntry[] {
+	const styles = window.getComputedStyle(document.documentElement);
+	const palette: PaletteEntry[] = [];
 
-  const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement;
-  const overlayCanvas = document.getElementById('overlay-canvas') as HTMLCanvasElement;
+	const primaryRgb = styles.getPropertyValue('--color-primary-rgb').trim();
+	const parts = primaryRgb.split(',').map((v) => Number.parseFloat(v));
+	if (parts.length === 3 && parts.every((v) => !Number.isNaN(v))) {
+		palette.push({ r: parts[0], g: parts[1], b: parts[2] });
+	}
 
-  if (!canvas || !overlayCanvas) {
-    console.warn('Background canvases not found');
-    return;
-  }
+	for (const varName of ['--color-accent', '--color-accent-2']) {
+		const entry = parseHexColor(styles.getPropertyValue(varName));
+		if (entry) palette.push(entry);
+	}
 
-  const background = new PageBackground(canvas, overlayCanvas);
+	// Fallback: muted peach if variables are unavailable for any reason.
+	if (palette.length === 0) {
+		palette.push({ r: 255, g: 181, b: 131 });
+	}
 
-  window.addEventListener('resize', () => {
-    background.resizeBackground();
-  });
+	return palette;
+}
+
+class CandyBackground {
+	private canvas: HTMLCanvasElement;
+	private ctx: CanvasRenderingContext2D;
+	private width = window.innerWidth;
+	private height = window.innerHeight;
+	private dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+	private particles: Particle[] = [];
+	private palette: PaletteEntry[] = readPalette();
+
+	private rafId: number | null = null;
+	private lastTimestamp: number | null = null;
+	private running = false;
+
+	private reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+	constructor(canvas: HTMLCanvasElement) {
+		const ctx = canvas.getContext('2d');
+		if (!ctx) {
+			throw new Error('Unable to get 2D context.');
+		}
+		this.canvas = canvas;
+		this.ctx = ctx;
+
+		this.resize();
+		this.spawnParticles();
+
+		if (this.reducedMotionQuery.matches) {
+			this.drawFrame(0);
+		} else {
+			this.start();
+		}
+
+		this.observeThemeChanges();
+		this.observeReducedMotion();
+		window.addEventListener('resize', this.handleResize, { passive: true });
+	}
+
+	/** Rebuilds the particle field (used on init, resize, and pageshow). */
+	private spawnParticles(): void {
+		const isMobile = this.width < MOBILE_BREAKPOINT;
+		const count = isMobile
+			? MOBILE_PARTICLES
+			: Math.round(randomBetween(DESKTOP_PARTICLES[0], DESKTOP_PARTICLES[1]));
+
+		this.particles = Array.from({ length: count }, () => this.createParticle(true));
+	}
+
+	private createParticle(anywhereY: boolean): Particle {
+		const size = randomBetween(3, 9);
+		return {
+			baseX: randomBetween(size, Math.max(this.width - size, size)),
+			y: anywhereY ? randomBetween(0, this.height) : this.height + size + randomBetween(0, 40),
+			size,
+			shape: Math.random() < 0.7 ? 'circle' : 'rounded-rect',
+			speed: randomBetween(6, 18),
+			freq: randomBetween(0.15, 0.5),
+			amp: randomBetween(12, 48),
+			phase: randomBetween(0, Math.PI * 2),
+			alpha: randomBetween(ALPHA_RANGE[0], ALPHA_RANGE[1]),
+			colorIndex: Math.floor(Math.random() * this.palette.length),
+			rotation: randomBetween(0, Math.PI * 2),
+			rotationSpeed: randomBetween(-0.15, 0.15),
+		};
+	}
+
+	/** Draws a single frame. `t` is elapsed seconds (drives the sine drift). */
+	private drawFrame(t: number): void {
+		const { ctx, dpr } = this;
+		ctx.save();
+		ctx.scale(dpr, dpr);
+		ctx.clearRect(0, 0, this.width, this.height);
+
+		for (const p of this.particles) {
+			const color = this.palette[p.colorIndex % this.palette.length];
+			ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${p.alpha})`;
+
+			const x = p.baseX + Math.sin(t * p.freq + p.phase) * p.amp;
+
+			if (p.shape === 'circle') {
+				ctx.beginPath();
+				ctx.arc(x, p.y, p.size, 0, Math.PI * 2);
+				ctx.fill();
+			} else {
+				const half = p.size;
+				const radius = Math.min(half * 0.6, half);
+				ctx.save();
+				ctx.translate(x, p.y);
+				ctx.rotate(p.rotation);
+				ctx.beginPath();
+				ctx.roundRect(-half, -half * 0.8, half * 2, half * 1.6, radius);
+				ctx.fill();
+				ctx.restore();
+			}
+		}
+
+		ctx.restore();
+	}
+
+	private tick = (timestamp: number): void => {
+		if (!this.running) return;
+
+		if (this.lastTimestamp === null) {
+			this.lastTimestamp = timestamp;
+		}
+		const dt = Math.min((timestamp - this.lastTimestamp) / 1000, 0.1);
+		this.lastTimestamp = timestamp;
+
+		const t = timestamp / 1000;
+
+		for (const p of this.particles) {
+			p.y -= p.speed * dt;
+			p.rotation += p.rotationSpeed * dt;
+			if (p.y < -p.size * 2) {
+				// Recycle: re-enter from below with a fresh drift profile.
+				Object.assign(p, this.createParticle(false));
+			}
+		}
+
+		this.drawFrame(t);
+		this.rafId = requestAnimationFrame(this.tick);
+	};
+
+	private start(): void {
+		if (this.running || this.reducedMotionQuery.matches) return;
+		this.running = true;
+		this.lastTimestamp = null;
+		this.rafId = requestAnimationFrame(this.tick);
+	}
+
+	private stop(): void {
+		this.running = false;
+		this.lastTimestamp = null;
+		if (this.rafId !== null) {
+			cancelAnimationFrame(this.rafId);
+			this.rafId = null;
+		}
+	}
+
+	private refreshColors = (): void => {
+		this.palette = readPalette();
+		if (this.reducedMotionQuery.matches) {
+			// Static mode: repaint the single frame with the new colors.
+			this.drawFrame(performance.now() / 1000);
+		}
+	};
+
+	private observeThemeChanges(): void {
+		// Primary contract: the theme bus event.
+		window.addEventListener('theme:change', this.refreshColors);
+
+		// Defensive: also watch the data-theme attribute directly.
+		const observer = new MutationObserver((mutations) => {
+			for (const mutation of mutations) {
+				if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+					this.refreshColors();
+				}
+			}
+		});
+		observer.observe(document.documentElement, {
+			attributes: true,
+			attributeFilter: ['data-theme'],
+		});
+	}
+
+	private observeReducedMotion(): void {
+		const onChange = (event: MediaQueryListEvent) => {
+			if (event.matches) {
+				this.stop();
+				this.drawFrame(performance.now() / 1000);
+			} else {
+				this.start();
+			}
+		};
+		if (typeof this.reducedMotionQuery.addEventListener === 'function') {
+			this.reducedMotionQuery.addEventListener('change', onChange);
+		}
+	}
+
+	private handleResize = (): void => {
+		this.resize();
+		this.spawnParticles();
+		if (this.reducedMotionQuery.matches) {
+			this.drawFrame(performance.now() / 1000);
+		}
+	};
+
+	private resize(): void {
+		this.width = window.innerWidth;
+		this.height = window.innerHeight;
+		this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+		this.canvas.width = Math.round(this.width * this.dpr);
+		this.canvas.height = Math.round(this.height * this.dpr);
+	}
+
+	/** Stops the animation loop (bfcache pagehide). */
+	public destroy(): void {
+		this.stop();
+	}
+
+	/** Restarts after a bfcache restore (pageshow persisted). */
+	public resume(): void {
+		this.refreshColors();
+		if (this.reducedMotionQuery.matches) {
+			this.drawFrame(performance.now() / 1000);
+		} else {
+			this.start();
+		}
+	}
+}
+
+function initializeBackground(): void {
+	const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement | null;
+	if (!canvas) {
+		console.warn('Background canvas not found');
+		return;
+	}
+
+	let background: CandyBackground | null = null;
+	try {
+		background = new CandyBackground(canvas);
+	} catch (error) {
+		console.warn('Failed to initialize background:', error);
+		return;
+	}
+
+	// bfcache: stop the loop when the page is frozen, restart on restore.
+	window.addEventListener('pagehide', () => background?.destroy());
+	window.addEventListener('pageshow', (event) => {
+		if (event.persisted) {
+			background?.resume();
+		}
+	});
 }
 
 initializeBackground();

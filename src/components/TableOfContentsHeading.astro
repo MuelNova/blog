@@ -8,61 +8,64 @@ interface Props {
 const {
   heading: { depth, slug, text },
 } = Astro.props
+
+const indent = Math.max(0, depth - 2)
 ---
 
-<li class="flex items-stretch">
-  <div class="flex items-stretch">
-    {
-      Array.from({ length: depth - 1 }, (_v, _k) => (
-        <div class="toc-lines flex flex-col items-stretch">
-          <span class="top-box" style="width: 0.75rem; flex-basis: 1rem; border-bottom-width: 1px;" />
-          <span class="bottom-box" style="width: 0.75rem; min-height: 50%; flex: 1; border-top-width: 1px;" />
-        </div>
-      ))
-    }
-  </div>
-  <a
-    class="toc-link"
-    href={`#${slug}`}
-    style="display: inline-block; margin-left: 0.5rem; padding: 0.25rem 0 0.25rem 0.25rem; line-clamp: 2;"
-  >{text}</a>
+<li class="toc-item" style={`--toc-indent: ${indent}`}>
+  <a class="toc-link" href={`#${slug}`}>
+    <span class="toc-dot" aria-hidden="true"></span>
+    <span class="toc-text">{text}</span>
+  </a>
 </li>
 
 <style>
-  .toc-lines span {
-    border-color: color-mix(in srgb, var(--color-foreground) 20%, transparent);
+  .toc-item {
+    padding-left: calc(var(--toc-indent) * 1rem);
   }
-  
-  .toc-lines:first-child span {
-    border-left-width: 2px;
+
+  .toc-link {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.625rem;
+    color: var(--color-foreground-secondary);
+    text-decoration: none;
+    transition: color 150ms ease, background-color 150ms ease;
   }
-  
-  li:last-child .toc-lines:first-child span.bottom-box {
-    border-left-width: 0 !important;
+
+  .toc-link:hover {
+    color: var(--color-foreground);
+    background: color-mix(in srgb, var(--color-primary) 14%, transparent);
   }
-  
-  li.active-heading a {
-    color: var(--color-accent);
+
+  .toc-text {
+    line-clamp: 2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Current-heading indicator: a soft candy dot */
+  .toc-dot {
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-border);
+    transform: translateY(-0.0625rem);
+    transition: background-color 200ms ease, transform 200ms var(--ease-pop);
+  }
+
+  li.active-heading .toc-link {
+    color: var(--color-foreground);
     font-weight: 600;
   }
-  
-  .toc-link {
-    color: var(--color-foreground);
-    text-decoration: none;
-  }
-  
-  .toc-link:hover {
-    color: var(--color-accent);
-  }
-  
-  @media (min-width: 1280px) {
-    .toc-lines span {
-      border-color: color-mix(in srgb, var(--color-foreground) 15%, transparent);
-    }
-    
-    .toc-lines span.top-box,
-    .toc-lines span.bottom-box {
-      width: 0.75rem;
-    }
+
+  li.active-heading .toc-dot {
+    background: var(--color-primary);
+    transform: translateY(-0.0625rem) scale(1.35);
   }
 </style>
