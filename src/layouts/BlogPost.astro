@@ -8,7 +8,6 @@ import Header from '../components/Header.astro';
 import TableOfContents from '../components/TableOfContents.astro';
 import Background from '../components/Background.astro';
 import Giscus from '../components/Giscus.astro';
-import MarqueeDivider from '../components/MarqueeDivider.astro';
 import ShareButton from '../components/ShareButton.astro';
 import { defaultLang, resolveLang, useTranslations, type Lang } from '../i18n/config';
 
@@ -92,7 +91,6 @@ const readingTimeLabel =
 		</main>
 		<ShareButton lang={lang} />
 		<Giscus />
-		<MarqueeDivider />
 		<Footer lang={lang} />
 	</body>
 </html>

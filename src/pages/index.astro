@@ -6,7 +6,6 @@ import AboutCard from '../components/AboutCard.astro';
 import LatestPosts from '../components/LatestPosts.astro';
 import Hero from '../components/hero/Hero.astro';
 import MagneticCursor from '../components/hero/MagneticCursor.astro';
-import MarqueeDivider from '../components/MarqueeDivider.astro';
 import { SITE_DESCRIPTION, SITE_TITLE, USER_NAME } from '../consts';
 import { SOCIAL_LINKS, getQuickInfo } from '../config/profile';
 import OpeningAnimation from '../components/OpeningAnimation.astro';
@@ -27,15 +26,11 @@ const t = useTranslations(lang);
 	description={SITE_DESCRIPTION}
 	lang={lang}
 	class="w-full flex flex-col"
-	showMarquee={false}
 >
 	<OpeningAnimation slot="overlay" />
 	
 	<!-- 首屏 Hero（五层结构） -->
 	<Hero lang={lang} />
-
-	<!-- 跑马灯分隔带：hero 下方 -->
-	<MarqueeDivider />
 
 	<!-- 磁性自定义光标（仅首页 + pointer:fine + 非 reduced-motion 生效） -->
 	<MagneticCursor />
@@ -70,9 +65,6 @@ const t = useTranslations(lang);
 			</div>
 		</div>
 	</div>
-
-	<!-- 跑马灯分隔带：LatestPosts 之后 -->
-	<MarqueeDivider />
 </PageLayout>
 
 <style>
