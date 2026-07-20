@@ -20,6 +20,11 @@ export interface ThemeColors {
 	separator: string;
 	accent: string;
 	link: string;
+	/* Cream sticker design tokens (used by the giscus theme endpoint) */
+	surface: string; // card / raised surface, matches --color-surface in global.css
+	primaryDeep: string; // one shade deeper than primary, for hover states
+	onPrimary: string; // readable text color on primary-filled buttons
+	borderStrong: string; // stronger warm border for 2px sticker strokes
 }
 
 export interface Theme {
@@ -50,6 +55,10 @@ const creamTheme: Theme = {
 		separator: 'rgba(84, 69, 63, 0.12)',
 		accent: '#FFD3E0',
 		link: '#3E93A8',
+		surface: '#FFF1E8',
+		primaryDeep: '#F29B5F',
+		onPrimary: '#54453F',
+		borderStrong: 'rgba(84, 69, 63, 0.35)',
 	},
 };
 
@@ -73,6 +82,10 @@ const creamDarkTheme: Theme = {
 		separator: 'rgba(242, 233, 227, 0.10)',
 		accent: '#E8A7BF',
 		link: '#8FC6D4',
+		surface: '#2A2320',
+		primaryDeep: '#D4884C',
+		onPrimary: '#1F1A17',
+		borderStrong: 'rgba(242, 233, 227, 0.30)',
 	},
 };
 
