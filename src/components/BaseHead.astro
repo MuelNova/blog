@@ -74,8 +74,14 @@ const generatedCss = `:root[data-theme="cream"] {
 
 <!-- Font preloads (match @font-face in global.css) -->
 <link rel="preload" href="/fonts/Baloo2-latin.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="/fonts/ZCOOLKuaiLe-subset.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="/fonts/JetBrainsMono-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+<!-- ZCOOL KuaiLe via Google Fonts (sliced; browser downloads only used slices).
+     Local full font in global.css ("ZCOOL KuaiLe Local") stays as fallback and
+     is only fetched when Google Fonts is unreachable — do NOT preload it. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" />
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
