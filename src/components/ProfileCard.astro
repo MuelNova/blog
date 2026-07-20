@@ -38,7 +38,7 @@ const infoIcons = ['ph:map-pin-line-duotone', 'ph:compass-duotone', 'ph:book-ope
 	</div>
 	
 	<!-- Name -->
-	<h2 class="text-lg font-bold text-[var(--color-foreground)] m-0">{name}</h2>
+	<h2 class="text-lg font-bold font-display text-foreground m-0">{name}</h2>
 	
 	<!-- Quick Info List -->
 	<ul class="list-none p-0 m-0 w-full text-sm">
@@ -46,9 +46,9 @@ const infoIcons = ['ph:map-pin-line-duotone', 'ph:compass-duotone', 'ph:book-ope
 			<li class="flex items-center gap-2 mb-2 last:mb-0">
 				<Icon
 					name={infoIcons[index % infoIcons.length]}
-					class="w-5 h-5 text-[var(--color-primary)] flex-shrink-0"
+					class="w-5 h-5 text-accent flex-shrink-0"
 				/>
-				<span class="text-[var(--color-foreground)]">{item}</span>
+				<span class="text-foreground">{item}</span>
 			</li>
 		))}
 	</ul>
@@ -61,8 +61,8 @@ const infoIcons = ['ph:map-pin-line-duotone', 'ph:compass-duotone', 'ph:book-ope
 		height: 6rem;
 		border-radius: 9999px;
 		overflow: hidden;
-		border: 2px solid var(--color-primary);
-		background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+		border: 2px solid var(--color-border);
+		background: color-mix(in srgb, var(--color-accent) 20%, var(--color-surface));
 		display: grid;
 		place-items: center;
 	}
@@ -79,17 +79,13 @@ const infoIcons = ['ph:map-pin-line-duotone', 'ph:compass-duotone', 'ph:book-ope
 		inset: 0;
 		display: grid;
 		place-items: center;
-		color: var(--color-primary);
+		color: var(--color-accent);
 		opacity: 0.85;
 		pointer-events: none;
 	}
 
 	.avatar-fallback.hide-fallback {
 		opacity: 0;
-	}
-
-	.avatar-fallback :global(svg) {
-		filter: drop-shadow(0 0 6px var(--color-primary));
 	}
 
 	.iconify {

@@ -1,7 +1,5 @@
 ---
 import PageLayout from '../layouts/PageLayout.astro';
-import Card from '../components/Card.astro';
-import CardHeader from '../components/CardHeader.astro';
 import LinkCard from '../components/LinkCard.astro';
 import { SITE_TITLE } from '../consts';
 import { getLinksByLang } from '../config/links';
@@ -46,34 +44,54 @@ const shuffledLinks = shuffleWithSeed(getLinksByLang(lang), seed);
 const t = useTranslations(lang);
 ---
 
-<PageLayout 
-	title={`${t('links.friends.title')} - ${SITE_TITLE}`} 
+<PageLayout
+	title={`${t('links.friends.title')} - ${SITE_TITLE}`}
 	description={t('links.friends.description')}
 	lang={lang}
-	class="w-full max-w-[960px] mx-auto py-3 md:py-8 px-0 md:px-4"
+	class="w-full max-w-[720px] mx-auto py-3 md:py-8 px-0 md:px-4"
 >
-	<Card>
-		<CardHeader title={t('links.friends.title')} icon="heart" />
-		<div class="links-container">
-			{shuffledLinks.map((link) => (
-				<LinkCard {...link} />
-			))}
-		</div>
-	</Card>
+	<header class="links-hero">
+		<h1 class="links-hero-title font-display">{lang === 'zh' ? '友链' : t('links.friends.title')}</h1>
+		<p class="links-hero-hand font-hand" aria-hidden="true">pals &amp; sweet corners of the web</p>
+	</header>
+
+	<!-- Simple vertical flow of capsule cards (no card wall) -->
+	<div class="links-container">
+		{shuffledLinks.map((link) => (
+			<LinkCard {...link} />
+		))}
+	</div>
 </PageLayout>
 
 <style>
-	.links-container {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 1rem;
-		padding: 0;
+	.links-hero {
+		display: flex;
+		align-items: baseline;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		padding: 0 0.25rem;
+		margin-bottom: 1.5rem;
 	}
 
-	@media (min-width: 768px) {
-		.links-container {
-			grid-template-columns: repeat(1, 1fr);
-			gap: 1rem;
-		}
+	.links-hero-title {
+		margin: 0;
+		font-size: 2rem;
+		line-height: 1.1;
+		color: var(--color-foreground);
+		letter-spacing: 0.02em;
+	}
+
+	.links-hero-hand {
+		margin: 0;
+		font-size: 1.25rem;
+		color: var(--color-foreground-secondary);
+		transform: rotate(-2deg);
+	}
+
+	.links-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		padding: 0;
 	}
 </style>
