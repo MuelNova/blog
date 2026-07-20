@@ -1,5 +1,5 @@
-import type { SupportedLang } from '../i18n/locales';
-import { defaultLang } from '../i18n/config';
+import type { SupportedLang } from "../i18n/locales";
+import { defaultLang } from "../i18n/config";
 
 export interface LinkCardProps {
   link: string;
@@ -86,10 +86,10 @@ const localizedLinks: LocalizedLink[] = [
       en: "Reverse engineer from Vidar-Team (Class of 2021), now in game security.",
       zh: "21 届 vidar-tream ( vidar-team? ) 的逆向手，目前在游戏安全",
     },
-    icon: "https://www.fei3ei.xyz/favicon.ico"
+    icon: "https://www.fei3ei.xyz/favicon.ico",
   },
   {
-    link: "https://blog.kingbridge.one/",
+    link: "https://blog.kingbridges.top/",
     linkText: {
       en: "BRIdGE's blog",
       zh: "BRIdGE's blog",
@@ -98,8 +98,8 @@ const localizedLinks: LocalizedLink[] = [
       en: "Gemini says this blog feels human, not AI-written docs—broad, quirky, and a bit cyber-mad.",
       zh: "Gemini: 看起来不像那种由 AI 生成或者堆砌枯燥教程的「技术文档站」，这个博客更有「人味儿」。自称「赛博疯子」可能暗示了博主的涉猎范围很广，想法天马行空，或者对当下的科技生活有着某种狂热甚至戏谑的态度。",
     },
-    icon: "https://blog.kingbridge.one//images/avatar.jpg"
-  }
+    icon: "https://blog.kingbridges.top/images/avatar.jpg",
+  },
 ];
 
 export function getLinksByLang(lang: SupportedLang): LinkCardProps[] {
