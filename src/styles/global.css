@@ -246,7 +246,10 @@ h6 {
 		border: 1px solid var(--color-border);
 		padding: 0.125rem 0.5rem;
 		border-radius: 0.5rem;
-		white-space: nowrap;
+		/* Allow long inline code to wrap instead of overflowing the layout.
+		   `anywhere` (unlike break-word) also counts toward min-content
+		   sizing, so flex/grid ancestors can't be blown out either. */
+		overflow-wrap: anywhere;
 		color: color-mix(in srgb, var(--color-foreground) 90%, transparent);
 	}
 	
