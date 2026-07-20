@@ -259,6 +259,10 @@ const chars = Array.from(brand);
 				{ passive: true }
 			);
 			gsap.ticker.add(() => {
+				// 开场播放期间冻结视差：装饰 span 保持在布局原位，
+				// 开场贴纸的落位测量才不会被鼠标移动破坏（否则交接瞬间装饰"跳"到偏移位置）。
+				// 解冻后从 0 lerp 到当前鼠标位置，是平滑起漂而非跳变。
+				if (!document.body.classList.contains('animation-triggered')) return;
 				cx += (tx - cx) * 0.06;
 				cy += (ty - cy) * 0.06;
 				items.forEach((el) => {

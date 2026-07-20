@@ -14,7 +14,7 @@
  * - localStorage('intro-enabled') 开关（theme-bus 的 isIntroEnabled）
  * - sessionStorage('intro-shown') 只播一次
  * - 播完（及跳过路径）给 body 加 `animation-triggered` class 触发 .landing-section 阶梯入场
- * - mask 揭到约 35% 时派发 window 事件 `intro:revealed`（Hero 入场编排监听）
+ * - mask 揭到约 15% 时派发 window 事件 `intro:revealed`（Hero 入场编排监听）
  * - 贴纸落位时派发 window 事件 `intro:sticker-land`，detail: { key: 'candy' | 'donut' | 'flower' }
  * - prefers-reduced-motion：直接跳过
  */
@@ -229,7 +229,7 @@
 			};
 			const mid = {
 				x: (start.x + end.x) / 2,
-				y: (start.y + end.y) / 2 - (70 + i * 24), // 先向上抛一点再落向目标
+				y: (start.y + end.y) / 2 - (36 + i * 14), // 轻微上抛即可，接近直线弹道
 			};
 			const scaleTo = LAND_TARGETS[i].size / stickerRects[i].width;
 			return { start, mid, end, scaleTo };
@@ -314,22 +314,22 @@
 			const v = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 			mask.style.webkitMaskImage = v;
 			mask.style.maskImage = v;
-			// 揭到约 35%：尽早触发 landIn / hero 编排，
+			// 揭到约 15%：尽早触发 landIn / hero 编排，
 			// hero 大字入场与花瓣揭开大幅交叠，消灭上下两层同时空屏的"空窗期"
-			if (!revealed && maskState.pct >= 77) {
+			if (!revealed && maskState.pct >= 30) {
 				revealed = true;
 				reveal();
 			}
 		};
 
 		// onUpdate 节流：setFlowerMask 每次调用都重建整张 data-uri，
-		// 35% 之后与 hero 入场 / Lenis / 粒子 canvas 同帧竞争容易掉帧。
+		// 揭开中段与 hero 入场 / Lenis / 粒子 canvas 同帧竞争容易掉帧。
 		// 均匀扩大的 mask 对刷新率不敏感 → 写入节流到 ~30fps（时间戳判定），
-		// 揭开 35% 的事件检测留在 setFlowerMask 外、保持全帧率，不拖慢 hero 衔接。
+		// 揭开的事件检测留在 setFlowerMask 外、保持全帧率，不拖慢 hero 衔接。
 		let lastMaskWrite = -1;
 		const MASK_MIN_INTERVAL = 1000 / 30;
 		const setFlowerMaskThrottled = () => {
-			if (!revealed && maskState.pct >= 77) {
+			if (!revealed && maskState.pct >= 30) {
 				revealed = true;
 				reveal();
 			}
@@ -639,7 +639,20 @@
 					],
 					delay: i * 0.08,
 					onComplete: () => {
-						// 落位：同帧通知 hero 装饰以最终形态接班，自己 0.2s 淡出——
+						// 落位钉死：当帧实测 hero 装饰位置，把 sticker 视觉中心 snap 到完全重合——
+						// 无论测量时机/视差/布局造成多少偏差，交接瞬间两边像素级对齐，
+						// 杜绝"贴纸落位 → 装饰在另一个位置弹出"的二次移动感。
+						const decorEl = document.querySelector<HTMLElement>(`[data-decor="${key}"]`);
+						if (decorEl) {
+							const dr = decorEl.getBoundingClientRect();
+							const sr = s.getBoundingClientRect();
+							const dx = dr.left + dr.width / 2 - (sr.left + sr.width / 2);
+							const dy = dr.top + dr.height / 2 - (sr.top + sr.height / 2);
+							if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+								gsap.set(s, { x: `+=${dx}`, y: `+=${dy}` });
+							}
+						}
+						// 同帧通知 hero 装饰以最终形态接班，自己 0.2s 淡出——
 						// 与 hero 装饰的 0.2s 沉降淡入交叠，视觉上贴纸"变成"了首页装饰
 						window.dispatchEvent(new CustomEvent('intro:sticker-land', { detail: { key } }));
 						gsap.to(s, { opacity: 0, duration: 0.2, ease: 'power1.out' });
@@ -690,6 +703,11 @@
 </style>
 
 <style is:global>
+	/* 开场播放期间锁定滚动：防止用户滚动导致 hero 装饰位置漂移、贴纸落位失准 */
+	body.is-animating {
+		overflow: hidden;
+	}
+
 	/* Global Landing Animation Styles */
 	/* Force initial hidden state when animation is active BUT not yet triggered */
 	body.is-animating:not(.animation-triggered) .landing-section {
