@@ -14,7 +14,7 @@ const t = useTranslations(lang);
 		aria-label={t('share.aria')}
 		title={t('share.tooltip')}
 	>
-		<Icon name="ph:share-network" class="w-5 h-5 md:w-6 md:h-6 text-accent glow-icon" />
+		<Icon name="ph:share-network" class="w-5 h-5 md:w-6 md:h-6 share-icon" />
 		<span class="share-btn-text">{t('share.button')}</span>
 	</button>
 </div>
@@ -34,7 +34,7 @@ const t = useTranslations(lang);
 		<!-- Header -->
 		<div class="share-header">
 			<div class="flex items-center gap-2">
-				<Icon name="ph:share-network" class="w-5 h-5 text-accent glow-icon" />
+				<Icon name="ph:share-network" class="w-5 h-5 share-icon" />
 				<h3 class="text-base md:text-lg font-semibold text-foreground">{t('share.title')}</h3>
 			</div>
 			<button id="share-close" class="share-close" aria-label="Close">
@@ -43,7 +43,6 @@ const t = useTranslations(lang);
 		</div>
 
 		<!-- Options -->
-		<div class="share-options">
 		<div class="share-options">
 			<label class="share-option">
 				<input type="checkbox" id="border-toggle" checked />
@@ -91,37 +90,55 @@ const t = useTranslations(lang);
 		justify-content: center;
 	}
 
-	/* Share Button */
+	/* Share Button — pill with circular bloom hover */
 	.share-btn {
-		padding: 0.75rem 1.5rem;
-		background: var(--color-background);
-		border: 1px solid var(--color-accent);
-		transition: all 0.2s ease;
+		position: relative;
+		overflow: hidden;
+		padding: 0.625rem 1.75rem;
+		background: var(--color-surface);
+		border: 2px solid var(--color-primary);
+		border-radius: var(--radius-pill);
+		transition: transform 200ms var(--ease-pop);
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 30%, transparent);
 		cursor: pointer;
 	}
 
-	.share-btn-text {
-		color: var(--color-accent);
-		font-size: 0.875rem;
-		font-weight: 500;
+	.share-btn::before {
+		content: '';
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: 150%;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		background: var(--color-primary-light);
+		transform: translate(-50%, -50%) scale(0);
+		transition: transform 350ms var(--ease-out);
+		pointer-events: none;
 	}
 
-	.share-btn:hover {
-		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-		box-shadow: 0 0 16px color-mix(in srgb, var(--color-accent) 40%, transparent);
+	.share-btn:hover::before {
+		transform: translate(-50%, -50%) scale(1);
+	}
+
+	.share-btn > * {
+		position: relative;
+	}
+
+	.share-btn-text {
+		color: var(--color-foreground);
+		font-size: 0.875rem;
+		font-weight: 600;
+	}
+
+	.share-icon {
+		color: var(--color-foreground-secondary);
 	}
 
 	.share-btn:active {
-		transform: scale(0.98);
-	}
-
-	/* Glow icon effect */
-	.glow-icon {
-		filter: drop-shadow(0 0 4px var(--color-accent));
+		transform: scale(0.96);
 	}
 
 	/* Overlay */
@@ -146,14 +163,14 @@ const t = useTranslations(lang);
 
 	/* Panel */
 	.share-panel {
-		background: var(--color-background);
-		border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
-		padding: 1rem;
+		background: var(--color-surface);
+		border: 2px solid var(--color-border);
+		border-radius: var(--radius-card);
+		padding: 1.25rem;
 		max-width: 90vw;
 		width: 400px;
-		box-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 20%, transparent);
 		transform: translateY(20px);
-		transition: transform 0.2s ease;
+		transition: transform 250ms var(--ease-out);
 	}
 
 	.share-overlay:not(.pointer-events-none) .share-panel {
@@ -167,7 +184,7 @@ const t = useTranslations(lang);
 		align-items: center;
 		margin-bottom: 1rem;
 		padding-bottom: 0.75rem;
-		border-bottom: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
+		border-bottom: 2px dashed var(--color-border);
 	}
 
 	.share-close {
@@ -192,20 +209,21 @@ const t = useTranslations(lang);
 		align-items: center;
 		gap: 0.5rem;
 		cursor: pointer;
-		padding: 0.5rem;
-		border: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
-		transition: all 0.2s;
+		padding: 0.5rem 0.75rem;
+		border: 2px solid var(--color-border);
+		border-radius: 0.875rem;
+		transition: border-color 150ms ease, background-color 150ms ease;
 	}
 
 	.share-option:hover {
-		border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-		background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+		border-color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 	}
 
 	.share-option input[type="checkbox"] {
 		width: 1rem;
 		height: 1rem;
-		accent-color: var(--color-accent);
+		accent-color: var(--color-primary);
 	}
 
 	/* Action Buttons */
@@ -222,19 +240,19 @@ const t = useTranslations(lang);
 		gap: 0.5rem;
 		padding: 0.625rem 1rem;
 		background: var(--color-background);
-		border: 1px solid var(--color-accent);
-		color: var(--color-accent);
-		transition: all 0.2s;
+		border: 2px solid var(--color-primary);
+		border-radius: var(--radius-pill);
+		color: var(--color-foreground);
+		transition: background-color 150ms ease, transform 200ms var(--ease-pop);
 		font-weight: 500;
 	}
 
 	.share-action-btn:hover {
-		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-		box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 30%, transparent);
+		background: var(--color-primary-light);
 	}
 
 	.share-action-btn:active {
-		transform: scale(0.98);
+		transform: scale(0.97);
 	}
 
 	/* Preview */
@@ -250,14 +268,15 @@ const t = useTranslations(lang);
 		width: 100%;
 		max-height: 400px;
 		object-fit: contain;
-		border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
+		border: 2px solid var(--color-border);
+		border-radius: 1rem;
 		margin-bottom: 0.75rem;
 		cursor: pointer;
-		transition: all 0.2s;
+		transition: border-color 150ms ease;
 	}
 
 	.share-preview img:hover {
-		box-shadow: 0 0 16px color-mix(in srgb, var(--color-accent) 40%, transparent);
+		border-color: var(--color-primary);
 	}
 
 	.preview-actions {
@@ -273,37 +292,37 @@ const t = useTranslations(lang);
 		gap: 0.5rem;
 		padding: 0.625rem 1rem;
 		background: var(--color-background);
-		border: 1px solid var(--color-accent);
-		color: var(--color-accent);
-		transition: all 0.2s;
+		border: 2px solid var(--color-primary);
+		border-radius: var(--radius-pill);
+		color: var(--color-foreground);
+		transition: background-color 150ms ease, transform 200ms var(--ease-pop);
 		font-weight: 500;
 	}
 
 	.preview-action-btn.secondary {
-		border-color: color-mix(in srgb, var(--color-foreground) 20%, transparent);
-		color: var(--color-foreground);
+		border-color: var(--color-border);
+		color: var(--color-foreground-secondary);
 	}
 
 	.preview-action-btn:hover {
-		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-		box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 30%, transparent);
+		background: var(--color-primary-light);
 	}
 
 	.preview-action-btn.secondary:hover {
 		background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
-		box-shadow: none;
 	}
 
 	.preview-action-btn:active {
-		transform: scale(0.98);
+		transform: scale(0.97);
 	}
 
 	/* Status */
 	.share-status {
 		margin-top: 1rem;
 		padding: 0.75rem;
-		background: color-mix(in srgb, var(--color-accent) 5%, transparent);
-		border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+		border: 2px dashed var(--color-border);
+		border-radius: 0.875rem;
 		text-align: center;
 	}
 
@@ -314,9 +333,7 @@ const t = useTranslations(lang);
 	/* Mobile optimizations */
 	@media (max-width: 640px) {
 		.share-btn {
-			right: 0.5rem;
-			bottom: 4rem;
-			padding: 0.5rem;
+			padding: 0.5rem 1.25rem;
 		}
 
 		.share-panel {

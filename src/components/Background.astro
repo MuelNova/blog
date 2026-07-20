@@ -1,33 +1,24 @@
 ---
 /**
  * Background Component
- * Renders animated glowing text background effect
- * Adapted from Spectre theme
+ * Low-density floating candy particles on a single fixed canvas.
+ * Colors follow the active cream / cream-dark theme via CSS variables.
  */
 ---
 
-<canvas id="bg-canvas"></canvas>
-<canvas id="overlay-canvas"></canvas>
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
 
 <script src="../scripts/page-background.ts"></script>
 
 <style>
-  #bg-canvas, #overlay-canvas {
+  #bg-canvas {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -2;
-    transition: all 0.15s ease;
-    opacity: 0;
-    font-family: 'Geist Mono', 'Courier New', Courier, monospace;
+    z-index: -1;
     user-select: none;
     pointer-events: none;
-  }
-
-  #overlay-canvas {
-    opacity: 1;
-    z-index: -1 !important;
   }
 </style>

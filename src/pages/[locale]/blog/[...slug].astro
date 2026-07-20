@@ -43,7 +43,13 @@ const { post } = Astro.props as { post: CollectionEntry<'blog'> };
 const { locale } = Astro.params;
 const lang = (locale as Lang) ?? defaultLang;
 const { Content, headings } = await render(post);
+
+// Estimate reading time: ~400 CJK chars/min and ~200 latin words/min.
+const body = post.body ?? '';
+const cjkCount = (body.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) ?? []).length;
+const latinWords = (body.replace(/[\u4e00-\u9fff\u3400-\u4dbf]/g, ' ').match(/[A-Za-z0-9]+/g) ?? []).length;
+const readingTimeMinutes = Math.max(1, Math.ceil(cjkCount / 400 + latinWords / 200));
 ---
-<BlogPost {...post.data} headings={headings} lang={lang}>
+<BlogPost {...post.data} headings={headings} lang={lang} readingTimeMinutes={readingTimeMinutes}>
   <Content />
 </BlogPost>
