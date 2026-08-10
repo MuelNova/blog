@@ -31,6 +31,72 @@ const filteredHeadings = headings.filter(({ depth }) => depth >= 2 && depth <= 3
 )}
 
 <script>
+  const toc = document.querySelector('details.toc')
+  const xl = window.matchMedia('(min-width: 1280px)')
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+  if (toc) {
+    let openTimer: number | undefined
+    let closeTimer: number | undefined
+
+    const cancelTimers = () => {
+      clearTimeout(openTimer)
+      clearTimeout(closeTimer)
+    }
+
+    const openToc = () => {
+      cancelTimers()
+      toc.classList.remove('toc-closing')
+      toc.setAttribute('open', '')
+    }
+
+    const closeToc = () => {
+      cancelTimers()
+      if (reduceMotion.matches) {
+        toc.removeAttribute('open')
+        return
+      }
+      // Let the slide-out animation finish before <details> hides its content
+      toc.classList.add('toc-closing')
+      closeTimer = window.setTimeout(() => {
+        // The card slides during open/close, which can fire spurious
+        // enter/leave events — never close while the cursor is still over it.
+        if (toc.matches(':hover')) {
+          toc.classList.remove('toc-closing')
+          return
+        }
+        toc.removeAttribute('open')
+        toc.classList.remove('toc-closing')
+      }, 180)
+    }
+
+    // On wide screens the ToC is a rail pinned to the right edge: collapsed by
+    // default, opens on hover with a small intent delay so skimming the right
+    // edge with the cursor doesn't trigger it.
+    if (xl.matches) toc.removeAttribute('open')
+    toc.addEventListener('mouseenter', () => {
+      if (!xl.matches) return
+      cancelTimers()
+      openTimer = window.setTimeout(openToc, 120)
+    })
+    toc.addEventListener('mouseleave', () => {
+      if (!xl.matches) return
+      cancelTimers()
+      closeTimer = window.setTimeout(() => {
+        if (!toc.matches(':hover')) closeToc()
+      }, 250)
+    })
+    document.addEventListener('click', (event) => {
+      if (!xl.matches || !toc.hasAttribute('open')) return
+      if (!toc.contains(event.target as Node)) closeToc()
+    })
+    xl.addEventListener('change', (event) => {
+      cancelTimers()
+      toc.classList.remove('toc-closing')
+      if (event.matches) toc.removeAttribute('open')
+      else toc.setAttribute('open', '')
+    })
+  }
+
   const anchors = document.querySelectorAll('h2[id], h3[id]')
   const links = document.querySelectorAll('details.toc > nav > ul > li')
   if (anchors.length === links.length && anchors.length > 0) {
@@ -105,20 +171,90 @@ const filteredHeadings = headings.filter(({ depth }) => depth >= 2 && depth <= 3
     padding-left: 0;
   }
   
-  /* XL screens and up - sticky sidebar */
+  /* XL screens and up - collapsible rail pinned to the right viewport edge */
   @media (min-width: 1280px) {
     .toc {
-      position: sticky;
-      top: 2.5rem;
-      flex-basis: 274px;
-      flex-shrink: 0;
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 40;
       margin-top: 0;
+      width: 2.5rem;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 0.875rem 0.5rem;
+      border-right: none;
+      border-radius: var(--radius-card) 0 0 var(--radius-card);
+    }
+
+    .toc summary {
+      padding-left: 0;
+      writing-mode: vertical-rl;
+      margin: 0 auto;
+    }
+
+    .toc summary::before {
+      display: none;
+    }
+
+    .toc[open] {
+      width: 300px;
+      padding: 1.25rem 1.5rem;
+      /* Springy nudge-in from the right. The offset must stay small: a large
+         translate moves the card out from under a stationary cursor, and the
+         resulting enter/leave churn makes the drawer flicker. `translate` is
+         an independent property, so it composes with translateY(-50%) above. */
+      animation: toc-drawer-in 240ms var(--ease-pop);
+    }
+
+    .toc.toc-closing {
+      animation: toc-drawer-out 160ms var(--ease-out) forwards;
+    }
+
+    .toc[open] summary {
+      writing-mode: horizontal-tb;
+      padding-left: 1.5rem;
+      margin: 0;
+    }
+
+    .toc[open] summary::before {
+      display: block;
     }
   }
-  
+
   @media (min-width: 1536px) {
-    .toc {
-      flex-basis: 320px;
+    .toc[open] {
+      width: 320px;
+    }
+  }
+
+  @keyframes toc-drawer-in {
+    from {
+      translate: 1.5rem 0;
+      opacity: 0;
+    }
+    to {
+      translate: 0 0;
+      opacity: 1;
+    }
+  }
+
+  @keyframes toc-drawer-out {
+    from {
+      translate: 0 0;
+      opacity: 1;
+    }
+    to {
+      translate: 1rem 0;
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toc[open],
+    .toc.toc-closing {
+      animation: none;
     }
   }
 </style>

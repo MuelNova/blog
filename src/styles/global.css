@@ -148,19 +148,6 @@ body {
 	}
 }
 
-@media (min-width: 1280px) {
-	.blog-post-main-with-toc {
-		display: flex;
-		gap: 2rem;
-		align-items: flex-start;
-	}
-	
-	.blog-article-wrapper {
-		flex: 1;
-		min-width: 0;
-	}
-}
-
 .blog-post-hero {
 	width: 100%;
 }
@@ -197,7 +184,7 @@ body {
 @media (min-width: 1280px) {
 	.blog-post-prose {
 		width: 100%;
-		max-width: 720px;
+		max-width: 800px;
 	}
 }
 
