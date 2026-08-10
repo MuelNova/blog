@@ -14,6 +14,8 @@ import viteCompression from 'vite-plugin-compression';
 
 import icon from 'astro-icon';
 import remarkDirective from 'remark-directive';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import { remarkAdmonitions } from './src/plugins/remark-admonitions.ts';
 
 const languageAliases = {
@@ -37,14 +39,16 @@ export default defineConfig({
     }
   },
   markdown: {
-    remarkPlugins: [remarkDirective, remarkAdmonitions],
+    remarkPlugins: [remarkDirective, remarkMath, remarkAdmonitions],
+    rehypePlugins: [rehypeKatex],
   },
   integrations: [expressiveCode({
     shiki: {
       langAlias: languageAliases,
     },
   }), mdx({
-    remarkPlugins: [remarkDirective, remarkAdmonitions],
+    remarkPlugins: [remarkDirective, remarkMath, remarkAdmonitions],
+    rehypePlugins: [rehypeKatex],
   }), sitemap(), react(), icon()],
   adapter: cloudflare({
     imageService: 'cloudflare',
