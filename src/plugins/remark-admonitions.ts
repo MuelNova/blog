@@ -16,7 +16,7 @@ function h(el: string, attrs: Properties = {}, children: any[] = []): P {
 }
 
 // Supported admonition types
-export type AdmonitionType = 'tip' | 'note' | 'important' | 'caution' | 'warning' | 'info'
+export type AdmonitionType = 'tip' | 'note' | 'important' | 'caution' | 'warning' | 'info' | 'danger'
 
 const Admonitions = new Set<AdmonitionType>([
   'tip',
@@ -25,6 +25,7 @@ const Admonitions = new Set<AdmonitionType>([
   'caution',
   'warning',
   'info',
+  'danger',
 ])
 
 /** Checks if a string is a supported admonition type. */
