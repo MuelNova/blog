@@ -100,6 +100,18 @@ const localizedLinks: LocalizedLink[] = [
     },
     icon: "https://blog.kingbridges.top/images/avatar.jpg",
   },
+  {
+    link: "https://bestwing.me/",
+    linkText: {
+      en: "Swing's blog",
+      zh: "Swing's Blog",
+    },
+    description: {
+      en: "CTF Player @FlappyPig @r3kapig · Security researcher",
+      zh: "CTF Player @FlappyPig @r3kapig · 安全研究员",
+    },
+    icon: "https://bestwing.me/images/favicon.svg",
+  },
 ];
 
 export function getLinksByLang(lang: SupportedLang): LinkCardProps[] {
