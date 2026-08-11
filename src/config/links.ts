@@ -112,6 +112,18 @@ const localizedLinks: LocalizedLink[] = [
     },
     icon: "https://bestwing.me/images/favicon.svg",
   },
+  {
+    link: "https://cainyzb.github.io/",
+    linkText: {
+      en: "Cain's Blog",
+      zh: "Cain's Blog",
+    },
+    description: {
+      en: "Misc / AI Pro in @r3kapig & @MoonshotAI, my mentor in MoonshotAI",
+      zh: "Misc / AI 大神，在 @r3kapig 和 @MoonshotAI，太有实力了，是我在月暗的 mentor",
+    },
+    icon: "https://cainyzb.github.io/images/Cain.png",
+  },
 ];
 
 export function getLinksByLang(lang: SupportedLang): LinkCardProps[] {
