@@ -124,6 +124,18 @@ const localizedLinks: LocalizedLink[] = [
     },
     icon: "https://cainyzb.github.io/images/Cain.png",
   },
+  {
+    link: "https://blog.csome.cc/",
+    linkText: {
+      en: "Csome",
+      zh: "Csome",
+    },
+    description: {
+      en: "Pwn master who invented the House of Some glibc IO_FILE chains, set Pwn challenges for XCTF Final, and moonlights as a musician.",
+      zh: "Pwn 大手子，手搓 House of Some 系列 IO_FILE 神链，给 XCTF Final 出过题，副业还是网易云音乐人，太有实力了",
+    },
+    icon: "https://blog.csome.cc/images/Csome2.webp",
+  },
 ];
 
 export function getLinksByLang(lang: SupportedLang): LinkCardProps[] {
