@@ -13,7 +13,7 @@ const { headings, lang = defaultLang } = Astro.props
 
 const t = useTranslations(lang)
 
-const filteredHeadings = headings.filter(({ depth }) => depth >= 2 && depth <= 3)
+const filteredHeadings = headings.filter(({ depth }) => depth >= 2 && depth <= 4)
 ---
 
 {filteredHeadings.length > 0 && (
@@ -97,7 +97,7 @@ const filteredHeadings = headings.filter(({ depth }) => depth >= 2 && depth <= 3
     })
   }
 
-  const anchors = document.querySelectorAll('h2[id], h3[id]')
+  const anchors = document.querySelectorAll('h2[id], h3[id], h4[id]')
   const links = document.querySelectorAll('details.toc > nav > ul > li')
   if (anchors.length === links.length && anchors.length > 0) {
     window.addEventListener('scroll', (_event) => {
