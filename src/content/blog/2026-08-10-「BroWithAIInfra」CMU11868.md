@@ -11,7 +11,11 @@ tags:
 
 :::important[进度]
 
-*08/11*：更新了[Lecture1](https://llmsystem.github.io/llmsystem2026fall/assets/files/llmsys-01-intro-e4fe7d3230b64f7bfc2bfa4e0060be43.pdf)
+*08 / 11*：更新了 [Lecture1](https://llmsystem.github.io/llmsystem2026fall/assets/files/llmsys-01-intro-e4fe7d3230b64f7bfc2bfa4e0060be43.pdf)
+
+*08 / 17*：更新了 [Lecture2](https://llmsystem.github.io/llmsystem2026fall/assets/files/llmsys-02-gpu-programming-c914ef6531dd16acd471c6c076508f4e.pdf)
+
+
 
 :::
 
@@ -43,7 +47,7 @@ tags:
 
 这里 SKILL 没有做太多的干涉，一个写完之后问另外几个 agent 怎么改进，优化了一波。
 
-## Lecture 01
+## Lecture 01 - Introduction to the LLMs
 
 > 题外话，真先进啊，已经把 K3 放到图里了。
 > ![Scale of LLMs](https://cdn.nova.gal/img/vscode_picgo_1786354729176.png)
@@ -73,6 +77,8 @@ $$
 
 不难注意这个也就是为什么我们 decode 阶段只能串行，因为必须要知道前序才能算出这个链式的概率，当然其实在训练的时候，因为这个整句话已经是 ground truth 了，其实就可以直接并行去训，叫 *Teacher Forcing*
 
+> 其实现在也有一些 so-called 并行的方案。例如 Speculative Decoding / MTP，但是其实都不是严格意义的并行。我们会在后面的内容里讲。
+
 
 
 然后 LLM 一般就是分成三类，Encoder Only / Decoder Only / Encoder & Decoder
@@ -87,7 +93,7 @@ P(x_{mask}\mid x)
 $$
 这个好处一眼就能看出来，以翻译来说，所有的 $y_t$ 都不依赖于 $y_{<t}$，而都只依赖于 $x$，这也就说明我们可以直接并行去生成，速度显然好；
 
-坏处也很明显，之前产生的东西没法看到，这种 *条件独立* 很容易带来 *多峰问题（Multimodality Problem）*。
+坏处也很明显，之前产生的东西没法看到，这种 *条件独立* 很容易带来 *多峰问题（Multimodality Problem）*，除此之外，也事先需要长度信息。
 
 > 举个最简单的例子：“翻译 teacher成中文“。
 >
@@ -97,13 +103,13 @@ $$
 >
 > 结果答案就变成了 "老生"。
 >
-> $P(y_1,y_2)\ne P(y_1)P(y_2)$
+> P(y₁, y₂) ≠ P(y₁)P(y₂)
 
-除此之外，这种 Encoder-only 的模型也事先需要长度信息，所以一般不咋用。
 
-:::danger 注意
 
-在 AI review 这段的时候，发现其实有一些歧义。其实也就是我把 *NAR* 的各种特性套在了 *BERT* 上。而事实上，*BERT* 更多处理分类、检索等工作，而不是 *生成* 。
+:::warning[注意]
+
+在 AI review 这段之前的文字的时候，发现其实有一些歧义。也就是我把 *NAR* 的各种特性套在了 *BERT* 上。而事实上，*BERT* 更多处理分类、检索等工作，而不是 *生成* 。
 
 :::
 
@@ -189,3 +195,187 @@ $$
 ![challenges to scale to larger LLMs](https://cdn.nova.gal/img/image-20260811020305145.png)
 
 slide 的图其实已经完全描述了整个优化任务，也对应后续课程的不同内容。当然，不只是 scale up，scale down 也是任务之一（量化、蒸馏、端侧部署都需要小模型）
+
+
+
+## Lecture 02
+
+> Updated at 2026-08-17
+
+:::warning
+
+之前写 lecture 1 那样实在是太耗费精力了，所以之后我们不再复述一些已经在 slide 中的（顶多截个图），只关注于自己的一些理解 / 思考 / 疑惑。
+
+~~毕竟写出来并不是教学而是记录~~
+
+:::
+
+想要做优化，我们肯定得通过数学的方式定义整个目标。而其实严格意义上来说，算力这件事是我们本身无法操控的，所以其实上最后的优化还是落在了 *算子的计算次数* 以及 *通信* 上面。我们可以以一个 **"平衡点"** 来定义整个优化目标，也就是说，对于一个 $MachineBalance=I$ 的卡来说，每从 HBM 里取 `1Byte` 的数据，我们得至少做 $I$ 次浮点计算，才能配得上这个卡的算力，否则，如果高于它，就是 *compute-bound*，低于它，则是 *memory-bound*，对应了不同的优化目标。
+
+> 而整个课基本上都在不同层的数据传输带宽上做文章。
+
+$$
+MachineBalance=\frac{FLOP/s}{Byte/s}
+$$
+
+举一个例子，假设某个算子在 A100 上的算术强度是 `I=200FLOP/Byte`，A100 的内存带宽是 `2.04TB/s`，峰值算力是 `312TF`，平衡点是 `153`。问这个算子在 H100 上的情况（H100 内存带宽 `3.35TB/s`，峰值算力 `989TF`，平衡点 `295`）。
+
+不难注意，这个算子在 A100 上属于 compute-bound 的情况，给了这么多字节但是算不完；而在 H100 上则是 memory-bound 的情况，没这么多字节给你算。它在 H100 上的实际算力就是 $3.35*200=670 TF$，也就是 $加速比=\frac{670}{312}=2.15$，而 H100 的算力提升实际上却是 $\frac{989}{312}=3.17$，差了 $\frac{(989-670)}{989}=32\%$。也就是说，我买一张 H100，其实上就用到了它 68% 的性能，也是算一次就亏一次钱。
+
+那咋办呢，看这个公式，增加带宽可以做到，或者换一个词，增加通信效率。例如，*算子融合 (kernel fusion)*，我们把多个算子放在一起做，让各种数据从寄存器里拿出来直接开算，省去了存中间结果以及拿中间结果的 HBM 通信开销，那么带宽也就美美增加了，这也是我们后面会说到的 *FlashAttention* 等的思路。
+
+### warp / block / etc...
+
+感觉刚上手 GPU programming 的时候，应该最容易乱的就是这里。
+
+首先我们应该区分出哪些是软件侧的实现和哪些是硬件侧的实现。
+
+**软件侧：**
+
+一个 Grid 相当于就是 GPU 本身，gridDim 就是一个 Grid 里有多少个 Block
+
+一个 Block 就相当于是一个运行组，这个组里面的所有线程独占一个 SharedMemory
+
+至于 Warp，它更像是软硬件的结合点。但是在写 kernel 的时候，还是要记得，虽然你写是以一个 `thread` 来写，但其实底层还是在调度一个 `warp`，做优化也应该从这一层来思考。
+
+```
+Grid                          ← 一次 kernel 启动的全部
+├── Block 0                   ← 你指定有几个、每个多大
+│   ├── Warp 0  (thread 0-31)     ← ⚠️ 你控制不了，硬件自动切
+│   ├── Warp 1  (thread 32-63)
+│   └── ...
+├── Block 1
+└── ...
+```
+
+**硬件侧**：
+
+硬件底层是以 SM 作为调度单元的。每个 SM 又有 4 个 Partition，一个 Partition 又有 32 条 Lane。
+
+```
+GPU (A6000)
+└── 84 × SM  (Streaming Multiprocessor)
+    └── 4 × Partition          ← 每个有 1 个 warp scheduler
+        └── 32 × Lane          ← 就是所谓的 "CUDA core"
+```
+
+
+
+聪明的你可能已经发现了，32 Lane，那不就和我们 Warp 有 32 个线程对上了吗？那一个 Partition 其实就是一个 Warp？太聪明了，你已经打通了软硬件的视角。这里的 32 Lane 其实就是每一个 Partition 会同时执行这 32 Lane 的同一条指令。而 4 Partition 自然也就代表每周期可以 issue 4 条不同的 warp 指令了。像这样向上分析，你也就能知道 SM 就是一个 Block 了。
+
+![warp on SM](https://cdn.nova.gal/img/image-20260817182304837.png)
+
+这么一思考，可能大概也许你就能把软硬件的视角打通了，做到写软件思考硬件，哈哈。
+
+
+
+举一个🌰
+
+```c++
+__global__ void VecAddKernel(int* A, int* B, int* C, int n) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) C[i] = A[i] + B[i];
+}
+// n = 1024
+VecAddKernel<<<4, 256>>>(dA, dB, dC, 1024);
+```
+
+**软件侧**：
+
+|                   | 数量  | 来源                                                         |
+| ----------------- | ----- | ------------------------------------------------------------ |
+| block             | 4     | 代码定义，一般就 `ceil(n / blockDim)`，例如这里就是 `ceil(1024 / 256)=4` |
+| 每 block 线程     | 256   | 代码定义，一般就固定 `128 / 256`                             |
+| **每 block warp** | **8** | `256 / 32`                                                   |
+| 总 warp           | 32    | `4 × 8`                                                      |
+| 总线程            | 1024  | `4 × 256`                                                    |
+
+**索引怎么算的** —— 以 block 2 的第 5 号线程为例：
+
+$i = \underbrace{256}_{\text{blockDim.x}} \times \underbrace{2}_{\text{blockIdx.x}} + \underbrace{5}_{\text{threadIdx.x}} = 517$
+
+它负责 `C[517] = A[517] + B[517]`。**每个线程只干一个元素**，全部 1024 个线程覆盖整个数组。
+
+**硬件侧**：
+
+- 4 个 block → 派到 **4 个不同的 SM** → 不难发现 84 个 SM 里 **80 个全程闲置**
+- 每个 SM 上的 8 个 warp → 均分给该 SM 的 4 个 partition，每个 partition 2 个 warp
+- 每个 warp 的 32 个线程 → 32 条 lane 同时执行**同一条指令**
+
+
+
+聪明的你一定发现了几个问题：
+
+1. 如果 block 分少了，好像我的 SM 就闲置了啊。
+
+   没错，所以如果可能的话，会推荐 $Block \ge 2\times SM$，给调度器找点事干。但是对于这种 $n=1024$ 的小规模问题，我们也只能优先保证 lane 不空转，也就是 $blockDim\mod 32 = 0$。
+
+   在这种情况下，其实我们这个问题大概就可以分成 `<<<4, 256>>>`, `<<<8, 128>>>`, `<<<32, 32>>>` 这几种情况。
+
+   不妨计算一下，其实他们总的 warp 数都是一样的，区别是用到 SM 的数量不同，第一个用了 4 个 SM，第三个用了 32 个 SM。
+
+   那岂不是无脑选第三个？其实也不然。`<<<4, 256>>>` 每个 SM 内部 8 个 warp，SM 内部的延迟隐藏的比较好。而 `<<<32, 32>>>` 32 个 SM 同时 ISSUE 访存请求，地址请求单元的并行度就高一些
+
+   但是两者在途的访存请求其实总数是一样的，都是 32 个 warp 发起的，所以其实上差距真不大。只要你不写成 `<<<164, 7>>>`，其实区别都不是很大啦。
+
+2. 如果访存由 warp 发起，那岂不是一个 warp 会访存 32 次？
+
+   那就不得不提到合并访存了。在新架构（Maxwell 之后），GPU 一次访存都是以 *32B 的 sector* 为最小访存单位，一个 cache line 就是 $4\times sector=128B$。
+
+   所以一次访存，硬件就会收集 32 个地址，看他们落在哪些 sector 上，从而决定发几个 sector 请求。
+
+   所以从最坏上看，是的，一个 warp 有可能访存 32 次，但我们肯定能确定这人写的是大分代码。
+
+   一般来说我们一个线程可能读一个 float / int，那就是 4B，最优解肯定是都物理连续，这样就只需要 4 次 sector 请求，并且它们位于同一条 cache line 上，爽爆。
+
+   > 说到这里，我们也顺带提一下 CUDA Kernel 里的规范，也就是默认以 threadIdx.x 为变化最快的方向来算 `tid`（数据的最后一维）
+   > $$
+   > \text{tid}_{\text{linear}} = \text{threadIdx.x} + \text{threadIdx.y}\cdot\text{blockDim.x} + \text{threadIdx.z}\cdot\text{blockDim.x}\cdot\text{blockDim.y}
+   > $$
+   > 举一个栗子🌰
+   >
+   > ```c++
+   > dim3 block(16, 8);        // 二维 block
+   > dim3 grid(10, 10);        // 二维 grid
+   > myKernel<<<grid, block>>>(...);
+   > ```
+   >
+   > 问 `thread(3, 5)` 落在它所在 block 的哪个 warp 里？
+   >
+   > 
+   >
+   > 一个懂二维数组的人说，这题简单。
+   >
+   > 一个 block 就是 `thread[16][8]`，所以 `thread[3][5]` 就是 $3\times8+5=29$，第一个 warp，于是他写出了类似我们刚才说的访存 32 次的大分代码。
+   >
+   > 
+   >
+   > 其实这里应该以 *矩阵* 的视角来看这个 Dim，`block(16, 8)` 的矩阵，x=16，y=8，应该是 `thread[8][16]`。
+   >
+   > > 好吧其实写到这里突然觉得挺显然的，但是没错我就是那个懂二维数组的猪头啊。
+   >
+   > 同理，这也引出了类似 Structure of Arrays 以及 Array of Structures 的问题，相信聪明的读者已经思考出了 Structure of Arrays 是更利于访存合并的，并且联想到了 PyTorch 里的类似 `stride()`、`contiguous` 都和这个有关系。
+   >
+   > 到 KVCache 的时候我们还会再涉及到这一坨东西。
+
+好吧，突然就把访存合并的东西讲了。那接下来就讲一点分支发散的情况吧，其实都是优化相关的，就是要建立起这个概念：优化一定要从 warp 边界这个思路去考虑。
+
+一个 warp 的 32 个线程**共用一个指令流**，如果遇到线程间结果不同的分支，硬件的做法是：**两条路径都执行一遍，各自用掩码关掉不该活跃的 lane。**
+$$
+T = T_{\text{if}} + T_{\text{else}}
+$$
+
+```c++
+if (cond) { A(); }   // 16 lane 活跃，16 lane 空转
+else      { B(); }   // 16 lane 活跃，16 lane 空转
+```
+
+这个优化手段就只能靠分支边界对齐到 warp 边界来解决
+
+```c++
+if (threadIdx.x % 2 == 0)      { ... }   // ❌ 每个 warp 内一半一半 → 2×
+if (threadIdx.x / 32 % 2 == 0) { ... }   // ✅ 整个 warp 同进同出 → 零代价
+```
+
+不过，如果 `cond` 是一个数据相关的，那就没辙了，这也是我们尽量想要避免的，只能预先按条件把数据分组。（例如，在 MoE 里就叫 Token 按专家分组重排）
+
