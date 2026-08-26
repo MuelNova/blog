@@ -15,6 +15,8 @@ tags:
 
 *08 / 17*：更新了 [Lecture2](https://llmsystem.github.io/llmsystem2026fall/assets/files/llmsys-02-gpu-programming-c914ef6531dd16acd471c6c076508f4e.pdf)
 
+*08 / 26*: 更新了 [Lecture3](https://llmsystem.github.io/llmsystem2026fall/assets/files/llmsys-03-gpu-acceleration-9438625d6b093566f7c1ae9fd558cda6.pdf) & [Homework1](https://llmsystem.github.io/llmsystemhomework/assignment_1/)
+
 
 
 :::
@@ -379,3 +381,500 @@ if (threadIdx.x / 32 % 2 == 0) { ... }   // ✅ 整个 warp 同进同出 → 零
 
 不过，如果 `cond` 是一个数据相关的，那就没辙了，这也是我们尽量想要避免的，只能预先按条件把数据分组。（例如，在 MoE 里就叫 Token 按专家分组重排）
 
+## Lecture 03
+
+### tiling matrix mul
+
+![image](https://cdn.nova.gal/img/vscode_picgo_1787555878394.png)
+跳过 Tiling for Matrix Multiplication 的内容，我们不难发现，其实在这种算法中，对于一个元素，其实会访问 N/T 次（相比而言，naïve 方法会访问 N 次），也就是说它其实只是把 block 间的冗余去掉了，但是跨 block 的冗余还在，所以其实很容易就得出，这种情况下我们的 CGMA 就是 0.25T FLOPS/B。
+
+想要 CGMA 变大，自然我们就是把 T 变大就好了...吗？
+
+其实这里受限于多个因素。首先，我们是以一个 block 为单位来做 tiling 的，因此，shared memory 大小显然限制，需要满足
+$$
+2 * T^2 * 4B \le M_\text{shared}
+$$
+
+其次，每个 block 的线程数量是有限的，但是一个 tile 的每一个地方都应该有一个线程去访问，所以还需要满足。
+$$
+T^2 \le N_\text{max\_threads}
+$$
+其次，假设我们内存够大，线程数量够多，但也要记得我们的 SM。假设我们让 T=N，似乎一个元素就只会访存 1 次，这是最理想的情况。但在这种情况下其实我们也就只有一个 SM 在跑，其他全在闲置，算力就亏麻了。
+
+在这种情况下，对于课程里的 Tiling，其实我们能推出一个比较好的解。
+$$
+\begin{cases}
+    T^2 \le 1024 \text{ (线程上限)}
+    \\
+    T^2 \mod 32 = 0 \text{ (warp lane 不闲置)}
+    \\
+    2 * T^2 * 4B \le 192KB \text{ (共享内存上限)}
+    \\
+    T^2 \div 32 \gt 4 \text{ (warp 数量大于 scheduler)}
+    \\
+    0.25T \text{ 尽可能大 (CGMA)}
+\end{cases}
+$$
+不难发现，选 32 就是最好的。当然，其实在这种情况下，我们可以算出 CGMA 是 8，仍然小于平衡点 10，所以意味着这还是一个 memory-bound 的算子，但已经比之前 0.25 好太多了。
+
+### HW1
+
+bank conflict 啥的等 HW1 的时候再说吧，有一些什么 padding 之类的东西。我们只需要知道 $bankid=tid * stride \mod 32$ 即可。
+
+#### P1 - MapKernel
+
+Apply a unary function to each element of the input array and store the result in the output array 的一类算子，显然没有什么数据间的依赖，直接并行即可。
+
+不过在这里其实就得建立一个 concept，就是 `index <-> position` 的转换。
+
+具体而言，`index` 是指坐标的位置，例如一个 `arr[3][5][10]`，那么我们的 `index[]` 就是 `[3, 5, 10]`；而 `position` 是指物理上的位置，也就是说我们把一个 `arr` flatten 之后的实际 index，例如一个 `shape[3, 5]` 的数组，对于 `index[1, 4]`，实际上 $pos = 1*5+4 = 9$。当然，除此之外其实还有 `stride` 的东西，用于处理转置之类的形状，不再赘述，相信读者建立这个概念很简单。
+
+对于 `broadcast` 来说，其实也就是一个把低维的和高维对齐的一个操作。举个简化的例子：
+```
+A = [[10]
+     [20]]
+
+B = [[1, 2, 3]
+     [4, 5, 6]]
+
+
+A + B = [[1 + 10, 2 + 10, 3 + 10],
+         [4 + 20, 5 + 20, 6 + 20]]
+```
+不难发现，其实这就是把 A 这个 `shape[2, 1]` 的张量拉到了 `shape[2, 3]`，懂内存管理的小朋友肯定知道，既然我们已经有 `index` 数组，我们来改这个索引数组就好了，不用去对值做复制，爽死啦。
+
+那么譬如对一个 tid = 1 （也就是指向 B 中 2 的线程），它的 indexA 数组其实就是 `[0, 0]`，指向了 10；对于 tid = 5（指向 B 中的 6），它的 indexA 数组就是 `[1, 0]`。
+
+根据这个，你大概就懂 `broadcast` 的实现原理了。对于小维度中的每一维度，如果它的 `shape[i] > 1`，那么这一维就等于 *大维度中，与这一维度右对齐的分量*，否则就置为 `0`。
+
+这是啥意思呢，我们再换一个例子就懂了。
+
+```
+A = [10, 20, 30]
+B = [[1, 2, 3]
+     [4, 5, 6]]
+```
+
+现在，A 的形状是 `shape[3]`，B 的形状是 `shape[2, 3]`，A 比 B 少一维。对于 tid=1 来说，我们应该它与 A 中第二个数相加，也就是 `indexA[1]` 和 `indexB[0, 1]` 对应；对于 tid=5 来说，我们应该让它与 A 中第三个数相加，也就是 `indexA[2]` 和 `indexB[1, 2]` 对应。不难发现，在这种规则下，其实我们只关注它们对齐的那一维度，那么我们小的 index 也就可以从大的 index 中 infer 出来。怎么找呢？`big_index[i + (num_dims_big - num_dims)]` 做右对齐。
+
+```
+shape[2, 3]
+shape   [3] <-- 右对齐
+```
+
+```c++
+
+__global__ void mapKernel(
+    float *out,
+    int *out_shape,
+    int *out_strides,
+    int out_size,
+    float *in_storage,
+    int *in_shape,
+    int *in_strides,
+    int shape_size,
+    int fn_id)
+{
+  /**
+   * Map function. Apply a unary function to each element of the input array and store the result in the output array.
+   * Optimization: Parallelize over the elements of the output array.
+   *
+   * You may find the following functions useful:
+   * - index_to_position: converts an index to a position in a compact array
+   * - to_index: converts a position to an index in a multidimensional array
+   * - broadcast_index: converts an index in a smaller array to an index in a larger array
+   *
+   * Args:
+   *  out: compact 1D array of size out_size to write the output to
+   *  out_shape: shape of the output array
+   *  out_strides: strides of the output array
+   *  out_size: size of the output array
+   *  in_storage: compact 1D array of size in_size
+   *  in_shape: shape of the input array
+   *  in_strides: strides of the input array
+   *  shape_size: number of dimensions in the input and output arrays, assume dimensions are the same
+   *  fn_id: id of the function to apply to each element of the input array
+   *
+   * Returns:
+   *  None (Fills in out array)
+   */
+
+  int out_index[MAX_DIMS];
+  int in_index[MAX_DIMS];
+
+  /// BEGIN HW1_1
+  int pos = blockIdx.x * blockDim.x + threadIdx.x;
+  if (pos >= out_size)
+  {
+    return;
+  }
+
+
+  to_index(pos, out_shape, out_index, shape_size);
+
+  // optional, as we have the same number of dimensions for in and out
+  broadcast_index(out_index, out_shape, in_shape, in_index, shape_size, shape_size);
+
+  int in_pos = index_to_position(in_index, in_strides, shape_size);
+  int out_pos = index_to_position(out_index, out_strides, shape_size);
+
+  out[out_pos] = fn(fn_id, in_storage[in_pos]);
+  /// TODO
+  // Hints:
+  // 1. Compute the position in the output array that this thread will write to
+  // 2. Convert the position to the out_index according to out_shape
+  // 3. Broadcast the out_index to the in_index according to in_shape (optional in some cases)
+  // 4. Calculate the position of element in in_array according to in_index and in_strides
+  // 5. Calculate the position of element in out_array according to out_index and out_strides
+  // 6. Apply the unary function to the input element and write the output to the out memory
+
+  // assert(false && "Not Implemented");
+  /// END HW1_1
+}
+```
+
+#### P2 - ZipKernel
+
+这里就要用到我们之前说的 broadcast 了，但是已经讲过了所以不多说了。
+
+```c++
+__global__ void zipKernel(
+    float *out,
+    int *out_shape,
+    int *out_strides,
+    int out_size,
+    int out_shape_size,
+    float *a_storage,
+    int *a_shape,
+    int *a_strides,
+    int a_shape_size,
+    float *b_storage,
+    int *b_shape,
+    int *b_strides,
+    int b_shape_size,
+    int fn_id)
+{
+  /**
+   * Zip function. Apply a binary function to elements of the input array a & b and store the result in the output array.
+   * Optimization: Parallelize over the elements of the output array.
+   *
+   * You may find the following functions useful:
+   * - index_to_position: converts an index to a position in a compact array
+   * - to_index: converts a position to an index in a multidimensional array
+   * - broadcast_index: converts an index in a smaller array to an index in a larger array
+   *
+   * Args:
+   *  out: compact 1D array of size out_size to write the output to
+   *  out_shape: shape of the output array
+   *  out_strides: strides of the output array
+   *  out_size: size of the output array
+   *  out_shape_size: number of dimensions in the output array
+   *  a_storage: compact 1D array of size in_size
+   *  a_shape: shape of the input array
+   *  a_strides: strides of the input array
+   *  a_shape_size: number of dimensions in the input array
+   *  b_storage: compact 1D array of size in_size
+   *  b_shape: shape of the input array
+   *  b_strides: strides of the input array
+   *  b_shape_size: number of dimensions in the input array
+   *  fn_id: id of the function to apply to each element of the a & b array
+   *
+   *
+   * Returns:
+   *  None (Fills in out array)
+   */
+
+  int out_index[MAX_DIMS];
+  int a_index[MAX_DIMS];
+  int b_index[MAX_DIMS];
+
+  /// BEGIN HW1_2
+
+  int pos = blockIdx.x * blockDim.x + threadIdx.x;
+  if (pos >= out_size) { return; }
+
+  to_index(pos, out_shape, out_index, out_shape_size);
+
+  broadcast_index(out_index, out_shape, a_shape, a_index, out_shape_size, a_shape_size);
+  broadcast_index(out_index, out_shape, b_shape, b_index, out_shape_size, b_shape_size);
+
+  int a_pos = index_to_position(a_index, a_strides, a_shape_size);
+  int b_pos = index_to_position(b_index, b_strides, b_shape_size);
+  int out_pos = index_to_position(out_index, out_strides, out_shape_size);
+
+  out[out_pos] = fn(fn_id, a_storage[a_pos], b_storage[b_pos]);
+
+  /// TODO
+  // Hints:
+  // 1. Compute the position in the output array that this thread will write to
+  // 2. Convert the position to the out_index according to out_shape
+  // 3. Calculate the position of element in out_array according to out_index and out_strides
+  // 4. Broadcast the out_index to the a_index according to a_shape
+  // 5. Calculate the position of element in a_array according to a_index and a_strides
+  // 6. Broadcast the out_index to the b_index according to b_shape
+  // 7.Calculate the position of element in b_array according to b_index and b_strides
+  // 8. Apply the binary function to the input elements in a_array & b_array and write the output to the out memory
+
+  // assert(false && "Not Implemented");
+  /// END HW1_2
+}
+```
+
+不过这里还得补 `cuda_kernel_ops.py`
+```python
+lib.tensorZip(
+                out._tensor._storage,
+                out._tensor._shape.astype(np.int32),
+                out._tensor._strides.astype(np.int32),
+                out.size,
+                len(out.shape),
+                a._tensor._storage,
+                a._tensor._shape.astype(np.int32),
+                a._tensor._strides.astype(np.int32),
+                a.size,
+                len(a.shape),
+                b._tensor._storage,
+                b._tensor._shape.astype(np.int32),
+                b._tensor._strides.astype(np.int32),
+                b.size,
+                len(b.shape),
+                fn_id,
+            )
+```
+
+#### P3 - ReduceKernel
+
+Reduce 就是要压 shape 了，我们可以不用 `output_array` 层面并行，可以靠 `reduction operation` 来并行。
+
+```
+
+__global__ void reduceKernel(
+    float *out,
+    int *out_shape,
+    int *out_strides,
+    int out_size,
+    float *a_storage,
+    int *a_shape,
+    int *a_strides,
+    int reduce_dim,
+    float reduce_value,
+    int shape_size,
+    int fn_id)
+{
+  /**
+   * Reduce function. Apply a reduce function to elements of the input array a and store the result in the output array.
+   * Optimization:
+   * Parallelize over the reduction operation. Each kernel performs one reduction.
+   * e.g. a = [[1, 2, 3], [4, 5, 6]], kernel0 computes reduce([1, 2, 3]), kernel1 computes reduce([4, 5, 6]).
+   *
+   * You may find the following functions useful:
+   * - index_to_position: converts an index to a position in a compact array
+   * - to_index: converts a position to an index in a multidimensional array
+   *
+   * Args:
+   *  out: compact 1D array of size out_size to write the output to
+   *  out_shape: shape of the output array
+   *  out_strides: strides of the output array
+   *  out_size: size of the output array
+   *  a_storage: compact 1D array of size in_size
+   *  a_shape: shape of the input array
+   *  a_strides: strides of the input array
+   *  reduce_dim: dimension to reduce on
+   *  reduce_value: initial value for the reduction
+   *  shape_size: number of dimensions in the input & output array, assert dimensions are the same
+   *  fn_id: id of the reduce function, currently only support add, multiply, and max
+   *
+   *
+   * Returns:
+   *  None (Fills in out array)
+   */
+
+  // __shared__ double cache[BLOCK_DIM]; // Uncomment this line if you want to use shared memory to store partial results
+  int out_index[MAX_DIMS];
+
+  /// BEGIN HW1_3
+  /// TODO
+  int pos = blockIdx.x * blockDim.x + threadIdx.x;
+  if (pos >= out_size) { return; }
+  /*
+  [[1, 2, 3],
+   [4, 5, 6]]
+
+  shape[2, 3] <-> shape[2, 1]
+  */
+
+  to_index(pos, out_shape, out_index, shape_size);
+
+  int out_pos = index_to_position(out_index, out_strides, shape_size);
+
+  float reduced_value = reduce_value;
+  for (int i = 0; i < a_shape[reduce_dim]; ++i) {
+    out_index[reduce_dim] = i;  // actually `a_index[reduce_dim] = i`, but we can reuse out_index since they have the same number of dimensions
+    int a_pos = index_to_position(out_index, a_strides, shape_size);
+    float a = a_storage[a_pos];
+    reduced_value = fn(fn_id, reduced_value, a);
+  }
+
+  
+  out[out_pos] = reduced_value;
+
+  // 1. Define the position of the output element that this thread or this block will write to
+  // 2. Convert the out_pos to the out_index according to out_shape
+  // 3. Initialize the reduce_value to the output element
+  // 4. Iterate over the reduce_dim dimension of the input array to compute the reduced value
+  // 5. Write the reduced value to out memory
+
+  // assert(false && "Not Implemented");
+  /// END HW1_3
+}
+```
+
+但是如果你计算一下，你就发现这个其实并不是最优，让我们看一下：
+
+[+] 每个元素只访存一次
+
+[+] 每个线程循环数相同
+
+[-] 合并访存大部分情况可能拉了。以我们代码里的例子为例，两个相邻线程访问的是相邻的行，他们之间的物理地址间隔是 `4B*3 = 12B`，那么他们的间隔就是 `4B*3*32=384B`，效率就只有 `1/3` 了。
+
+[-] 并行度拉了，一个 thread 就负责要规约的那一维的一个 slice
+
+那怎么优化呢，首先看并行度的事情，我们考虑能不能让一个 thread 还是只关注一个元素，让一个 block 才关注一个 slice，朴素的，我们可以想到每个 thread 读自己对应的元素，然后做累加。
+```
+第 0 轮:  a0  a1  a2  a3  a4  a5  a6  a7
+第 1 轮:  └┬┘  └┬┘  └┬┘  └┬┘      4 个线程各加一对 → 4 个部分和
+          s1  s2  s3  s4
+第 2 轮:  └──┬──┘  └──┬──┘          2 个线程       → 2 个部分和
+             t1        t2
+第 3 轮:  └─────┬─────┘             1 个线程       → 总和
+                total
+```
+
+大概就是
+```c++
+__shared__ double cache[BLOCK_DIM];
+
+cache[threadIdx.x] = a_storage[pos_a];
+__syncthreads();
+
+for (int i = 1; i < a_shape[reduce_dim]; i<<=1) {
+  if (threadIdx.x % (2*i) == 0 && threadIdx.x + i < a_shape[reduce_dim])
+    cache[threadIdx.x] += cache[threadIdx.x + i];
+  __syncthreads();
+}
+
+if (threadIdx.x == 0) out[out_pos] = cache[threadIdx.x];
+```
+
+这个和我们上一版大概能有 1.8 倍多性能提升，还是比较明显的。
+```
+[2048x262144]    naive 16.01 ms (134.2 GB/s)   tree<256> 8.69 ms (247.1 GB/s)  1.84x
+```
+
+当然，聪明的你可能发现了，这个其实有问题：我们假设了 $BLOCK\_DIM \ge a\_shape[reduce\_dim]$，所以实际上还要再做额外的跨步处理；此外，在 warp 层面上，你会发现这个是每个 `2i` 倍数的 threadIdx.x 都会跑，当 $i \ge 16$ 的时候，你会发现还有 $BLOCK\_DIM \div 2i$ 个 warp 在跑，每个都只有 1 个 lane 实际在跑，这是非常浪费的。
+
+> Problem: highly divergent warps are very inefficient, and % operator is very slow
+> 
+> Nvidia - Optimizing Parallel Reduction in CUDA
+
+
+因此，我们可以思考是不是可以把这个逆着搓一下，尽可能让后面剩下的反而都是 idx 连续的，具体我们不再赘述。事实上，在我们刚才 2048*202144 的规模下，这两版差距几乎不可见（因为是 HBM Bound，时间几乎都花在了 load 上）。如果我们降低规模，它大概在 1.45 倍左右的加速（但其实 +40% 基本上都是因为把取余换成了乘法）。
+
+更多的优化可以看 [Nvidia](https://developer.download.nvidia.cn/assets/cuda/files/reduction.pdf) 这一篇
+
+#### P4 - MatMul
+
+还引入了 batch dim，但是基本上和我们之前的 tiling 大同小异。值得注意的是在 HOST 里面把 m, p 写反了，很反直觉，所以改了。
+
+```c++
+
+__global__ void MatrixMultiplyKernel(
+    float *out,
+    const int *out_shape,
+    const int *out_strides,
+    float *a_storage,
+    const int *a_shape,
+    const int *a_strides,
+    float *b_storage,
+    const int *b_shape,
+    const int *b_strides)
+{
+  /**
+   * Multiply two (compact) matrices into an output (also comapct) matrix. Matrix a and b are both in a batch
+   * format, with shape [batch_size, m, n], [batch_size, n, p].
+   * Requirements:
+   * - All data must be first moved to shared memory.
+   * - Only read each cell in a and b once.
+   * - Only write to global memory once per kernel.
+   * There is guarantee that a_shape[0] == b_shape[0], a_shape[2] == b_shape[1],
+   * and out_shape[0] == a_shape[0], out_shape[1] == a_shape[1], out_shape[2] == b_shape[2].
+   *
+   * Args:
+   *   out: compact 1D array of size batch_size x m x p to write the output to
+   *   out_shape: shape of the output array
+   *   out_strides: strides of the output array
+   *   a_storage: compact 1D array of size batch_size x m x n
+   *   a_shape: shape of the a array
+   *   a_strides: strides of the a array
+   *   b_storage: compact 1D array of size batch_size x n x p
+   *   b_shape: shape of the b array
+   *   b_strides: strides of the b array
+   *
+   * Returns:
+   *   None (Fills in out array)
+   */
+
+  __shared__ float a_shared[TILE][TILE];
+  __shared__ float b_shared[TILE][TILE];
+
+  // In each block, we will compute a batch of the output matrix
+  // All the threads in the block will work together to compute this batch
+  int batch = blockIdx.z;
+  int a_batch_stride = a_shape[0] > 1 ? a_strides[0] : 0;
+  int b_batch_stride = b_shape[0] > 1 ? b_strides[0] : 0;
+
+  /// BEGIN HW1_4
+
+  // for a [m, n] and b [n, p], the output is [m, p], and for each element, we'll do n multiplications
+  // which needs n/TILE iterations of loading a tile of a and b into shared memory, and then computing the output tile.
+
+  int row = blockIdx.y * TILE + threadIdx.y;
+  int col = blockIdx.x * TILE + threadIdx.x;
+  int out_pos = batch * out_strides[0] + row * out_strides[1] + col * out_strides[2];
+
+  bool row_in_bounds = row < out_shape[1];
+  bool col_in_bounds = col < out_shape[2];
+  
+  float sum = 0.0f;
+  for (int t = 0; t < (a_shape[2] + TILE - 1) / TILE; t++) {
+    int a_pos = batch * a_batch_stride + row * a_strides[1] + t * TILE * a_strides[2] + threadIdx.x;
+    int b_pos = batch * b_batch_stride + t * TILE * b_strides[1] + threadIdx.y + col * b_strides[2];
+    int N = min(TILE, a_shape[2] - t * TILE);
+
+    a_shared[threadIdx.y][threadIdx.x] = (row_in_bounds && threadIdx.x < N) ? a_storage[a_pos] : 0.0f;
+    b_shared[threadIdx.y][threadIdx.x] = (col_in_bounds && threadIdx.y < N) ? b_storage[b_pos] : 0.0f;
+    __syncthreads();
+
+    for (int i = 0; i < N; i++) {
+      sum += a_shared[threadIdx.y][i] * b_shared[i][threadIdx.x];
+    }
+    __syncthreads();
+  }
+
+  if (row_in_bounds && col_in_bounds) {
+    out[out_pos] = sum;
+  }
+  /// TODO
+  // Hints:
+  // 1. Compute the row and column of the output matrix this block will compute
+  // 2. Compute the position in the output array that this thread will write to
+  // 3. Iterate over tiles of the two input matrices, read the data into shared memory
+  // 4. Synchronize to make sure the data is available to all threads
+  // 5. Compute the output tile for this thread block
+  // 6. Synchronize to make sure all threads are done computing the output tile for (row, col)
+  // 7. Write the output to global memory
+
+  // assert(false && "Not Implemented");
+  /// END HW1_4
+}
+```
